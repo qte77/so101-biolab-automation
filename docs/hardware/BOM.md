@@ -33,8 +33,8 @@ PLA+, 0.4mm nozzle, 0.2mm layer, 15% infill, supports >45 degrees.
 
 | Part | Source |
 |------|--------|
-| Follower arm (all parts, single plate) | [SO-ARM100 STL (follower)](https://github.com/TheRobotStudio/SO-ARM100/tree/main/stl/SO101) |
-| Leader arm (all parts, single plate) | [SO-ARM100 STL (leader)](https://github.com/TheRobotStudio/SO-ARM100/tree/main/stl/SO101) |
+| Follower arm (all parts, single plate) | [SO-ARM100 STL (follower)](https://github.com/TheRobotStudio/SO-ARM100/tree/main/STL/SO101) |
+| Leader arm (all parts, single plate) | [SO-ARM100 STL (leader)](https://github.com/TheRobotStudio/SO-ARM100/tree/main/STL/SO101) |
 
 **Custom parts (to be designed for this project):**
 
