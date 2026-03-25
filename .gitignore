@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+outputs/
+datasets/
+*.ckpt
+*.pt
+wandb/
+.env
+.claude/settings.local.json
+*.whl
+.pytest_cache/
+.ruff_cache/
+
+# Ralph
+ralph/logs/
+ralph/worktrees/

@@ -1,0 +1,32 @@
+# 96-well plate layout configuration
+# All coordinates in mm, relative to arm base frame
+
+plate:
+  # Plate origin (A1 corner) in arm workspace coordinates
+  origin_x_mm: 150.0
+  origin_y_mm: -50.0
+  origin_z_mm: 20.0  # Top of plate wells
+
+  # SBS standard (auto-calculated, override if needed)
+  well_spacing_mm: 9.0
+  a1_offset_x_mm: 14.38
+  a1_offset_y_mm: 11.24
+
+tip_rack:
+  # Pipette tip rack position
+  origin_x_mm: 80.0
+  origin_y_mm: -50.0
+  origin_z_mm: 45.0
+
+reagent_trough:
+  # Reagent trough position
+  origin_x_mm: 200.0
+  origin_y_mm: 0.0
+  origin_z_mm: 25.0
+
+# Heights for approach and insertion
+heights:
+  safe_z_mm: 80.0       # Safe travel height above deck
+  approach_z_mm: 40.0   # Approach height above wells
+  aspirate_z_mm: 15.0   # Tip depth during aspiration
+  dispense_z_mm: 25.0   # Tip height during dispense

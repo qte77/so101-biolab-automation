@@ -1,0 +1,21 @@
+# Tool dock configuration
+# Joint positions in degrees [shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll, gripper]
+
+stations:
+  pipette:
+    tool: pipette
+    approach_joints: [-90.0, -30.0, -60.0, 0.0, 0.0, 30.0]
+    engage_joints: [-90.0, -15.0, -45.0, 0.0, 0.0, 30.0]
+    dock_joints: [-90.0, -15.0, -45.0, 0.0, 0.0, 0.0]
+
+  gripper:
+    tool: gripper
+    approach_joints: [-90.0, -30.0, -60.0, 0.0, 90.0, 30.0]
+    engage_joints: [-90.0, -15.0, -45.0, 0.0, 90.0, 30.0]
+    dock_joints: [-90.0, -15.0, -45.0, 0.0, 90.0, 0.0]
+
+  fridge_hook:
+    tool: fridge_hook
+    approach_joints: [-90.0, -30.0, -60.0, 0.0, 180.0, 30.0]
+    engage_joints: [-90.0, -15.0, -45.0, 0.0, 180.0, 30.0]
+    dock_joints: [-90.0, -15.0, -45.0, 0.0, 180.0, 0.0]
