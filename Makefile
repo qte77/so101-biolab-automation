@@ -27,6 +27,7 @@ setup_train: ## Install training dependencies (torch, wandb)
 setup_rtk: ## Install RTK CLI for token-optimized LLM output
 	@if command -v rtk > /dev/null 2>&1; then echo "rtk already installed: $$(rtk --version)"; \
 	else curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh; fi
+	rtk init -g
 
 # MARK: dev
 lint: ## Format and lint with ruff
