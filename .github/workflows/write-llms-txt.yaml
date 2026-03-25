@@ -1,0 +1,56 @@
+name: Write repo llms.txt
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/templates/llms.txt.tpl"
+      - "src/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "AGENTS.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-file:
+    runs-on: ubuntu-latest
+    env:
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Validate template links exist
+        run: |
+          stale=0
+          for path in $(grep -oE '\$\{BLOB\}/[^)]+' .github/templates/llms.txt.tpl | sed 's|\${BLOB}/||'); do
+            if [ ! -f "$path" ]; then
+              echo "::error::Stale link in template: $path"
+              stale=1
+            fi
+          done
+          exit $stale
+
+      - name: Generate llms.txt from template
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BLOB="https://github.com/${REPO}/blob/main"
+          PROJECT_NAME=$(sed -n 's/^# //p' README.md | head -1)
+          PROJECT_DESC=$(curl -sf -H "Authorization: token ${GH_TOKEN}" \
+            "https://api.github.com/repos/${REPO}" | jq -r '.description // empty')
+          export BLOB PROJECT_NAME PROJECT_DESC
+          mkdir -p docs
+          envsubst '${BLOB} ${PROJECT_NAME} ${PROJECT_DESC}' < .github/templates/llms.txt.tpl > docs/llms.txt
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add docs/llms.txt
+          git diff --cached --quiet && echo "No changes to llms.txt" && exit 0
+          git commit -m "docs: update llms.txt index"
+          git push

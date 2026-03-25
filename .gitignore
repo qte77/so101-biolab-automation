@@ -21,3 +21,23 @@ wandb/
 # Ralph
 ralph/logs/
 ralph/worktrees/
+
+# Claude Code sandbox bwrap phantom files
+# https://github.com/anthropics/claude-code/issues/17727
+/HEAD
+/config
+/hooks
+/objects
+/refs
+/.bash_profile
+/.bashrc
+/.profile
+/.zprofile
+/.zshrc
+/.gitconfig
+/.gitmodules
+/.ripgreprc
+/.claude/agents
+/.claude/commands
+/.idea
+/.vscode
