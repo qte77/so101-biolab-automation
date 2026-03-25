@@ -33,7 +33,8 @@
   },
   "containerEnv": {
     "UV_LINK_MODE": "copy",
-    "UV_CACHE_DIR": "/tmp/claude-1000/uv-cache"
+    "UV_CACHE_DIR": "/tmp/claude-1000/uv-cache",
+    "RTK_TELEMETRY_DISABLED": "1"
   },
   "postCreateCommand": "make setup"
 }

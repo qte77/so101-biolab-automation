@@ -24,7 +24,7 @@ Dual SO-101 robotic arm bio-lab automation: 96-well pipetting, tool changing, re
 
 ## Hardware
 
-Two [SO-101](https://github.com/therobotstudio/so-arm100) follower arms + one leader arm, controlled via [LeRobot](https://huggingface.co/docs/lerobot). ~$400 total BOM. See `hardware/BOM.md` for details.
+Two [SO-101](https://github.com/therobotstudio/so-arm100) follower arms + one leader arm, controlled via [LeRobot](https://huggingface.co/docs/lerobot/index). ~$400 total BOM. See `hardware/BOM.md` for details.
 
 ## Quick Start
 
@@ -87,9 +87,9 @@ docs/              Assembly guide, demo scenarios, architecture
 This repo includes [RTK](https://github.com/rtk-ai/rtk) config for 60-90% LLM token savings during agentic coding sessions.
 
 ```bash
-make setup_rtk    # install RTK binary
-rtk init -g       # activate CC PreToolUse hook (run outside CC session)
+make setup_rtk    # install RTK binary + activate CC hook (run outside CC session)
 rtk gain --graph  # view token savings
+export RTK_TELEMETRY_DISABLED=1  # opt-out of telemetry
 ```
 
 ## License
