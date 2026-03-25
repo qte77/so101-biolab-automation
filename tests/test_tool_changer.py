@@ -2,7 +2,7 @@
 
 import pytest
 
-from biolab.tool_changer import Tool, ToolChanger, ToolDockConfig, DockStation
+from biolab.tool_changer import DockStation, Tool, ToolChanger, ToolDockConfig
 
 
 @pytest.fixture
@@ -46,9 +46,7 @@ class TestToolChanger:
         changer.change_tool(Tool.GRIPPER)
         assert len(stub.actions) == 0
 
-    def test_change_tool_returns_current_and_picks_new(
-        self, dock_config: ToolDockConfig
-    ) -> None:
+    def test_change_tool_returns_current_and_picks_new(self, dock_config: ToolDockConfig) -> None:
         stub = StubArmController()
         changer = ToolChanger(dock_config, stub, "arm_a")
         changer.current_tool = Tool.GRIPPER

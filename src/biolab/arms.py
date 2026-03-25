@@ -77,9 +77,7 @@ class DualArmController:
     def arm_ids(self) -> list[str]:
         """IDs of configured follower arms."""
         return [
-            cfg.arm_id
-            for cfg in [self.config.arm_a, self.config.arm_b]
-            if cfg.role == "follower"
+            cfg.arm_id for cfg in [self.config.arm_a, self.config.arm_b] if cfg.role == "follower"
         ]
 
     def connect(self) -> None:

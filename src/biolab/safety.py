@@ -8,8 +8,8 @@ from __future__ import annotations
 import logging
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -103,8 +103,9 @@ class SafetyMonitor:
             return True
         lo, hi = self.config.joint_limits[joint_name]
         if value < lo or value > hi:
-            logger.warning("Joint limit violation: %s=%.1f (limits: %.1f–%.1f)",
-                           joint_name, value, lo, hi)
+            logger.warning(
+                "Joint limit violation: %s=%.1f (limits: %.1f–%.1f)", joint_name, value, lo, hi
+            )
             return False
         return True
 

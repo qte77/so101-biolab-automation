@@ -1,0 +1,58 @@
+name: Generate SBOM
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  SBOM_DIR: docs/SBOM
+
+jobs:
+  generate-sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install 3.10
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Create SBOM output directory
+        run: mkdir -p "$SBOM_DIR"
+
+      - name: Export GitHub dependency graph SBOM
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: gh api "repos/$REPO/dependency-graph/sbom" --jq '.sbom' > "$SBOM_DIR/github-depgraph.spdx.json"
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Generate Syft SPDX SBOM
+        run: syft dir:. -o spdx-json="$SBOM_DIR/syft-scan.spdx.json"
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add "$SBOM_DIR/"
+          git diff --cached --quiet && echo "No changes to SBOM" && exit 0
+          git commit -m "docs: update SBOM"
+          git push
