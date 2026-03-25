@@ -1,9 +1,10 @@
-[exclude]
 # UitHub returns 401 to bots/CI
 # Codespaces link redirects to login
 # CodeFactor badge URL requires auth
-paths = [
+# GitToDoc may be unavailable
+exclude = [
     "https://uithub.com/",
     "https://github.com/codespaces/new",
     "https://www.codefactor.io/",
+    "https://gittodoc.com/",
 ]
