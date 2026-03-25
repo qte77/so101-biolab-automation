@@ -54,7 +54,10 @@ def main() -> None:
     well = parse_well_name(args.well)
     logger.info(
         "Target: %s (%.2f, %.2f mm) — action: %s",
-        well.name, well.x_mm, well.y_mm, args.action,
+        well.name,
+        well.x_mm,
+        well.y_mm,
+        args.action,
     )
     controller.send_to_well(args.arm, args.well)
     controller.disconnect()

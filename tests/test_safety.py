@@ -2,8 +2,6 @@
 
 import time
 
-import pytest
-
 from biolab.safety import SafetyConfig, SafetyMonitor
 
 

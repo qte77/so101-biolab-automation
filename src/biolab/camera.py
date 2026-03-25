@@ -64,7 +64,11 @@ class CameraPipeline:
             self._captures[name] = cap
             logger.info(
                 "Camera %s opened (device %d, %dx%d@%dfps)",
-                name, cfg.device_index, cfg.width, cfg.height, cfg.fps,
+                name,
+                cfg.device_index,
+                cfg.width,
+                cfg.height,
+                cfg.fps,
             )
 
     def stop(self) -> None:

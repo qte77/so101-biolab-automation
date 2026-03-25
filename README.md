@@ -1,5 +1,18 @@
 # so101-biolab-automation
 
+[![License](https://img.shields.io/badge/license-Apache2.0-58f4c2.svg)](LICENSE)
+![Version](https://img.shields.io/badge/version-0.1.0-58f4c2.svg)
+[![CodeQL](https://github.com/qte77/so101-biolab-automation/actions/workflows/codeql.yaml/badge.svg)](https://github.com/qte77/so101-biolab-automation/actions/workflows/codeql.yaml)
+[![CodeFactor](https://www.codefactor.io/repository/github/qte77/so101-biolab-automation/badge)](https://www.codefactor.io/repository/github/qte77/so101-biolab-automation)
+[![ruff](https://github.com/qte77/so101-biolab-automation/actions/workflows/ruff.yaml/badge.svg)](https://github.com/qte77/so101-biolab-automation/actions/workflows/ruff.yaml)
+[![pytest](https://github.com/qte77/so101-biolab-automation/actions/workflows/pytest.yaml/badge.svg)](https://github.com/qte77/so101-biolab-automation/actions/workflows/pytest.yaml)
+[![Link Checker](https://github.com/qte77/so101-biolab-automation/actions/workflows/links-fail-fast.yaml/badge.svg)](https://github.com/qte77/so101-biolab-automation/actions/workflows/links-fail-fast.yaml)
+
+[![Flat Repo (UitHub)](https://img.shields.io/badge/Flat_Repo-uithub-800080.svg)](https://uithub.com/qte77/so101-biolab-automation)
+[![Flat Repo (GitToDoc)](https://img.shields.io/badge/Flat_Repo-GitToDoc-fe4a60.svg)](https://gittodoc.com/qte77/so101-biolab-automation)
+[![vscode.dev](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=vscode.dev&labelColor=2c2c32&color=007acc&logoColor=007acc)](https://vscode.dev/github/qte77/so101-biolab-automation)
+[![Codespace Dev](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=Codespace%20Dev&labelColor=2c2c32&color=007acc&logoColor=007acc)](https://github.com/codespaces/new?repo=qte77/so101-biolab-automation)
+
 Dual SO-101 robotic arm bio-lab automation: 96-well pipetting, tool changing, remote oversight.
 
 ## What This Demonstrates
