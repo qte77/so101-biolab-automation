@@ -82,6 +82,16 @@ docs/              Assembly guide, demo scenarios, architecture
 - FastAPI + WebRTC — Remote dashboard
 - OpenCV — Camera pipeline
 
+## Token Optimization (Experimental)
+
+This repo includes [RTK](https://github.com/rtk-ai/rtk) config for 60-90% LLM token savings during agentic coding sessions.
+
+```bash
+make setup_rtk    # install RTK binary
+rtk init -g       # activate CC PreToolUse hook (run outside CC session)
+rtk gain --graph  # view token savings
+```
+
 ## License
 
 Apache-2.0
