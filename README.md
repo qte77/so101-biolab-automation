@@ -24,7 +24,7 @@ Dual SO-101 robotic arm bio-lab automation: 96-well pipetting, tool changing, re
 
 ## Hardware
 
-Two [SO-101](https://github.com/therobotstudio/so-arm100) follower arms + one leader arm, controlled via [LeRobot](https://huggingface.co/docs/lerobot/index). ~$400 total BOM. See `hardware/BOM.md` for details.
+Two [SO-101](https://github.com/therobotstudio/so-arm100) follower arms + one leader arm, controlled via [LeRobot](https://huggingface.co/docs/lerobot/index). ~$350–$650 depending on config. See [docs/hardware/BOM.md](docs/hardware/BOM.md) for full shopping list with links.
 
 ## Quick Start
 
@@ -66,12 +66,11 @@ Edge Controller (RPi 5 / Jetson)
 
 ```
 src/biolab/        Core arm control, pipette, plate coords, tool changer, safety
-src/dashboard/     FastAPI server, WebRTC video, browser UI
+src/dashboard/     FastAPI server, WebSocket commands, browser UI
 scripts/           Calibration, recording, training, demo orchestration
 configs/           Arm ports, plate layout, tool dock positions
-hardware/          BOM, STL files, wiring diagrams
-tests/             Unit tests for plate coords, tool changer, safety
-docs/              Assembly guide, demo scenarios, architecture
+docs/hardware/     BOM, STL files, wiring diagrams
+tests/             69 tests (arms, camera, pipette, plate, safety, tool changer, dashboard, scripts)
 ```
 
 ## Key Dependencies
@@ -87,10 +86,13 @@ docs/              Assembly guide, demo scenarios, architecture
 This repo includes [RTK](https://github.com/rtk-ai/rtk) config for 60-90% LLM token savings during agentic coding sessions.
 
 ```bash
-make setup_rtk    # install RTK binary + activate CC hook (run outside CC session)
+make setup_rtk    # install RTK binary + activate CC PreToolUse hook (run outside CC session)
 rtk gain --graph  # view token savings
-export RTK_TELEMETRY_DISABLED=1  # opt-out of telemetry
 ```
+
+**Note:** RTK's tracking DB (`~/.local/share/rtk/`) must be in the CC sandbox `allowWrite` list for savings to persist inside CC sessions. Add `/home/vscode/.local/share/rtk` to `sandbox.filesystem.allowWrite` in `~/.claude/settings.json` and restart the session. Without this, commands are filtered but savings are not recorded.
+
+Opt-out of telemetry: `export RTK_TELEMETRY_DISABLED=1`
 
 ## License
 
