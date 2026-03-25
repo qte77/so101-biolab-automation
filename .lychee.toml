@@ -1,10 +1,14 @@
-# UitHub returns 401 to bots/CI
-# Codespaces link redirects to login
-# CodeFactor badge URL requires auth
-# GitToDoc may be unavailable
+# Lychee link checker config
+# https://lychee.cli.rs/usage/config/
+
+# Accept 2xx and 429 (rate limited)
+accept = [200, 201, 204, 429]
+
+# Exclude URLs that fail in CI but work in browser
 exclude = [
-    "https://uithub.com/",
-    "https://github.com/codespaces/new",
-    "https://www.codefactor.io/",
-    "https://gittodoc.com/",
+    "^https://uithub\\.com",
+    "^https://github\\.com/codespaces/new",
+    "^https://www\\.codefactor\\.io",
+    "^https://gittodoc\\.com",
+    "^https://img\\.shields\\.io",
 ]
