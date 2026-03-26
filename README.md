@@ -65,13 +65,20 @@ Edge Controller (RPi 5 / Jetson)
 ## Project Structure
 
 ```
-src/biolab/        Core arm control, pipette, plate coords, tool changer, safety
+src/biolab/        Core arm control, pipette, plate coords, tool changer, safety, workflow
 src/dashboard/     FastAPI server, WebSocket commands, browser UI
-scripts/           Calibration, recording, training, demo orchestration
-configs/           Arm ports, plate layout, tool dock positions
-docs/hardware/     BOM, STL files, wiring diagrams
-tests/             69 tests (arms, camera, pipette, plate, safety, tool changer, dashboard, scripts)
+scripts/           CLI entry points for use cases and demo orchestration
+configs/           Arm ports, plate layout, tool dock positions (YAML)
+docs/              Architecture, user stories, demo scenarios, hardware BOM
+tests/             92 tests (all modules + E2E workflow + dashboard + scripts)
 ```
+
+## Documentation
+
+- [Architecture](docs/architecture.md) — system design, module responsibilities, data flows
+- [User Stories](docs/UserStory.md) — UC1-4 acceptance criteria
+- [Demo Scenarios](docs/demo-scenarios.md) — how to run and verify each use case
+- [Hardware BOM](docs/hardware/BOM.md) — shopping list with links ($350-$820)
 
 ## Key Dependencies
 
