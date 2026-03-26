@@ -26,7 +26,8 @@ Key references:
 - [docs/architecture.md](docs/architecture.md) — system design (AUTHORITY)
 - [docs/UserStory.md](docs/UserStory.md) — acceptance criteria (AUTHORITY)
 - [docs/demo-scenarios.md](docs/demo-scenarios.md) — how to run demos
-- [CONTRIBUTING.md](CONTRIBUTING.md) — full documentation hierarchy
+- [docs/hardware/BOM.md](docs/hardware/BOM.md) — hardware shopping list
+- [CONTRIBUTING.md](CONTRIBUTING.md) — dev workflow + full documentation hierarchy
 
 ## Decision Framework
 
@@ -34,8 +35,10 @@ Key references:
 
 **Information sources:**
 - Requirements/scope: task description or user instruction (primary)
-- Technical implementation: `src/` code + `configs/` (authority)
-- Hardware details: `configs/*.yaml` (authority — never hardcode values from here)
+- System design: [docs/architecture.md](docs/architecture.md) (AUTHORITY)
+- Acceptance criteria: [docs/UserStory.md](docs/UserStory.md) (AUTHORITY)
+- Hardware constraints: [docs/hardware/BOM.md](docs/hardware/BOM.md) + `configs/*.yaml`
+- Implementation detail: `src/` code (reference, not authority)
 
 **Anti-scope-creep:** Only implement what is explicitly requested. Hardware automation
 is safety-critical — never add untested behaviour speculatively.

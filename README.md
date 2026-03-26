@@ -50,17 +50,7 @@ make demo
 
 ## Architecture
 
-```
-Remote Dashboard (FastAPI + WebRTC)
-        │
-Edge Controller (RPi 5 / Jetson)
-  ├── LeRobot (teleop, policy, record)
-  ├── PyLabRobot (pipette, 96-well layout)
-  ├── Tool Changer (servo + magnet dock)
-  └── Camera Pipeline (OpenCV → WebRTC)
-        │
-   Arm A (student) ── Arm B (teacher/student)
-```
+See [docs/architecture.md](docs/architecture.md) for full system design, module responsibilities, and data flows.
 
 ## Project Structure
 
@@ -70,7 +60,7 @@ src/dashboard/     FastAPI server, WebSocket commands, browser UI
 scripts/           CLI entry points for use cases and demo orchestration
 configs/           Arm ports, plate layout, tool dock positions (YAML)
 docs/              Architecture, user stories, demo scenarios, hardware BOM
-tests/             92 tests (all modules + E2E workflow + dashboard + scripts)
+tests/             All modules + E2E workflow + dashboard + scripts
 ```
 
 ## Documentation

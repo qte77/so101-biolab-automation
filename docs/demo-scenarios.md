@@ -139,7 +139,7 @@ echo '{"command": "e_stop"}' | websocat ws://localhost:8080/ws
 All scenarios are covered by automated tests:
 
 ```bash
-uv run pytest tests/test_workflow.py -v    # 23 workflow tests
-uv run pytest tests/test_dashboard.py -v   # 6 dashboard tests
-uv run pytest -q                           # 92 total tests
+uv run pytest tests/test_workflow.py -v    # workflow use case tests
+uv run pytest tests/test_dashboard.py -v   # dashboard integration tests
+uv run pytest -q                           # full suite
 ```

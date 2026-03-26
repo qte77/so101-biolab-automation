@@ -5,8 +5,12 @@
 ## Documentation
 
 - [README](${BLOB}/README.md)
-- [CONTRIBUTING](${BLOB}/CONTRIBUTING.md)
 - [AGENTS](${BLOB}/AGENTS.md)
+- [CONTRIBUTING](${BLOB}/CONTRIBUTING.md)
+- [Architecture](${BLOB}/docs/architecture.md)
+- [User Stories](${BLOB}/docs/UserStory.md)
+- [Demo Scenarios](${BLOB}/docs/demo-scenarios.md)
+- [Hardware BOM](${BLOB}/docs/hardware/BOM.md)
 - [CHANGELOG](${BLOB}/CHANGELOG.md)
 
 ## Source

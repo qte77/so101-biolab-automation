@@ -112,16 +112,13 @@
 
 > As a **developer**, I want to add a new use case by composing existing modules, so that I can automate new lab tasks without modifying core modules.
 
-**Pattern:**
+**Acceptance criteria:**
 
-```python
-from biolab.workflow import create_workflow_context, pipette_well
+- [ ] New workflow composes existing modules via `create_workflow_context()`
+- [ ] No modifications to core modules (`arms.py`, `pipette.py`, `plate.py`, etc.)
+- [ ] New workflow has corresponding tests in `tests/`
 
-arm, pipette, changer, layout = create_workflow_context()
-# Compose existing primitives:
-pipette_well(arm, pipette, layout, "arm_a", "TROUGH", "B5", 100.0)
-arm.disconnect()
-```
+See [docs/architecture.md](architecture.md) for module API and composition patterns.
 
 ### US-5.2: Run All Tests Without Hardware
 
