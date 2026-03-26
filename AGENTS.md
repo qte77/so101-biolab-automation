@@ -16,16 +16,18 @@ For technical workflows and coding standards, see [CONTRIBUTING.md](CONTRIBUTING
 
 ## Architecture Overview
 
+See [docs/architecture.md](docs/architecture.md) for full system design, module table, and data flows.
+
 - **Dual SO-101 arms** — leader/follower teleoperation and ACT policy execution
-- **LeRobot** — arm control, imitation learning, teleoperation recording
-- **PyLabRobot** — liquid handling abstractions (pipette, plate coords)
+- **Workflow orchestration** — composes arms + pipette + tool changer into use cases (UC1-4)
 - **FastAPI dashboard** — remote oversight with WebSocket command channel
 
-Key directories:
-- `src/biolab/` — Core: arm control, pipette, plate coords, tool changer, safety monitor
-- `src/dashboard/` — FastAPI + WebRTC remote oversight
-- `configs/` — YAML for arm ports, plate layout, tool dock positions
-- `scripts/` — Calibration, recording, training, demo wrappers
+Key references:
+- [docs/architecture.md](docs/architecture.md) — system design (AUTHORITY)
+- [docs/UserStory.md](docs/UserStory.md) — acceptance criteria (AUTHORITY)
+- [docs/demo-scenarios.md](docs/demo-scenarios.md) — how to run demos
+- [docs/hardware/BOM.md](docs/hardware/BOM.md) — hardware shopping list
+- [CONTRIBUTING.md](CONTRIBUTING.md) — dev workflow + full documentation hierarchy
 
 ## Decision Framework
 
@@ -33,8 +35,10 @@ Key directories:
 
 **Information sources:**
 - Requirements/scope: task description or user instruction (primary)
-- Technical implementation: `src/` code + `configs/` (authority)
-- Hardware details: `configs/*.yaml` (authority — never hardcode values from here)
+- System design: [docs/architecture.md](docs/architecture.md) (AUTHORITY)
+- Acceptance criteria: [docs/UserStory.md](docs/UserStory.md) (AUTHORITY)
+- Hardware constraints: [docs/hardware/BOM.md](docs/hardware/BOM.md) + `configs/*.yaml`
+- Implementation detail: `src/` code (reference, not authority)
 
 **Anti-scope-creep:** Only implement what is explicitly requested. Hardware automation
 is safety-critical — never add untested behaviour speculatively.

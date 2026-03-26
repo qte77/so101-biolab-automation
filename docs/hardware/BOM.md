@@ -38,14 +38,14 @@ PLA+, 0.4mm nozzle, 0.2mm layer, 15% infill, supports >45 degrees.
 
 **Custom parts (to be designed for this project):**
 
-| Part | File | Material | Notes |
-|------|------|----------|-------|
-| Pipette mount adapter | `stl/pipette_mount_so101.stl` | PLA+ | Adapts gripper to hold digital-pipette-v2 |
-| Tool dock (3-station) | `stl/tool_dock_3station.stl` | PLA+ | Magnetic dock, ref: [Berkeley tool changer](https://goldberg.berkeley.edu/pubs/CASE2018-ron-tool-changer-submitted.pdf) |
-| Fridge hook end-effector | `stl/fridge_hook_tool.stl` | PLA+ | Hook for fridge door handle |
-| 96-well plate holder | `stl/96well_plate_holder.stl` | PLA+ | SBS footprint alignment pins |
-| Tip rack holder | `stl/tip_rack_holder.stl` | PLA+ | Holds standard pipette tip rack |
-| Compliant gripper tips | `stl/gripper_tips.stl` | TPU 95A | Ref: [silicone mold (Thingiverse)](https://www.thingiverse.com/thing:7152864), [fin-ray gripper (MakerWorld)](https://makerworld.com/en/models/2075813) |
+| Part | Planned File | Material | Notes |
+|------|-------------|----------|-------|
+| Pipette mount adapter | *TBD* | PLA+ | Adapts gripper to hold digital-pipette-v2 |
+| Tool dock (3-station) | *TBD* | PLA+ | Magnetic dock, ref: [Berkeley tool changer](https://goldberg.berkeley.edu/pubs/CASE2018-ron-tool-changer-submitted.pdf) |
+| Fridge hook end-effector | *TBD* | PLA+ | Hook for fridge door handle |
+| 96-well plate holder | *TBD* | PLA+ | SBS footprint alignment pins |
+| Tip rack holder | *TBD* | PLA+ | Holds standard pipette tip rack |
+| Compliant gripper tips | *TBD* | TPU 95A | Ref: [silicone mold (Thingiverse)](https://www.thingiverse.com/thing:7152864), [fin-ray gripper (MakerWorld)](https://makerworld.com/en/models/2075813) |
 
 ## Cameras
 

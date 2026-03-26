@@ -61,3 +61,23 @@ uv run pytest -m "not hardware"
 
 Types: `feat | fix | build | chore | ci | docs | style | refactor | perf | test`
 Scopes: `biolab | dashboard | configs | scripts | tests | docs`
+
+## Documentation Hierarchy
+
+Each document has a specific authority. Do not duplicate information across documents — reference the authoritative source instead.
+
+| Document | Authority | Audience | Content |
+|----------|-----------|----------|---------|
+| [README.md](README.md) | Human entry point | Humans | What, why, quick start, badges, doc links |
+| [AGENTS.md](AGENTS.md) | Agent entry point | AI agents | Rules, decision framework, all authority references |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Dev workflow | Both | Commands, testing, code style, this hierarchy |
+| [docs/architecture.md](docs/architecture.md) | System design | Both | Module responsibilities, data flows, design decisions |
+| [docs/UserStory.md](docs/UserStory.md) | Acceptance criteria | Both | User stories US-1.1–US-5.2 with testable criteria |
+| [docs/demo-scenarios.md](docs/demo-scenarios.md) | Operations | Both | How to run and verify each use case |
+| [docs/hardware/BOM.md](docs/hardware/BOM.md) | Hardware | Both | Shopping list, vendor links, cost summary |
+| [CHANGELOG.md](CHANGELOG.md) | Version history | Both | Keep a Changelog format |
+| [AGENT_LEARNINGS.md](AGENT_LEARNINGS.md) | Patterns | AI agents | Discovered patterns and solutions |
+| [AGENT_REQUESTS.md](AGENT_REQUESTS.md) | Escalation | AI agents | Blocked items requiring human input |
+| `.claude/rules/*.md` | Session rules | AI agents | Always-loaded: core-principles, context-management, compound-learning |
+
+**Anti-redundancy:** Update the authoritative document, then remove duplicates elsewhere.
