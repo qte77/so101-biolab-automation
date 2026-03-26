@@ -61,3 +61,22 @@ uv run pytest -m "not hardware"
 
 Types: `feat | fix | build | chore | ci | docs | style | refactor | perf | test`
 Scopes: `biolab | dashboard | configs | scripts | tests | docs`
+
+## Documentation Hierarchy
+
+Each document has a specific authority. Do not duplicate information across documents — reference the authoritative source instead.
+
+| Document | Authority | Content |
+|----------|-----------|---------|
+| [README.md](README.md) | Entry point | What, why, quick start, badges, links to all docs |
+| [AGENTS.md](AGENTS.md) | Agent rules | Behavioral rules, decision framework, quality thresholds |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Dev workflow | Commands, testing, code style, this hierarchy |
+| [docs/architecture.md](docs/architecture.md) | System design | Module responsibilities, data flows, stub mode, design decisions |
+| [docs/UserStory.md](docs/UserStory.md) | Acceptance criteria | User stories US-1.1–US-5.2 with testable criteria |
+| [docs/demo-scenarios.md](docs/demo-scenarios.md) | Operations | How to run and verify each use case |
+| [docs/hardware/BOM.md](docs/hardware/BOM.md) | Hardware | Shopping list, vendor links, cost summary |
+| [CHANGELOG.md](CHANGELOG.md) | Version history | Keep a Changelog format |
+| [AGENT_LEARNINGS.md](AGENT_LEARNINGS.md) | Patterns | Discovered patterns and solutions |
+| [AGENT_REQUESTS.md](AGENT_REQUESTS.md) | Escalation | Blocked items requiring human input |
+
+**Anti-redundancy:** Update the authoritative document, then remove duplicates elsewhere.
