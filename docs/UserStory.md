@@ -126,7 +126,7 @@ See [docs/architecture.md](architecture.md) for module API and composition patte
 
 **Acceptance criteria:**
 
-- [ ] `uv run pytest` passes (92 tests) on any machine with Python 3.10+
+- [ ] `uv run pytest` passes on any machine with Python 3.10+
 - [ ] No `@pytest.mark.hardware` tests run by default
 - [ ] Stub mode automatically activates when lerobot/pyserial/cv2 unavailable
 
