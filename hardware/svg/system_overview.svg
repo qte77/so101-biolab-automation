@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Arial, sans-serif" font-size="12">
+  <title>so101-biolab-automation Workspace Layout</title>
+  <style>
+    .label { font-weight: bold; font-size: 13px; }
+    .sublabel { font-size: 11px; fill: #666; }
+    .box { stroke: #333; stroke-width: 1.5; rx: 6; }
+    .arm { fill: #e3f2fd; }
+    .tool { fill: #fff3e0; }
+    .plate { fill: #e8f5e9; }
+    .fridge { fill: #fce4ec; }
+    .camera { fill: #f3e5f5; }
+    .arrow { stroke: #999; stroke-width: 1; fill: none; marker-end: url(#arrowhead); }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#999"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold">Workspace Layout — so101-biolab-automation</text>
+  <text x="400" y="48" text-anchor="middle" class="sublabel">Top-down view (not to scale). All positions configurable in configs/plate_layout.yaml</text>
+
+  <!-- Arm A (left) -->
+  <rect x="80" y="180" width="120" height="140" class="box arm"/>
+  <text x="140" y="210" text-anchor="middle" class="label">Arm A</text>
+  <text x="140" y="228" text-anchor="middle" class="sublabel">SO-101 follower</text>
+  <text x="140" y="244" text-anchor="middle" class="sublabel">port: /dev/ttyACM1</text>
+  <circle cx="140" cy="275" r="20" fill="none" stroke="#1565c0" stroke-width="2" stroke-dasharray="4,3"/>
+  <text x="140" y="280" text-anchor="middle" class="sublabel">reach</text>
+
+  <!-- Arm B (right) -->
+  <rect x="600" y="180" width="120" height="140" class="box arm"/>
+  <text x="660" y="210" text-anchor="middle" class="label">Arm B</text>
+  <text x="660" y="228" text-anchor="middle" class="sublabel">SO-101 follower</text>
+  <text x="660" y="244" text-anchor="middle" class="sublabel">port: /dev/ttyACM2</text>
+  <circle cx="660" cy="275" r="20" fill="none" stroke="#1565c0" stroke-width="2" stroke-dasharray="4,3"/>
+  <text x="660" y="280" text-anchor="middle" class="sublabel">reach</text>
+
+  <!-- 96-well plate holder (center) -->
+  <rect x="300" y="170" width="200" height="80" class="box plate"/>
+  <text x="400" y="198" text-anchor="middle" class="label">96-Well Plate</text>
+  <text x="400" y="216" text-anchor="middle" class="sublabel">96well_plate_holder.stl</text>
+  <text x="400" y="232" text-anchor="middle" class="sublabel">127.76 × 85.48 mm (SBS)</text>
+
+  <!-- Tip rack -->
+  <rect x="300" y="280" width="100" height="50" class="box plate"/>
+  <text x="350" y="302" text-anchor="middle" class="label">Tip Rack</text>
+  <text x="350" y="318" text-anchor="middle" class="sublabel">tip_rack_holder.stl</text>
+
+  <!-- Reagent trough -->
+  <rect x="420" y="280" width="100" height="50" class="box plate"/>
+  <text x="470" y="302" text-anchor="middle" class="label">Trough</text>
+  <text x="470" y="318" text-anchor="middle" class="sublabel">reagent source</text>
+
+  <!-- Tool dock -->
+  <rect x="300" y="380" width="200" height="60" class="box tool"/>
+  <text x="400" y="405" text-anchor="middle" class="label">Tool Dock (3 stations)</text>
+  <text x="400" y="422" text-anchor="middle" class="sublabel">tool_dock_3station.stl</text>
+  <!-- Tool slots -->
+  <rect x="320" y="398" width="40" height="30" fill="#fff" stroke="#999" rx="3"/>
+  <text x="340" y="418" text-anchor="middle" font-size="9">pipette</text>
+  <rect x="380" y="398" width="40" height="30" fill="#fff" stroke="#999" rx="3"/>
+  <text x="400" y="418" text-anchor="middle" font-size="9">gripper</text>
+  <rect x="440" y="398" width="40" height="30" fill="#fff" stroke="#999" rx="3"/>
+  <text x="460" y="418" text-anchor="middle" font-size="9">hook</text>
+
+  <!-- Fridge -->
+  <rect x="30" y="370" width="100" height="80" class="box fridge"/>
+  <text x="80" y="400" text-anchor="middle" class="label">Fridge</text>
+  <text x="80" y="418" text-anchor="middle" class="sublabel">fridge_hook_tool.stl</text>
+  <text x="80" y="434" text-anchor="middle" class="sublabel">for door handle</text>
+
+  <!-- Overhead camera -->
+  <rect x="350" y="80" width="100" height="40" class="box camera"/>
+  <text x="400" y="105" text-anchor="middle" class="label">Overhead Cam</text>
+
+  <!-- Wrist cameras -->
+  <rect x="95" y="140" width="90" height="30" class="box camera"/>
+  <text x="140" y="160" text-anchor="middle" class="sublabel">wrist cam A</text>
+  <rect x="615" y="140" width="90" height="30" class="box camera"/>
+  <text x="660" y="160" text-anchor="middle" class="sublabel">wrist cam B</text>
+
+  <!-- Arrows: arm reach to plate -->
+  <path d="M200,250 L300,210" class="arrow"/>
+  <path d="M600,250 L500,210" class="arrow"/>
+
+  <!-- Arrows: arm reach to dock -->
+  <path d="M170,320 L300,400" class="arrow"/>
+  <path d="M630,320 L500,400" class="arrow"/>
+
+  <!-- Arrow: arm A to fridge -->
+  <path d="M100,320 L90,370" class="arrow"/>
+
+  <!-- Legend -->
+  <rect x="600" y="400" width="15" height="15" class="arm" stroke="#333" stroke-width="1"/>
+  <text x="620" y="412" font-size="10">Arm</text>
+  <rect x="600" y="420" width="15" height="15" class="plate" stroke="#333" stroke-width="1"/>
+  <text x="620" y="432" font-size="10">Labware</text>
+  <rect x="600" y="440" width="15" height="15" class="tool" stroke="#333" stroke-width="1"/>
+  <text x="620" y="452" font-size="10">Tool dock</text>
+  <rect x="680" y="400" width="15" height="15" class="fridge" stroke="#333" stroke-width="1"/>
+  <text x="700" y="412" font-size="10">Fridge</text>
+  <rect x="680" y="420" width="15" height="15" class="camera" stroke="#333" stroke-width="1"/>
+  <text x="700" y="432" font-size="10">Camera</text>
+
+  <!-- Footer -->
+  <text x="400" y="490" text-anchor="middle" class="sublabel">EXPERIMENTAL — dimensions approximate. See configs/plate_layout.yaml for positions.</text>
+</svg>
