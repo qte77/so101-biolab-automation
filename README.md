@@ -69,6 +69,7 @@ tests/             All modules + E2E workflow + dashboard + scripts
 - [User Stories](docs/UserStory.md) — UC1-4 acceptance criteria
 - [Demo Scenarios](docs/demo-scenarios.md) — how to run and verify each use case
 - [Hardware BOM](docs/hardware/BOM.md) — shopping list with links ($350-$820)
+- [Research](docs/research.md) — community designs, papers, future vision (VLM, embodied AI)
 
 ## Key Dependencies
 
