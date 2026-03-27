@@ -18,6 +18,7 @@ Exports:
     hardware/svg/tool_cone_male.svg
 """
 
+import math
 from pathlib import Path
 
 import cadquery as cq
@@ -25,20 +26,19 @@ import cadquery as cq
 # --- Parameters (all in mm) ---
 # SO-101 wrist flange (motor 5 horn mount)
 # TODO: measure from real hardware or SO-ARM100 STEP files
-WRIST_FLANGE_DIAMETER = 25.0  # Approximate
-WRIST_SCREW_PATTERN_RADIUS = 9.0  # M3 screw circle radius
+WRIST_SCREW_PATTERN_RADIUS = 9.0
 WRIST_SCREW_DIAMETER = 3.2  # M3 clearance
 
 # Cone geometry (Berkeley design: 10° half-angle)
 CONE_ANGLE_DEG = 10.0
 CONE_HEIGHT = 15.0
-CONE_TOP_DIAMETER = 30.0  # Wider end (mating surface)
-CONE_BOTTOM_DIAMETER = CONE_TOP_DIAMETER - 2 * CONE_HEIGHT * 0.176  # tan(10°) ≈ 0.176
+CONE_TOP_RADIUS = 15.0
+CONE_BOTTOM_RADIUS = CONE_TOP_RADIUS - CONE_HEIGHT * math.tan(math.radians(CONE_ANGLE_DEG))
 
 # Dowel pins for alignment
 DOWEL_DIAMETER = 3.0
 DOWEL_HEIGHT = 8.0
-DOWEL_OFFSET = 10.0  # Distance from center
+DOWEL_OFFSET = 10.0
 
 # Magnet pockets (5mm dia × 3mm deep neodymium)
 MAGNET_DIAMETER = 5.0
@@ -47,62 +47,62 @@ MAGNET_OFFSET = 12.0
 
 # Base plate
 BASE_THICKNESS = 5.0
+BASE_RADIUS = CONE_TOP_RADIUS + 3
+
+
+def _make_truncated_cone(height: float, r_bottom: float, r_top: float) -> cq.Workplane:
+    """Create a truncated cone (frustum) via revolve.
+
+    Args:
+        height: Cone height.
+        r_bottom: Bottom radius (smaller).
+        r_top: Top radius (larger).
+
+    Returns:
+        CadQuery solid.
+    """
+    return (
+        cq.Workplane("XZ")
+        .moveTo(0, 0)
+        .lineTo(r_bottom, 0)
+        .lineTo(r_top, height)
+        .lineTo(0, height)
+        .close()
+        .revolve(360, (0, 0, 0), (0, 1, 0))
+    )
 
 
 def build_robot_cone() -> cq.Workplane:
     """Build female (robot-side) cone adapter for SO-101 wrist.
 
-    Mounts to motor 5 horn via M3 screws. Has conical pocket
-    that receives the male tool cone.
-
     Returns:
         CadQuery workplane with female cone solid.
     """
-    # Base cylinder that mounts to wrist
-    base = (
-        cq.Workplane("XY")
-        .cylinder(BASE_THICKNESS, CONE_TOP_DIAMETER / 2 + 3)
-    )
+    # Base cylinder
+    base = cq.Workplane("XY").cylinder(BASE_THICKNESS, BASE_RADIUS)
 
     # Cut conical pocket (female)
-    cone = (
-        cq.Workplane("XY")
-        .cone(CONE_HEIGHT, CONE_BOTTOM_DIAMETER / 2, CONE_TOP_DIAMETER / 2)
-        .translate((0, 0, BASE_THICKNESS / 2))
-    )
+    cone = _make_truncated_cone(CONE_HEIGHT, CONE_BOTTOM_RADIUS, CONE_TOP_RADIUS)
+    cone = cone.translate((0, 0, -BASE_THICKNESS / 2 + 0.5))
     base = base.cut(cone)
 
-    # Cut M3 mounting holes for wrist flange
-    import math
-
+    # M3 mounting holes (4x at 90° intervals, offset 45°)
     for i in range(4):
         angle = math.radians(i * 90 + 45)
         x = WRIST_SCREW_PATTERN_RADIUS * math.cos(angle)
         y = WRIST_SCREW_PATTERN_RADIUS * math.sin(angle)
-        hole = (
-            cq.Workplane("XY")
-            .cylinder(BASE_THICKNESS + 1, WRIST_SCREW_DIAMETER / 2)
-            .translate((x, y, 0))
-        )
-        base = base.cut(hole)
+        hole = cq.Workplane("XY").cylinder(BASE_THICKNESS + 1, WRIST_SCREW_DIAMETER / 2)
+        base = base.cut(hole.translate((x, y, 0)))
 
-    # Add dowel pin holes
+    # Dowel pin holes (2x, opposing)
     for sign in [1, -1]:
-        hole = (
-            cq.Workplane("XY")
-            .cylinder(DOWEL_HEIGHT, DOWEL_DIAMETER / 2)
-            .translate((sign * DOWEL_OFFSET, 0, -BASE_THICKNESS / 2 + DOWEL_HEIGHT / 2))
-        )
-        base = base.cut(hole)
+        hole = cq.Workplane("XY").cylinder(DOWEL_HEIGHT, DOWEL_DIAMETER / 2)
+        base = base.cut(hole.translate((sign * DOWEL_OFFSET, 0, BASE_THICKNESS / 2 - DOWEL_HEIGHT / 2)))
 
-    # Magnet pockets
+    # Magnet pockets (2x, opposing on Y axis)
     for sign in [1, -1]:
-        pocket = (
-            cq.Workplane("XY")
-            .cylinder(MAGNET_DEPTH, MAGNET_DIAMETER / 2)
-            .translate((0, sign * MAGNET_OFFSET, BASE_THICKNESS / 2 - MAGNET_DEPTH / 2))
-        )
-        base = base.cut(pocket)
+        pocket = cq.Workplane("XY").cylinder(MAGNET_DEPTH, MAGNET_DIAMETER / 2)
+        base = base.cut(pocket.translate((0, sign * MAGNET_OFFSET, -BASE_THICKNESS / 2 + MAGNET_DEPTH / 2)))
 
     return base
 
@@ -110,46 +110,29 @@ def build_robot_cone() -> cq.Workplane:
 def build_male_cone() -> cq.Workplane:
     """Build male (tool-side) cone base.
 
-    Shared by all tools (pipette, gripper, hook). Each tool attaches
-    to the flat back of this cone.
-
     Returns:
         CadQuery workplane with male cone solid.
     """
-    # Conical protrusion (male)
-    cone = (
-        cq.Workplane("XY")
-        .cone(CONE_HEIGHT, CONE_BOTTOM_DIAMETER / 2 - 0.3, CONE_TOP_DIAMETER / 2 - 0.3)
+    # Conical protrusion (0.3mm smaller for clearance)
+    cone = _make_truncated_cone(
+        CONE_HEIGHT, CONE_BOTTOM_RADIUS - 0.3, CONE_TOP_RADIUS - 0.3
     )
 
     # Base plate for tool attachment
-    base = (
-        cq.Workplane("XY")
-        .cylinder(BASE_THICKNESS, CONE_TOP_DIAMETER / 2 + 3)
-        .translate((0, 0, -CONE_HEIGHT / 2 - BASE_THICKNESS / 2))
-    )
+    base = cq.Workplane("XY").cylinder(BASE_THICKNESS, BASE_RADIUS)
+    base = base.translate((0, 0, -CONE_HEIGHT / 2 - BASE_THICKNESS / 2))
 
     result = cone.union(base)
 
-    # Dowel pin protrusions
+    # Dowel pin protrusions (0.1mm smaller for fit)
     for sign in [1, -1]:
-        pin = (
-            cq.Workplane("XY")
-            .cylinder(DOWEL_HEIGHT, DOWEL_DIAMETER / 2 - 0.1)
-            .translate((sign * DOWEL_OFFSET, 0, CONE_HEIGHT / 2 + DOWEL_HEIGHT / 2))
-        )
-        result = result.union(pin)
+        pin = cq.Workplane("XY").cylinder(DOWEL_HEIGHT, DOWEL_DIAMETER / 2 - 0.1)
+        result = result.union(pin.translate((sign * DOWEL_OFFSET, 0, CONE_HEIGHT / 2 + DOWEL_HEIGHT / 2)))
 
     # Magnet pockets (matching robot side)
     for sign in [1, -1]:
-        pocket = (
-            cq.Workplane("XY")
-            .cylinder(MAGNET_DEPTH, MAGNET_DIAMETER / 2)
-            .translate(
-                (0, sign * MAGNET_OFFSET, CONE_HEIGHT / 2 - MAGNET_DEPTH / 2)
-            )
-        )
-        result = result.cut(pocket)
+        pocket = cq.Workplane("XY").cylinder(MAGNET_DEPTH, MAGNET_DIAMETER / 2)
+        result = result.cut(pocket.translate((0, sign * MAGNET_OFFSET, CONE_HEIGHT / 2 - MAGNET_DEPTH / 2)))
 
     return result
 
