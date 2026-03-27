@@ -1,3 +1,11 @@
+---
+title: Architecture
+purpose: System design, module responsibilities, data flows, stub mode, design decisions
+authority: System design (AUTHORITY)
+created: 2026-03-27
+updated: 2026-03-27
+---
+
 # Architecture
 
 ## System Overview

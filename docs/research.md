@@ -1,7 +1,14 @@
-# Research Findings: Enhancements & Good-to-Knows for so101-biolab-automation
+---
+title: Research Findings
+purpose: Community designs, academic papers, future vision (VLM, embodied AI, PCR use case)
+authority: Research (INFORMATIONAL — not requirements)
+sources: MakerWorld, Thingiverse, Printables, GitHub, arXiv, bioRxiv, Reddit, MakerForge, UZH, EPFL
+created: 2026-03-27
+updated: 2026-03-27
+validated_links: 2026-03-27
+---
 
-**Research date:** 2026-03-27
-**Sources crawled:** MakerWorld, Thingiverse, Printables, GitHub, arXiv, bioRxiv, Reddit, MakerForge, UZH, Exa web search
+# Research Findings: Enhancements & Good-to-Knows for so101-biolab-automation
 
 ## Key Finding: No SO-101 Pipette End Effector Exists
 
