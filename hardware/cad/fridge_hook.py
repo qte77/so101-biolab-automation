@@ -34,10 +34,7 @@ def build_fridge_hook() -> cq.Workplane:
         CadQuery workplane with hook solid.
     """
     # Mounting plate
-    mount = (
-        cq.Workplane("XY")
-        .cylinder(MOUNT_THICKNESS, MOUNT_DIAMETER / 2)
-    )
+    mount = cq.Workplane("XY").cylinder(MOUNT_THICKNESS, MOUNT_DIAMETER / 2)
 
     # Hook arm (vertical part)
     arm = (
@@ -50,7 +47,13 @@ def build_fridge_hook() -> cq.Workplane:
     tip = (
         cq.Workplane("XY")
         .box(HOOK_WIDTH, HOOK_OPENING, HOOK_THICKNESS)
-        .translate((0, -HOOK_OPENING / 2 + HOOK_THICKNESS / 2, MOUNT_THICKNESS / 2 + HOOK_DEPTH - HOOK_THICKNESS / 2))
+        .translate(
+            (
+                0,
+                -HOOK_OPENING / 2 + HOOK_THICKNESS / 2,
+                MOUNT_THICKNESS / 2 + HOOK_DEPTH - HOOK_THICKNESS / 2,
+            )
+        )
     )
 
     return mount.union(arm).union(tip)

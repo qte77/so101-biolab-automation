@@ -59,6 +59,7 @@ convention = "google"
 pythonVersion = "3.10"
 typeCheckingMode = "basic"
 include = ["src"]
+reportMissingImports = "warning"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

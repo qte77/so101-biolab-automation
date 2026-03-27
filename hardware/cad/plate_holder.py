@@ -52,8 +52,7 @@ def build_plate_holder() -> cq.Workplane:
 
     # Cut inner pocket for plate
     holder = (
-        holder
-        .faces(">Z")
+        holder.faces(">Z")
         .workplane()
         .rect(INNER_LENGTH, INNER_WIDTH)
         .cutBlind(-BASE_THICKNESS + 1.0)  # Leave 1mm floor

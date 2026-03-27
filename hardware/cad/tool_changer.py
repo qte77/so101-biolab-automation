@@ -97,12 +97,14 @@ def build_robot_cone() -> cq.Workplane:
     # Dowel pin holes (2x, opposing)
     for sign in [1, -1]:
         hole = cq.Workplane("XY").cylinder(DOWEL_HEIGHT, DOWEL_DIAMETER / 2)
-        base = base.cut(hole.translate((sign * DOWEL_OFFSET, 0, BASE_THICKNESS / 2 - DOWEL_HEIGHT / 2)))
+        z = BASE_THICKNESS / 2 - DOWEL_HEIGHT / 2
+        base = base.cut(hole.translate((sign * DOWEL_OFFSET, 0, z)))
 
     # Magnet pockets (2x, opposing on Y axis)
     for sign in [1, -1]:
         pocket = cq.Workplane("XY").cylinder(MAGNET_DEPTH, MAGNET_DIAMETER / 2)
-        base = base.cut(pocket.translate((0, sign * MAGNET_OFFSET, -BASE_THICKNESS / 2 + MAGNET_DEPTH / 2)))
+        z = -BASE_THICKNESS / 2 + MAGNET_DEPTH / 2
+        base = base.cut(pocket.translate((0, sign * MAGNET_OFFSET, z)))
 
     return base
 
@@ -114,9 +116,7 @@ def build_male_cone() -> cq.Workplane:
         CadQuery workplane with male cone solid.
     """
     # Conical protrusion (0.3mm smaller for clearance)
-    cone = _make_truncated_cone(
-        CONE_HEIGHT, CONE_BOTTOM_RADIUS - 0.3, CONE_TOP_RADIUS - 0.3
-    )
+    cone = _make_truncated_cone(CONE_HEIGHT, CONE_BOTTOM_RADIUS - 0.3, CONE_TOP_RADIUS - 0.3)
 
     # Base plate for tool attachment
     base = cq.Workplane("XY").cylinder(BASE_THICKNESS, BASE_RADIUS)
@@ -127,12 +127,14 @@ def build_male_cone() -> cq.Workplane:
     # Dowel pin protrusions (0.1mm smaller for fit)
     for sign in [1, -1]:
         pin = cq.Workplane("XY").cylinder(DOWEL_HEIGHT, DOWEL_DIAMETER / 2 - 0.1)
-        result = result.union(pin.translate((sign * DOWEL_OFFSET, 0, CONE_HEIGHT / 2 + DOWEL_HEIGHT / 2)))
+        z = CONE_HEIGHT / 2 + DOWEL_HEIGHT / 2
+        result = result.union(pin.translate((sign * DOWEL_OFFSET, 0, z)))
 
     # Magnet pockets (matching robot side)
     for sign in [1, -1]:
         pocket = cq.Workplane("XY").cylinder(MAGNET_DEPTH, MAGNET_DIAMETER / 2)
-        result = result.cut(pocket.translate((0, sign * MAGNET_OFFSET, CONE_HEIGHT / 2 - MAGNET_DEPTH / 2)))
+        z = CONE_HEIGHT / 2 - MAGNET_DEPTH / 2
+        result = result.cut(pocket.translate((0, sign * MAGNET_OFFSET, z)))
 
     return result
 
