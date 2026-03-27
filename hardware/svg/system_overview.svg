@@ -1,41 +1,72 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Arial, sans-serif" font-size="12">
-  <title>so101-biolab-automation Workspace Layout</title>
-  <style>
-    .label { font-weight: bold; font-size: 13px; }
-    .sublabel { font-size: 11px; fill: #666; }
-    .box { stroke: #333; stroke-width: 1.5; rx: 6; }
-    .arm { fill: #e3f2fd; }
-    .tool { fill: #fff3e0; }
-    .plate { fill: #e8f5e9; }
-    .fridge { fill: #fce4ec; }
-    .camera { fill: #f3e5f5; }
-    .arrow { stroke: #999; stroke-width: 1; fill: none; marker-end: url(#arrowhead); }
-  </style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
   <defs>
-    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#999"/>
+    <style>
+      /* Light mode (default) */
+      .page-bg { fill: #ffffff; }
+      .label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-weight: bold; font-size: 13px; fill: #1f2328; }
+      .sublabel { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 11px; fill: #656d76; }
+      .title-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .slot-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 9px; fill: #1f2328; }
+      .legend-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 10px; fill: #1f2328; }
+      .footer-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 11px; fill: #8b949e; }
+      .box { stroke: #d0d7de; stroke-width: 1.5; rx: 6; }
+      .arm { fill: #dbeafe; }
+      .tool { fill: #fef3c7; }
+      .plate { fill: #d1fae5; }
+      .fridge { fill: #fce7f3; }
+      .camera { fill: #ede9fe; }
+      .slot { fill: #ffffff; stroke: #d0d7de; rx: 3; }
+      .reach { stroke: #2563eb; }
+      .arrow { stroke: #9ca3af; stroke-width: 1; fill: none; marker-end: url(#arrowhead-light); }
+
+      /* Dark mode */
+      @media (prefers-color-scheme: dark) {
+        .page-bg { fill: #0d1117; }
+        .label { fill: #e6edf3; }
+        .sublabel { fill: #8b949e; }
+        .title-text { fill: #e6edf3; }
+        .slot-text { fill: #e6edf3; }
+        .legend-text { fill: #e6edf3; }
+        .footer-text { fill: #484f58; }
+        .box { stroke: #30363d; }
+        .arm { fill: #1e3a5f; }
+        .tool { fill: #3d2e0a; }
+        .plate { fill: #0d3321; }
+        .fridge { fill: #3d1329; }
+        .camera { fill: #2e1a47; }
+        .slot { fill: #161b22; stroke: #30363d; }
+        .reach { stroke: #58a6ff; }
+        .arrow { stroke: #484f58; marker-end: url(#arrowhead-dark); }
+      }
+    </style>
+    <marker id="arrowhead-light" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#9ca3af"/>
+    </marker>
+    <marker id="arrowhead-dark" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#484f58"/>
     </marker>
   </defs>
 
+  <!-- Page background -->
+  <rect width="800" height="500" class="page-bg"/>
+
   <!-- Title -->
-  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold">Workspace Layout — so101-biolab-automation</text>
-  <text x="400" y="48" text-anchor="middle" class="sublabel">Top-down view (not to scale). All positions configurable in configs/plate_layout.yaml</text>
+  <text x="400" y="30" text-anchor="middle" class="title-text">Workspace Layout — so101-biolab-automation</text>
+  <text x="400" y="48" text-anchor="middle" class="footer-text">Top-down view (not to scale). Positions in configs/plate_layout.yaml</text>
 
   <!-- Arm A (left) -->
   <rect x="80" y="180" width="120" height="140" class="box arm"/>
   <text x="140" y="210" text-anchor="middle" class="label">Arm A</text>
   <text x="140" y="228" text-anchor="middle" class="sublabel">SO-101 follower</text>
   <text x="140" y="244" text-anchor="middle" class="sublabel">port: /dev/ttyACM1</text>
-  <circle cx="140" cy="275" r="20" fill="none" stroke="#1565c0" stroke-width="2" stroke-dasharray="4,3"/>
-  <text x="140" y="280" text-anchor="middle" class="sublabel">reach</text>
+  <circle cx="140" cy="275" r="20" fill="none" class="reach" stroke-width="2" stroke-dasharray="4,3"/>
 
   <!-- Arm B (right) -->
   <rect x="600" y="180" width="120" height="140" class="box arm"/>
   <text x="660" y="210" text-anchor="middle" class="label">Arm B</text>
   <text x="660" y="228" text-anchor="middle" class="sublabel">SO-101 follower</text>
   <text x="660" y="244" text-anchor="middle" class="sublabel">port: /dev/ttyACM2</text>
-  <circle cx="660" cy="275" r="20" fill="none" stroke="#1565c0" stroke-width="2" stroke-dasharray="4,3"/>
-  <text x="660" y="280" text-anchor="middle" class="sublabel">reach</text>
+  <circle cx="660" cy="275" r="20" fill="none" class="reach" stroke-width="2" stroke-dasharray="4,3"/>
 
   <!-- 96-well plate holder (center) -->
   <rect x="300" y="170" width="200" height="80" class="box plate"/>
@@ -55,15 +86,14 @@
 
   <!-- Tool dock -->
   <rect x="300" y="380" width="200" height="60" class="box tool"/>
-  <text x="400" y="405" text-anchor="middle" class="label">Tool Dock (3 stations)</text>
-  <text x="400" y="422" text-anchor="middle" class="sublabel">tool_dock_3station.stl</text>
-  <!-- Tool slots -->
-  <rect x="320" y="398" width="40" height="30" fill="#fff" stroke="#999" rx="3"/>
-  <text x="340" y="418" text-anchor="middle" font-size="9">pipette</text>
-  <rect x="380" y="398" width="40" height="30" fill="#fff" stroke="#999" rx="3"/>
-  <text x="400" y="418" text-anchor="middle" font-size="9">gripper</text>
-  <rect x="440" y="398" width="40" height="30" fill="#fff" stroke="#999" rx="3"/>
-  <text x="460" y="418" text-anchor="middle" font-size="9">hook</text>
+  <text x="400" y="400" text-anchor="middle" class="label">Tool Dock (3 stations)</text>
+  <text x="400" y="435" text-anchor="middle" class="sublabel">tool_dock_3station.stl</text>
+  <rect x="320" y="405" width="40" height="22" class="slot"/>
+  <text x="340" y="420" text-anchor="middle" class="slot-text">pipette</text>
+  <rect x="380" y="405" width="40" height="22" class="slot"/>
+  <text x="400" y="420" text-anchor="middle" class="slot-text">gripper</text>
+  <rect x="440" y="405" width="40" height="22" class="slot"/>
+  <text x="460" y="420" text-anchor="middle" class="slot-text">hook</text>
 
   <!-- Fridge -->
   <rect x="30" y="370" width="100" height="80" class="box fridge"/>
@@ -81,29 +111,25 @@
   <rect x="615" y="140" width="90" height="30" class="box camera"/>
   <text x="660" y="160" text-anchor="middle" class="sublabel">wrist cam B</text>
 
-  <!-- Arrows: arm reach to plate -->
+  <!-- Arrows -->
   <path d="M200,250 L300,210" class="arrow"/>
   <path d="M600,250 L500,210" class="arrow"/>
-
-  <!-- Arrows: arm reach to dock -->
   <path d="M170,320 L300,400" class="arrow"/>
   <path d="M630,320 L500,400" class="arrow"/>
-
-  <!-- Arrow: arm A to fridge -->
   <path d="M100,320 L90,370" class="arrow"/>
 
   <!-- Legend -->
-  <rect x="600" y="400" width="15" height="15" class="arm" stroke="#333" stroke-width="1"/>
-  <text x="620" y="412" font-size="10">Arm</text>
-  <rect x="600" y="420" width="15" height="15" class="plate" stroke="#333" stroke-width="1"/>
-  <text x="620" y="432" font-size="10">Labware</text>
-  <rect x="600" y="440" width="15" height="15" class="tool" stroke="#333" stroke-width="1"/>
-  <text x="620" y="452" font-size="10">Tool dock</text>
-  <rect x="680" y="400" width="15" height="15" class="fridge" stroke="#333" stroke-width="1"/>
-  <text x="700" y="412" font-size="10">Fridge</text>
-  <rect x="680" y="420" width="15" height="15" class="camera" stroke="#333" stroke-width="1"/>
-  <text x="700" y="432" font-size="10">Camera</text>
+  <rect x="600" y="400" width="15" height="15" class="arm" stroke="#d0d7de" stroke-width="1"/>
+  <text x="620" y="412" class="legend-text">Arm</text>
+  <rect x="600" y="420" width="15" height="15" class="plate" stroke="#d0d7de" stroke-width="1"/>
+  <text x="620" y="432" class="legend-text">Labware</text>
+  <rect x="600" y="440" width="15" height="15" class="tool" stroke="#d0d7de" stroke-width="1"/>
+  <text x="620" y="452" class="legend-text">Tool dock</text>
+  <rect x="680" y="400" width="15" height="15" class="fridge" stroke="#d0d7de" stroke-width="1"/>
+  <text x="700" y="412" class="legend-text">Fridge</text>
+  <rect x="680" y="420" width="15" height="15" class="camera" stroke="#d0d7de" stroke-width="1"/>
+  <text x="700" y="432" class="legend-text">Camera</text>
 
   <!-- Footer -->
-  <text x="400" y="490" text-anchor="middle" class="sublabel">EXPERIMENTAL — dimensions approximate. See configs/plate_layout.yaml for positions.</text>
+  <text x="400" y="490" text-anchor="middle" class="footer-text">EXPERIMENTAL — dimensions approximate. See configs/plate_layout.yaml for positions.</text>
 </svg>
