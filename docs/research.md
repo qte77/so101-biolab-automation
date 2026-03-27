@@ -25,6 +25,9 @@ No community design for a pipette attachment specifically for SO-101. This is an
 | [Bambu-Optimized SO-101](https://makerworld.com/en/models/1399268) | MakerWorld (manfromwest) | 2025-05 | Best SO-101 print files for Bambu. Camera mount provisions. |
 | [AB-SO-BOT](https://github.com/Mr-C4T/AB-SO-BOT) | GitHub (54 stars) | 2025 | Aluminium body upgrade with RealSense mounts. |
 | [WH148 Leader Arm](https://www.thingiverse.com/thing:7041540) | Thingiverse (xuyuan) | 2025-05 | Cheaper potentiometer-based leader arm. |
+| [SO-101 Fin-Ray Gripper](https://makerworld.com/en/models/2075813) | MakerWorld (GauravMM) | 2025-12 | Compliant gripper for delicate/oddly-shaped objects. TPU 95A. |
+| [SO-101 Parallel Gripper](https://github.com/roboninecom/SO-ARM100-101-Parallel-Gripper) | GitHub (Robonine) | 2026-03 | 1.5kg payload, 100.5mm stroke, $76. Open-source STL + code. |
+| [XLeRobot](https://github.com/Vector-Wangel/XLeRobot) | GitHub ([docs](https://xlerobot.readthedocs.io)) | 2025 | Dual SO-101 on mobile base (LeKiwi). $660. URDFs + ManiSkill sim. 600-1000g payload/arm. |
 
 ## Tool Changer Design
 
@@ -57,16 +60,33 @@ No community design for a pipette attachment specifically for SO-101. This is an
 | [MULA](https://www.printables.com/model/1019242) | Printables | open | 2024 ([paper](https://doi.org/10.1016/j.ohx.2024.e00075)) | Gastight syringe mechanism. CAD on [Mendeley](https://data.mendeley.com/datasets/3m3t4f9ft3). |
 | [OLA](https://docs.openlabautomata.xyz/) | Website | open | active | Community hub. Protocol sharing. |
 | [PHIL](https://github.com/CSDGroup/PHIL) | GitHub | MIT | 2022 ([Nature Comms](https://www.nature.com/articles/s41467-022-30643-7)) | ETH Zurich. Personal pipetting robot. Tip management, media exchange, live-cell compatible. |
+| [PyLabRobot](https://github.com/PyLabRobot/pylabrobot) | GitHub | Apache-2.0 | 2023 ([bioRxiv](https://www.biorxiv.org/content/10.1101/2023.07.10.547733)) | MIT Media Lab. Hardware-agnostic liquid handling. Already in our stack. Write SO-101 backend driver. |
+| [OptoBot](https://github.com/nicolaegues/OptoBot) | GitHub | — | 2024 | OT-2 + Python for automated experimental optimization loops. Closed-loop observe→decide→pipette pattern. |
+| [OT-2 Plate Handler](https://doi.org/10.26434/chemrxiv-2025-n95kk) | ChemRxiv | — | 2025 (Bolt et al.) | 3D-printed robotic claw for Opentrons OT-2. Plate gripping geometry + positioning tolerances reusable. |
 
 ## Bimanual SO-101 Support
 
 **[AIDASLab/lerobot-so101-bimanual](https://github.com/AIDASLab/lerobot-so101-bimanual)** (2026-01, 5 stars) — Drop-in LeRobot fork with `bi_so101_follower`/`bi_so101_leader` types. Calibration, teleoperation, recording all work dual-arm. **Use this instead of patching upstream.**
 
-## Andrew+ (Commercial Reference)
+## Commercial References
+
+### Andrew+ (Waters/Andrew Alliance) — [UZH page](https://www.zmb.uzh.ch/en/Available-Systems/SamplePreparationInstruments/Andrew-%2C-The-Pipetting-Robot.html)
 
 - Cartesian gantry + interchangeable electronic pipettes (single/8-channel)
 - Modular "Domino" snap-in accessories (heater/shaker, cooled racks, tip racks)
+- OneLab cloud protocol software (drag-and-drop)
 - Lessons: modular workspace with fixed slot positions; separate pipettes by volume range; 8-channel head for 96-well efficiency
+
+### Sartorius Electronic Pipettes — [product page](https://www.sartorius.com/en/products/pipetting/electronic-pipettes)
+
+- Picus 2: single/multi-channel, Bluetooth, programmable protocols
+- Future integration target for SO-101 (see Pipette Strategy section)
+
+## Community Resources
+
+- [MakerForge SO-101 guide](https://www.makerforge.tech/posts/seeed-so101/) — servo calibration, port detection, teleoperation setup
+- [Seeed Studio SO-101 wiki](https://wiki.seeedstudio.com/lerobot_so100m/) — reComputer Jetson + SO-101 kits
+- [PyLabRobot 2025 roadmap](http://discuss.pylabrobot.org/t/plr-dev-roadmap-2025-q1-q2/143) — extending to robotic arms (directly relevant)
 
 ## Known Hardware Issues
 
@@ -104,6 +124,9 @@ No community design for a pipette attachment specifically for SO-101. This is an
 | [Microplate Handling Accuracy](https://www.biorxiv.org/content/10.1101/2023.12.29.573685v1) | 2024 | Quantifies positioning tolerance for 96-well plate grasping. Sets engineering targets. |
 | [Open Liquid Handler](https://www.biorxiv.org/content/10.64898/2026.03.02.709168v1) | 2026 | Industry-grade open-source liquid handler. PyLabRobot-compatible (same author). |
 | [Keyframe-Guided Rewards](https://arxiv.org/abs/2603.00719) | 2026 | RL reward shaping for long-horizon lab tasks. Aligns with ACT chunked actions. |
+| [BioMARS](https://arxiv.org/abs/2507.01485) | 2025 | Multi-agent robot system for autonomous bio experiments. Dual-arm coordination patterns. |
+| [Dual Demonstration for Chemical Automation](https://arxiv.org/abs/2506.11384) | 2025 | Teaches both end-effector AND jig operations simultaneously. Tool-change + substrate-handling. |
+| [Cutting the Cord](https://arxiv.org/abs/2603.09051) | 2026 | GPU-accelerated bimanual mobile manipulation on LeRobot/XLeRobot. Untethered deployment. |
 
 ### Imitation Learning (ACT & Bimanual)
 
@@ -116,6 +139,9 @@ No community design for a pipette attachment specifically for SO-101. This is an
 | [MoE-ACT](https://arxiv.org/abs/2603.15265) | 2026 | One multi-task model via MoE. Handles 5+ tasks without per-task training. |
 | [DexMimicGen](https://arxiv.org/abs/2410.24185) | 2024 | 20 demos → 2000 synthetic. NVIDIA open-source. Solves data scarcity. |
 | [X-IL](https://arxiv.org/abs/2502.12330) | 2025 | Systematic policy architecture comparison. Guide for ACT alternatives. |
+| [Bi-ACT](https://arxiv.org/abs/2401.17698) | 2024 | Bilateral force-feedback ACT. Improves demo quality for contact-rich tasks (tip press-fit). |
+| [FTACT](https://arxiv.org/abs/2509.23112) | 2025 | Force-torque aware ACT. F/T sensor in observation space for contact-aware policies. |
+| [Bimanual ACT with Inter-Arm Coordination](https://arxiv.org/abs/2503.13916) | 2025 | ACT + inter-arm coordination module. Precise bimanual synchronization (AIST Japan). |
 
 ### Tool Use & Door Opening
 
@@ -133,6 +159,9 @@ No community design for a pipette attachment specifically for SO-101. This is an
 | [YOTO](https://arxiv.org/abs/2501.14208) | 2025 | One-shot bimanual from video. Near-zero demo cost. |
 | [Echo](https://arxiv.org/abs/2504.07939) | 2025 | Force-feedback teleoperation. Better demos for press-fit tasks. Open-source. |
 | [RoboCopilot](https://arxiv.org/abs/2503.07771) | 2025 | Human-in-the-loop correction during execution. Interventions become training data. |
+| [GELLO](https://arxiv.org/abs/2309.13037) | 2023 | Low-cost replica-arm teleoperation (UC Berkeley). Alternative to leader-follower. |
+| [Taming VR Teleoperation](https://arxiv.org/abs/2508.14542) | 2025 | VR-based multi-task bimanual demo collection. Less operator fatigue than leader arm. |
+| [Opening Articulated Structures](https://arxiv.org/abs/2402.17767) | 2024 | Real-world door/fridge opening without pre-mapped kinematics (UIUC, Saurabh Gupta). |
 
 ## Cross-Cutting Insights
 
