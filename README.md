@@ -50,6 +50,8 @@ make demo
 
 ## Architecture
 
+![Workspace Layout](hardware/svg/system_overview.svg)
+
 See [docs/architecture.md](docs/architecture.md) for full system design, module responsibilities, and data flows.
 
 ## Project Structure
