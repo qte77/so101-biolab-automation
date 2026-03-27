@@ -29,7 +29,8 @@ setup_cad: ## Install CAD dependencies (cadquery, requires Python 3.10-3.12)
 	uv sync --group cad
 
 render_parts: ## Generate STL + SVG from CadQuery scripts (requires setup_cad)
-	@for f in hardware/cad/*.py; do echo "Rendering $$f..."; uv run --group cad python "$$f"; done
+	@for f in hardware/cad/*.py; do [ "$$(basename $$f)" = "theme_svgs.py" ] && continue; echo "Rendering $$f..."; uv run --group cad python "$$f"; done
+	python hardware/cad/theme_svgs.py
 
 setup_rtk: ## Install RTK CLI for token-optimized LLM output
 	@if command -v rtk > /dev/null 2>&1; then echo "rtk already installed: $$(rtk --version)"; \

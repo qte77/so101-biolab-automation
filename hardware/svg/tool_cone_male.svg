@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+  <defs>
+    <style>
+      .cq-bg { fill: #ffffff; }
+      @media (prefers-color-scheme: dark) {
+        .cq-bg { fill: #0d1117; }
+        g[stroke="rgb(0,0,0)"] { stroke: #c9d1d9 !important; }
+        g[stroke="rgb(160,160,160)"] { stroke: #484f58 !important; }
+        line { stroke: #c9d1d9 !important; }
+        text { stroke: #c9d1d9 !important; fill: #c9d1d9 !important; }
+      }
+    </style>
+  </defs>
+  <rect width="800.0" height="240.0" class="cq-bg"/>
+
 <svg
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
