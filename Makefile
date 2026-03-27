@@ -24,6 +24,18 @@ setup: ## Install dev + test dependencies
 setup_train: ## Install training dependencies (torch, wandb)
 	uv sync --group train
 
+setup_cad: ## Install CAD dependencies (cadquery, requires Python 3.10-3.12)
+	uv sync --group cad
+
+render_parts: ## Generate STL + SVG from CadQuery scripts (requires setup_cad)
+	uv run --group cad python hardware/cad/plate_holder.py
+	uv run --group cad python hardware/cad/tool_changer.py
+	uv run --group cad python hardware/cad/fridge_hook.py
+
+setup_rtk: ## Install RTK CLI for token-optimized LLM output
+	@if command -v rtk > /dev/null 2>&1; then echo "rtk already installed: $$(rtk --version)"; \
+	else curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh; fi
+	rtk init -g
 
 # MARK: dev
 lint: ## Format and lint with ruff
