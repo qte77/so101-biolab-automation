@@ -1,35 +1,93 @@
 {
+  "env": {
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL": "1",
+    "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1"
+  },
+  "outputStyle": "default",
+  "spinnerTipsEnabled": true,
+  "prefersReducedMotion": true,
+  "statusLine": {
+    "type": "command",
+    "command": "bash .claude/scripts/statusline.sh"
+  },
+  "attribution": {
+    "commit": "Co-Authored-By: Claude <noreply@anthropic.com>",
+    "pr": "Generated with Claude <noreply@anthropic.com>"
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "enableWeakerNestedSandbox": false,
+    "network": {
+      "allowLocalBinding": true
+    }
+  },
   "permissions": {
     "allow": [
-      "Bash(make:*)",
-      "Bash(uv:*)",
-      "Bash(git:status:*)",
+      "AskUserQuestion",
+      "Bash(date:*)",
+      "Bash(git:add:*)",
       "Bash(git:diff:*)",
       "Bash(git:log:*)",
-      "Bash(git:add:*)",
-      "Edit(src/**)",
-      "Edit(tests/**)",
+      "Bash(git:status:*)",
+      "Bash(git:log:--grep:*)",
+      "Bash(git:rev-list:*)",
+      "Bash(jq:*)",
+      "Bash(make:*)",
+      "Bash(tree:*)",
       "Edit(docs/)",
+      "Edit(tests/)",
+      "Edit(src/**)",
       "Edit(configs/)",
-      "Edit(scripts/)"
+      "Edit(scripts/)",
+      "mcp__ide__getDiagnostics",
+      "Read(.claude/skills/)",
+      "Read(.claude/rules/)",
+      "SlashCommand",
+      "Skill"
     ],
     "deny": [
+      "Bash(awk:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(git:push:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(ls:*)",
+      "Bash(source:*)",
+      "Bash(tail:*)",
+      "Bash(touch:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
       "Edit(.env)",
       "Read(.env)"
     ],
     "ask": [
+      "Bash(git clean:*)",
       "Bash(git:commit:*)",
-      "Bash(git:push:*)",
+      "Bash(git reset:*)",
+      "Bash(mv:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Edit(.claude/**)",
       "Edit(AGENTS.md)",
       "Edit(CLAUDE.md)",
-      "Edit(pyproject.toml)"
+      "Edit(Makefile)",
+      "Edit(pyproject.toml)",
+      "Edit(README.md)"
     ]
   },
   "enabledPlugins": {
     "context7@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
-    "cc-meta@qte77-claude-code-utils": true
+    "cc-meta@qte77-claude-code-utils": true,
+    "python-dev@qte77-claude-code-utils": true,
+    "docs-governance@qte77-claude-code-utils": true,
+    "commit-helper@qte77-claude-code-utils": true,
+    "codebase-tools@qte77-claude-code-utils": true
   },
   "extraKnownMarketplaces": {
     "qte77-claude-code-utils": {

@@ -78,19 +78,6 @@ tests/             All modules + E2E workflow + dashboard + scripts
 - FastAPI + WebRTC — Remote dashboard
 - OpenCV — Camera pipeline
 
-## Token Optimization (Experimental)
-
-This repo includes [RTK](https://github.com/rtk-ai/rtk) config for 60-90% LLM token savings during agentic coding sessions.
-
-```bash
-make setup_rtk    # install RTK binary + activate CC PreToolUse hook (run outside CC session)
-rtk gain --graph  # view token savings
-```
-
-**Note:** RTK's tracking DB (`~/.local/share/rtk/`) must be in the CC sandbox `allowWrite` list for savings to persist inside CC sessions. Add `/home/vscode/.local/share/rtk` to `sandbox.filesystem.allowWrite` in `~/.claude/settings.json` and restart the session. Without this, commands are filtered but savings are not recorded.
-
-Opt-out of telemetry: `export RTK_TELEMETRY_DISABLED=1`
-
 ## License
 
 Apache-2.0
