@@ -1,3 +1,12 @@
+---
+title: Bill of Materials
+purpose: Hardware shopping list with first-party vendor links and cost estimates
+authority: Hardware (AUTHORITY)
+created: 2026-03-27
+updated: 2026-03-27
+validated_links: 2026-03-27
+---
+
 # Bill of Materials
 
 Hardware shopping list for the so101-biolab-automation prototype.

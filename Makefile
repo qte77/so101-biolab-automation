@@ -1,6 +1,7 @@
 .SILENT:
 .ONESHELL:
-.PHONY: help setup setup_train lint type_check test validate quick_validate \
+.PHONY: help setup setup_train setup_cad setup_lychee render_parts \
+        lint lint_links type_check test test_rerun validate quick_validate \
         calibrate teleop record train eval serve demo
 
 # MARK: config
@@ -24,16 +25,39 @@ setup: ## Install dev + test dependencies
 setup_train: ## Install training dependencies (torch, wandb)
 	uv sync --group train
 
+setup_cad: ## Install CAD dependencies (cadquery, requires Python 3.10-3.12)
+	uv sync --group cad
+
+render_parts: ## Generate STL + SVG from CadQuery scripts (requires setup_cad)
+	@for f in hardware/cad/*.py; do [ "$$(basename $$f)" = "theme_svgs.py" ] && continue; echo "Rendering $$f..."; uv run --group cad python "$$f"; done
+	python hardware/cad/theme_svgs.py
+
+setup_rtk: ## Install RTK CLI for token-optimized LLM output
+	@if command -v rtk > /dev/null 2>&1; then echo "rtk already installed: $$(rtk --version)"; \
+	else curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh; fi
+	rtk init -g
 
 # MARK: dev
 lint: ## Format and lint with ruff
 	uv run ruff format . && uv run ruff check . --fix
+
+lint_links: ## Check links with lychee
+	@if command -v lychee > /dev/null 2>&1; then lychee --config .lychee.toml .; \
+	else echo "lychee not installed — run: make setup_lychee"; fi
+
+setup_lychee: ## Install lychee link checker
+	@if command -v lychee > /dev/null 2>&1; then echo "lychee already installed: $$(lychee --version)"; \
+	else curl -sSfL https://github.com/lycheeverse/lychee/releases/latest/download/lychee-x86_64-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin 2>/dev/null \
+	|| echo "Install failed — download manually from https://github.com/lycheeverse/lychee/releases"; fi
 
 type_check: ## Run pyright type checking
 	uv run pyright src
 
 test: ## Run all tests with pytest
 	uv run pytest
+
+test_rerun: ## Rerun last failed tests only
+	uv run pytest --lf -x
 
 quick_validate: lint type_check ## Fast validation (lint + type check)
 

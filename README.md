@@ -50,17 +50,22 @@ make demo
 
 ## Architecture
 
+![Workspace Layout](hardware/svg/system_overview.svg)
+
 See [docs/architecture.md](docs/architecture.md) for full system design, module responsibilities, and data flows.
 
 ## Project Structure
 
 ```
-src/biolab/        Core arm control, pipette, plate coords, tool changer, safety, workflow
+src/biolab/        Core: arm control, pipette, plate coords, tool changer, safety, workflow
 src/dashboard/     FastAPI server, WebSocket commands, browser UI
 scripts/           CLI entry points for use cases and demo orchestration
 configs/           Arm ports, plate layout, tool dock positions (YAML)
-docs/              Architecture, user stories, demo scenarios, hardware BOM
-tests/             All modules + E2E workflow + dashboard + scripts
+hardware/cad/      CadQuery scripts for 3D-printed parts (Python, parametric)
+hardware/stl/      Generated STL files (via make render_parts, gitignored)
+hardware/svg/      SVG 2D projections of parts (tracked, for documentation)
+docs/              Architecture, user stories, demo scenarios, BOM, research
+tests/             92 tests across 10 test files
 ```
 
 ## Documentation
@@ -69,6 +74,7 @@ tests/             All modules + E2E workflow + dashboard + scripts
 - [User Stories](docs/UserStory.md) — UC1-4 acceptance criteria
 - [Demo Scenarios](docs/demo-scenarios.md) — how to run and verify each use case
 - [Hardware BOM](docs/hardware/BOM.md) — shopping list with links ($350-$820)
+- [Research](docs/research.md) — community designs, papers, future vision (VLM, embodied AI)
 
 ## Key Dependencies
 

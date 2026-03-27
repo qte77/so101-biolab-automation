@@ -1,36 +1,48 @@
 # Lychee link checker config
 # https://lychee.cli.rs/usage/config/
 
-# Accept 2xx, 429 (rate limited), and handle timeouts
 accept = [200, 201, 204, 429]
 timeout = 30
 max_retries = 2
 
-# Exclude URLs that fail in CI but work in browser
+# Exclude URLs that return 401/403/302 to bots but work in browsers.
+# Grouped by reason. All verified manually on 2026-03-27.
 exclude = [
-    "^https://uithub\\.com",
-    "^https://github\\.com/codespaces/new",
-    "^https://www\\.codefactor\\.io",
-    "^https://gittodoc\\.com",
+    # Shields.io badges — rate-limited, transient 429/503
     "^https://img\\.shields\\.io",
+    # GitHub special pages — redirect to login
+    "^https://github\\.com/codespaces/new",
+    "^https://vscode\\.dev",
+    # Code quality services — require auth
+    "^https://www\\.codefactor\\.io",
+    # Flat repo viewers — 401 to bots
+    "^https://uithub\\.com",
+    "^https://gittodoc\\.com",
+    # Vendor/commerce sites — 403 bot protection
     "^https://www\\.alibaba\\.com",
     "^https://www\\.aliexpress\\.com",
     "^https://www\\.seeedstudio\\.com",
+    "^https://wiki\\.seeedstudio\\.com",
     "^https://www\\.waveshare\\.com",
     "^https://www\\.actuonix\\.com",
     "^https://www\\.partabot\\.com",
     "^https://www\\.wowrobo\\.com",
-    "^https://www\\.thingiverse\\.com",
-    "^https://makerworld\\.com",
     "^https://store\\.arduino\\.cc",
-    "^https://wiki\\.seeedstudio\\.com",
-    "^https://en\\.wikipedia\\.org",
-    "^https://goldberg\\.berkeley\\.edu",
-    "^https://pubs\\.rsc\\.org",
     "^https://www\\.nvidia\\.com",
     "^https://www\\.raspberrypi\\.com",
+    # Maker community sites — 403 bot protection
+    "^https://www\\.thingiverse\\.com",
+    "^https://makerworld\\.com",
+    "^https://www\\.printables\\.com",
+    "^https://grabcad\\.com",
+    # Academic publishers — 403/timeout to bots
+    "^https://doi\\.org",
+    "^https://www\\.biorxiv\\.org",
+    "^https://huggingface\\.co",
+    "^https://goldberg\\.berkeley\\.edu",
+    "^https://pubs\\.rsc\\.org",
+    "^https://en\\.wikipedia\\.org",
+    # Reference sites — timeout in CI
     "^https://keepachangelog\\.com",
     "^https://semver\\.org",
-    "^https://vscode\\.dev",
-    "^https://huggingface\\.co",
 ]
