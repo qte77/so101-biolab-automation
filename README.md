@@ -55,12 +55,15 @@ See [docs/architecture.md](docs/architecture.md) for full system design, module 
 ## Project Structure
 
 ```
-src/biolab/        Core arm control, pipette, plate coords, tool changer, safety, workflow
+src/biolab/        Core: arm control, pipette, plate coords, tool changer, safety, workflow
 src/dashboard/     FastAPI server, WebSocket commands, browser UI
 scripts/           CLI entry points for use cases and demo orchestration
 configs/           Arm ports, plate layout, tool dock positions (YAML)
-docs/              Architecture, user stories, demo scenarios, hardware BOM
-tests/             All modules + E2E workflow + dashboard + scripts
+hardware/cad/      CadQuery scripts for 3D-printed parts (Python, parametric)
+hardware/stl/      Generated STL files (via make render_parts, gitignored)
+hardware/svg/      SVG 2D projections of parts (tracked, for documentation)
+docs/              Architecture, user stories, demo scenarios, BOM, research
+tests/             92 tests across 10 test files
 ```
 
 ## Documentation

@@ -18,6 +18,9 @@ wandb/
 .pytest_cache/
 .ruff_cache/
 
+# Generated STL binaries (regenerate via: make render_parts)
+hardware/stl/*.stl
+
 # Ralph
 ralph/logs/
 ralph/worktrees/
