@@ -7,9 +7,10 @@ Usage:
     python hardware/cad/theme_svgs.py
 """
 
+import re
 from pathlib import Path
 
-THEME_CSS = """\
+THEME_STYLE = """\
   <defs>
     <style>
       .cq-bg { fill: #ffffff; }
@@ -24,7 +25,7 @@ THEME_CSS = """\
   </defs>"""
 
 SVG_DIR = Path(__file__).parent.parent / "svg"
-SKIP = {"system_overview.svg"}  # Already themed manually
+SKIP = {"system_overview.svg"}
 
 
 def theme_svg(path: Path) -> None:
@@ -32,28 +33,26 @@ def theme_svg(path: Path) -> None:
     content = path.read_text()
 
     if "prefers-color-scheme" in content:
-        return  # Already themed
+        return
 
-    # Extract width/height from SVG tag
-    w = h = "100%"
-    for attr in ["width", "height"]:
-        import re
+    # Find the end of the <svg ...> opening tag (not <?xml ?>)
+    match = re.search(r"<svg\b[^>]*>", content)
+    if not match:
+        print(f"Skipped: {path.name} (no <svg> tag found)")
+        return
 
-        match = re.search(rf'{attr}="([^"]+)"', content)
-        if match:
-            if attr == "width":
-                w = match.group(1)
-            else:
-                h = match.group(1)
+    svg_end = match.end()
 
-    # Insert after opening <svg> tag
+    # Extract width/height
+    w_match = re.search(r'width="([^"]+)"', match.group())
+    h_match = re.search(r'height="([^"]+)"', match.group())
+    w = w_match.group(1) if w_match else "100%"
+    h = h_match.group(1) if h_match else "100%"
+
     bg_rect = f'  <rect width="{w}" height="{h}" class="cq-bg"/>'
-    injection = f"\n{THEME_CSS}\n{bg_rect}\n"
+    injection = f"\n{THEME_STYLE}\n{bg_rect}"
 
-    # Find end of <svg ...> tag
-    svg_end = content.index(">") + 1
     themed = content[:svg_end] + injection + content[svg_end:]
-
     path.write_text(themed)
     print(f"Themed: {path.name}")
 
