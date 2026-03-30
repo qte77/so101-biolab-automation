@@ -2,18 +2,16 @@
 
 from __future__ import annotations
 
+import importlib
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-# Import module under test
-sys_path_entry = str(Path(__file__).resolve().parent.parent / "hardware" / "slicer")
-import importlib
-import sys
-
-sys.path.insert(0, sys_path_entry)
+# Import module under test (not a package, lives outside src/)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hardware" / "slicer"))
 validate = importlib.import_module("validate")
 sys.path.pop(0)
 
