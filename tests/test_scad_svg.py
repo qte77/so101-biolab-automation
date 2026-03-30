@@ -45,11 +45,6 @@ def _count_path_points(svg_text: str) -> int:
     return total
 
 
-def _count_paths(svg_text: str) -> int:
-    """Count <path> elements in SVG."""
-    return len(re.findall(r"<path\b", svg_text))
-
-
 class TestSvgSpatialQuality:
     """SVGs must show 3D spatial detail, not flat outlines."""
 
