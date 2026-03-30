@@ -221,12 +221,11 @@ openscad -p params.json -P set_name -o out.stl input.scad  # parameter file
 
 ```
 OpenSCAD (.scad) ──→ STL ──→ PrusaSlicer CLI ──→ printability report
-CadQuery (.py)   ──→ STL ──→ (same)              (fallback path)
 ```
 
-- OpenSCAD: primary parametric generator (reliable CLI, SVG export)
+- OpenSCAD: parametric generator (reliable CLI, SVG via projection)
 - PrusaSlicer: printability validator (optional, graceful fallback if unavailable)
-- CadQuery: frozen as fallback
+- CadQuery: legacy reference in `hardware/cad/` (no longer used for generation)
 
 ## STL Files Plan
 

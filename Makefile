@@ -1,8 +1,8 @@
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
-	render_parts render_scad check_prints render_all \
+	setup setup_train setup_scad setup_slicer setup_rtk setup_lychee \
+	render_scad check_prints render_all \
 	lint lint_links type_check test test_rerun validate quick_validate \
 	calibrate teleop record train eval serve demo \
 	help
@@ -28,9 +28,6 @@ setup: ## Install dev + test dependencies
 
 setup_train: ## Install training dependencies (torch, wandb)
 	uv sync --group train
-
-setup_cad: ## Install CAD dependencies (cadquery, requires Python 3.10-3.12)
-	uv sync --group cad
 
 setup_scad: ## Install OpenSCAD for parametric STL/SVG generation
 	if command -v openscad > /dev/null 2>&1; then
@@ -86,34 +83,26 @@ setup_lychee: ## Install lychee link checker
 # MARK: HARDWARE
 
 
-render_parts: ## Generate STL + SVG from CadQuery scripts (requires setup_cad)
-	for f in hardware/cad/*.py; do
-		[ "$$(basename $$f)" = "theme_svgs.py" ] && continue
-		echo "Rendering $$f ..."
-		uv run --group cad python "$$f"
-	done
-	python3 hardware/cad/theme_svgs.py
-
 render_scad: ## Generate STL + SVG from OpenSCAD scripts (requires setup_scad)
 	command -v openscad > /dev/null 2>&1 || { echo "ERROR: openscad not found — run: make setup_scad"; exit 1; }
 	STL_DIR="$$(pwd)/hardware/stl"
 	echo "--- STL generation"
-	openscad -o hardware/stl/tip_rack_holder.stl hardware/scad/tip_rack_holder.scad
-	openscad -o hardware/stl/gripper_tips_tpu.stl hardware/scad/gripper_tips.scad
-	openscad -o hardware/stl/96well_plate_holder.stl hardware/scad/plate_holder.scad
-	openscad -o hardware/stl/fridge_hook_tool.stl hardware/scad/fridge_hook.scad
-	openscad -o hardware/stl/tool_dock_3station.stl hardware/scad/tool_dock.scad
-	openscad -o hardware/stl/pipette_mount_so101.stl hardware/scad/pipette_mount.scad
-	openscad -o hardware/stl/tool_cone_robot.stl -D 'PART="robot"' hardware/scad/tool_changer.scad
-	openscad -o hardware/stl/tool_cone_pipette.stl -D 'PART="male"' hardware/scad/tool_changer.scad
-	openscad -o hardware/stl/tool_cone_gripper.stl -D 'PART="male"' hardware/scad/tool_changer.scad
-	openscad -o hardware/stl/tool_cone_hook.stl -D 'PART="male"' hardware/scad/tool_changer.scad
+	openscad -o hardware/stl/tip_rack_holder.stl hardware/scad/tip_rack_holder.scad 2>/dev/null
+	openscad -o hardware/stl/gripper_tips_tpu.stl hardware/scad/gripper_tips.scad 2>/dev/null
+	openscad -o hardware/stl/96well_plate_holder.stl hardware/scad/plate_holder.scad 2>/dev/null
+	openscad -o hardware/stl/fridge_hook_tool.stl hardware/scad/fridge_hook.scad 2>/dev/null
+	openscad -o hardware/stl/tool_dock_3station.stl hardware/scad/tool_dock.scad 2>/dev/null
+	openscad -o hardware/stl/pipette_mount_so101.stl hardware/scad/pipette_mount.scad 2>/dev/null
+	openscad -o hardware/stl/tool_cone_robot.stl -D 'PART="robot"' hardware/scad/tool_changer.scad 2>/dev/null
+	openscad -o hardware/stl/tool_cone_pipette.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
+	openscad -o hardware/stl/tool_cone_gripper.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
+	openscad -o hardware/stl/tool_cone_hook.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
 	echo "--- SVG projection from STLs"
 	for stl in hardware/stl/*.stl; do
 		base=$$(basename "$$stl" .stl)
 		echo "  $$base.svg"
 		echo "projection() import(\"$$STL_DIR/$$base.stl\");" \
-			| openscad -o "hardware/svg/$$base.svg" /dev/stdin
+			| openscad -o "hardware/svg/$$base.svg" /dev/stdin 2>/dev/null
 	done
 	python3 hardware/cad/theme_svgs.py
 	echo "=== render_scad: done ==="

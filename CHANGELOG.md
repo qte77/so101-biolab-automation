@@ -14,7 +14,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - OpenSCAD parametric scripts (`hardware/scad/`) as primary STL+SVG generator with PrusaSlicer CLI printability validation — CadQuery generates geometrically correct STLs but has no awareness of FDM printing constraints; vertical empty rows, unsupported overhangs, and gravity-related failures are invisible until a print fails physically
 - PrusaSlicer validation script (`hardware/slicer/validate.py`) with graceful fallback when slicer unavailable
 - Makefile targets: `setup_scad`, `setup_slicer`, `render_scad`, `check_prints`, `render_all`
-- CadQuery CAD scripts for experimental 3D-printed parts (`hardware/cad/`) — kept as fallback
+- Legacy CadQuery CAD scripts (`hardware/cad/`) — reference only, replaced by OpenSCAD
 - Generated STL + SVG: plate holder, tool changer cones, fridge hook
 - `docs/architecture.md`, `docs/UserStory.md`, `docs/demo-scenarios.md`
 - `docs/hardware/BOM.md` with first-party sourced links
@@ -34,6 +34,6 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `camera.py`: cv2 import deferred to `start()` for headless environments
 - `arms.py`: stub-safe `get_observation`/`send_action`, added `send_to_well()` + `park_all()`
 - `pipette.py`: fill state tracking with over-aspiration/over-dispense guards
-- Makefile: `.SILENT`/`.ONESHELL`, `.DEFAULT_GOAL`, `# MARK:` grouped help, `render_parts`
+- Makefile: `.SILENT`/`.ONESHELL`, `.DEFAULT_GOAL`, `# MARK:` grouped help, removed `render_parts`/`setup_cad`
 - SVGs now generated as 2D top-down projections from STLs (via `projection() import()`) with dark mode theming
-- `pyproject.toml`: dependency-groups, pytest ini_options, ruff N/UP, pyright, cadquery optional
+- `pyproject.toml`: dependency-groups, pytest ini_options, ruff N/UP, pyright; removed cadquery dep

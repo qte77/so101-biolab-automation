@@ -69,8 +69,8 @@ src/biolab/        Core: arm control, pipette, plate coords, tool changer, safet
 src/dashboard/     FastAPI server, WebSocket commands, browser UI
 scripts/           CLI entry points for use cases and demo orchestration
 configs/           Arm ports, plate layout, tool dock positions (YAML)
-hardware/scad/     OpenSCAD parametric scripts (primary STL+SVG generation)
-hardware/cad/      CadQuery scripts for 3D-printed parts (fallback)
+hardware/scad/     OpenSCAD parametric scripts (STL+SVG generation)
+hardware/cad/      Legacy CadQuery scripts (reference only)
 hardware/slicer/   PrusaSlicer CLI printability validation (optional)
 hardware/stl/      Generated STL files (via make render_scad, gitignored)
 hardware/svg/      SVG 2D projections of parts (tracked, for documentation)
