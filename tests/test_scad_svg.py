@@ -77,31 +77,27 @@ class TestSvgSpatialQuality:
         assert "<path" in svg_text or "<polygon" in svg_text
 
     @pytest.mark.parametrize("part", BOX_PARTS)
-    def test_box_part_has_isometric_shape(self, part: str) -> None:
-        """Box parts have 4 points but must be a parallelogram (not axis-aligned rectangle).
+    def test_box_part_has_wireframe_edges(self, part: str) -> None:
+        """Box-shaped parts must show multiple edges (wireframe), not just an outline.
 
-        Flat projection: points differ on only 2 axes (axis-aligned).
-        Isometric projection: points differ on both axes (skewed parallelogram).
+        CadQuery SVG export renders visible edges with hidden-line removal,
+        producing lines/paths for each visible face edge. A box has >=7 visible
+        edges in isometric view. A flat silhouette has only 4 points.
         """
         svg_path = SVG_DIR / f"{part}.svg"
         svg_text = svg_path.read_text()
 
-        # Extract coordinate pairs
-        d_attrs = re.findall(r'd="([^"]*)"', svg_text)
-        coords = []
-        for d in d_attrs:
-            for match in re.finditer(r"([-\d.]+),([-\d.]+)", d):
-                coords.append((float(match.group(1)), float(match.group(2))))
+        # Count distinct drawing elements (line, path, polyline)
+        lines = len(re.findall(r"<line\b", svg_text))
+        paths = len(re.findall(r"<path\b", svg_text))
+        polylines = len(re.findall(r"<polyline\b", svg_text))
+        total_edges = lines + paths + polylines
 
-        assert len(coords) >= 4, f"{part}.svg has <4 coordinates"
-
-        # Check that it's not axis-aligned (flat projection gives axis-aligned rect)
-        xs = {round(c[0], 1) for c in coords}
-        ys = {round(c[1], 1) for c in coords}
-        # Isometric parallelogram: 4 unique x AND 4 unique y values
-        # Flat rectangle: only 2 unique x OR 2 unique y values
-        assert len(xs) > 2 or len(ys) > 2, (
-            f"{part}.svg appears axis-aligned (flat projection)"
+        # A wireframe box in isometric has many edges; a silhouette has 1 path
+        assert total_edges > 1 or _count_path_points(svg_text) > 6, (
+            f"{part}.svg has only {total_edges} drawing elements with "
+            f"{_count_path_points(svg_text)} path points — "
+            f"needs wireframe rendering (CadQuery SVG), not silhouette"
         )
 
     def test_all_stl_parts_have_svgs(self) -> None:
