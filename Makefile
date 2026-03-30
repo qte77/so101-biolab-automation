@@ -3,10 +3,11 @@
 .PHONY: \
 	setup setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
 	render_scad check_prints render_all \
-	lint lint_links type_check test test_rerun validate quick_validate \
-	calibrate teleop record train eval serve demo \
-	help
-.DEFAULT_GOAL := help
+	lint_code check_links check_types run_tests rerun_tests quick_validate validate \
+	calibrate_arms start_teleop record_episodes train_policy \
+	eval_policy serve_dashboard run_demo \
+	show_help
+.DEFAULT_GOAL := show_help
 
 
 # -- config --
@@ -86,9 +87,8 @@ setup_lychee: ## Install lychee link checker
 # MARK: HARDWARE
 
 
-render_scad: ## Generate STL + SVG from OpenSCAD scripts (requires setup_scad)
+render_scad: ## Generate STL + SVG from OpenSCAD scripts (requires setup_scad + setup_cad)
 	command -v openscad > /dev/null 2>&1 || { echo "ERROR: openscad not found — run: make setup_scad"; exit 1; }
-	STL_DIR="$$(pwd)/hardware/stl"
 	echo "--- STL generation"
 	openscad -o hardware/stl/tip_rack_holder.stl hardware/scad/tip_rack_holder.scad 2>/dev/null
 	openscad -o hardware/stl/gripper_tips_tpu.stl hardware/scad/gripper_tips.scad 2>/dev/null
@@ -114,12 +114,12 @@ check_prints: ## Run PrusaSlicer printability checks on STLs (optional, requires
 
 render_all: render_scad check_prints ## Generate parts (OpenSCAD) + validate printability
 
-calibrate: ## Calibrate all arms
+calibrate_arms: ## Calibrate all arms (leader + followers)
 	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_A_PORT) --robot.id=arm_a
 	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_B_PORT) --robot.id=arm_b
 	lerobot-calibrate --teleop.type=so101_leader --teleop.port=$(LEADER_PORT) --teleop.id=leader
 
-teleop: ## Start teleoperation (leader → follower)
+start_teleop: ## Start teleoperation (leader → follower)
 	lerobot-teleoperate \
 		--robot.type=so101_follower \
 		--robot.port=$(FOLLOWER_A_PORT) \
@@ -130,7 +130,7 @@ teleop: ## Start teleoperation (leader → follower)
 		--teleop.id=leader \
 		--display_data=true
 
-record: ## Record teleoperation episodes
+record_episodes: ## Record teleoperation episodes
 	lerobot-record \
 		--robot.type=so101_follower \
 		--robot.port=$(FOLLOWER_A_PORT) \
@@ -145,7 +145,7 @@ record: ## Record teleoperation episodes
 		--dataset.streaming_encoding=true \
 		--display_data=true
 
-train: ## Train policy on recorded data
+train_policy: ## Train policy on recorded data
 	lerobot-train \
 		--dataset.repo_id=$(DATASET) \
 		--policy.type=$(POLICY) \
@@ -158,47 +158,47 @@ train: ## Train policy on recorded data
 # MARK: DEV
 
 
-lint: ## Format and lint with ruff
+lint_code: ## Format and lint with ruff
 	uv run ruff format . && uv run ruff check . --fix
 
-lint_links: ## Check links with lychee
+check_links: ## Check links with lychee
 	if command -v lychee > /dev/null 2>&1; then
 		lychee --config .lychee.toml .
 	else
 		echo "lychee not installed — run: make setup_lychee"
 	fi
 
-type_check: ## Run pyright type checking
+check_types: ## Run pyright type checking
 	uv run pyright src
 
-test: ## Run all tests with pytest
+run_tests: ## Run all tests with pytest
 	uv run pytest
 
-test_rerun: ## Rerun last failed tests only
+rerun_tests: ## Rerun last failed tests only
 	uv run pytest --lf -x
 
-quick_validate: lint type_check ## Fast validation (lint + type check)
+quick_validate: lint_code check_types ## Fast validation (lint + type check)
 
-validate: lint type_check test ## Full validation (lint + type check + test)
+validate: lint_code check_types run_tests ## Full validation (lint + type check + test)
 
 
 # MARK: APP
 
 
-eval: ## Evaluate trained policy
+eval_policy: ## Evaluate trained policy
 	python scripts/run_demo.py --mode=eval --arm-port=$(FOLLOWER_A_PORT)
 
-serve: ## Start remote dashboard
+serve_dashboard: ## Start remote dashboard
 	uvicorn src.dashboard.server:app --host 0.0.0.0 --port 8080 --reload
 
-demo: ## Run full demo pipeline
+run_demo: ## Run full demo pipeline
 	python scripts/run_demo.py --mode=full
 
 
 # MARK: HELP
 
 
-help: ## Show available recipes grouped by section
+show_help: ## Show available recipes grouped by section
 	echo "Usage: make [recipe]"
 	echo ""
 	awk '/^# MARK:/ { \
