@@ -1,7 +1,7 @@
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup setup_train setup_scad setup_slicer setup_rtk setup_lychee \
+	setup setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
 	render_scad check_prints render_all \
 	lint lint_links type_check test test_rerun validate quick_validate \
 	calibrate teleop record train eval serve demo \
@@ -29,7 +29,10 @@ setup: ## Install dev + test dependencies
 setup_train: ## Install training dependencies (torch, wandb)
 	uv sync --group train
 
-setup_scad: ## Install OpenSCAD for parametric STL/SVG generation
+setup_cad: ## Install CadQuery for SVG wireframe generation (requires Python 3.10-3.12)
+	uv sync --group cad
+
+setup_scad: ## Install OpenSCAD for parametric STL generation
 	if command -v openscad > /dev/null 2>&1; then
 		echo "openscad already installed: $$(openscad --version 2>&1 | head -1)"
 	else
@@ -97,13 +100,8 @@ render_scad: ## Generate STL + SVG from OpenSCAD scripts (requires setup_scad)
 	openscad -o hardware/stl/tool_cone_pipette.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
 	openscad -o hardware/stl/tool_cone_gripper.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
 	openscad -o hardware/stl/tool_cone_hook.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
-	echo "--- SVG projection from STLs"
-	for stl in hardware/stl/*.stl; do
-		base=$$(basename "$$stl" .stl)
-		echo "  $$base.svg"
-		echo "projection() rotate([55, 0, 25]) import(\"$$STL_DIR/$$base.stl\");" \
-			| openscad -o "hardware/svg/$$base.svg" /dev/stdin 2>/dev/null
-	done
+	echo "--- SVG wireframe from STLs (CadQuery)"
+	uv run --group cad python3 hardware/cad/stl_to_svg.py --all
 	python3 hardware/cad/theme_svgs.py
 	echo "=== render_scad: done ==="
 
