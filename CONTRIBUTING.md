@@ -8,6 +8,11 @@ For AI agent behavioral rules, see [AGENTS.md](AGENTS.md).
 | Command | Purpose |
 |---------|---------|
 | `make setup` | Install all dependencies |
+| `make setup_scad` | Install OpenSCAD for parametric STL/SVG generation |
+| `make setup_slicer` | Install PrusaSlicer for printability validation (optional) |
+| `make render_scad` | Generate STL + SVG from OpenSCAD scripts |
+| `make check_prints` | Run PrusaSlicer printability checks on STLs |
+| `make render_all` | Generate parts + validate printability |
 | `make validate` | Complete pre-commit validation (lint + type check + test) |
 | `make quick_validate` | Fast development validation (lint + type check) |
 | `make test` | Run all non-hardware tests with pytest |
@@ -60,7 +65,7 @@ uv run pytest -m "not hardware"
 ## Conventional Commits
 
 Types: `feat | fix | build | chore | ci | docs | style | refactor | perf | test`
-Scopes: `biolab | dashboard | configs | scripts | tests | docs`
+Scopes: `biolab | dashboard | configs | scripts | tests | docs | hardware`
 
 ## Documentation Hierarchy
 

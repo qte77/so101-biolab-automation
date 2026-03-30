@@ -173,6 +173,61 @@ No community design for a pipette attachment specifically for SO-101. This is an
 6. **PyLabRobot backend driver** — writing one for SO-101 makes all existing protocols work on our arms
 7. **8-channel pipette head** — 8x efficiency for 96-well work; design as a specialized end-effector
 
+## Slicer CLI & Parametric CAD Research
+
+**Problem:** CadQuery generates geometrically correct STLs but has no FDM awareness. Vertical empty rows, unsupported overhangs, and gravity failures are invisible until a print fails.
+
+### OpenSCAD CLI
+
+Mature, stable parametric CAD. `.scad` -> STL/SVG/DXF/PNG via CLI.
+
+```bash
+openscad -o out.stl input.scad                    # export STL
+openscad -o out.svg --projection=ortho input.scad  # export SVG
+openscad -D 'length=100' -o out.stl input.scad     # parametric override
+openscad -p params.json -P set_name -o out.stl input.scad  # parameter file
+```
+
+- Install: `apt install openscad`, snap, flatpak, or AppImage
+- CSG maps 1:1 from CadQuery: `box`->`cube`, `cylinder`->`cylinder`, `cut`->`difference()`, `revolve`->`rotate_extrude()`
+- No printability validation (must pair with slicer)
+
+### Slicer CLI Comparison
+
+| Tool | CLI Maturity | Headless Linux | Overhang Detection | Notes |
+|------|-------------|----------------|-------------------|-------|
+| **PrusaSlicer** | Mature | Yes | Yes | `prusa-slicer --export-gcode model.stl --load config.ini`. Most stable. [Wiki](https://github.com/prusa3d/PrusaSlicer/wiki/Command-Line-Interface) |
+| **Bambu Studio** | Modern | Yes (Docker avail) | Yes | `--slice`, `--orient`, `--arrange`, JSON config. Best error codes. [Wiki](https://github.com/bambulab/BambuStudio/wiki/Command-Line-Usage) |
+| **SuperSlicer** | Mature | Yes | Enhanced | PrusaSlicer fork with better overhang detection. [Docs](https://docs.superslicer.org/advanced-usage-guides/cmd-line-guide/) |
+| **CuraEngine** | Stable | Yes | Limited | Pure engine, no GUI deps. JSON settings. [GitHub](https://github.com/Ultimaker/CuraEngine) |
+| **OrcaSlicer** | **Broken** | **No** (GTK3 crashes) | Yes (when it works) | CLI shares GUI code, segfaults headless. [#2714](https://github.com/SoftFever/OrcaSlicer/issues/2714), [#12277](https://github.com/OrcaSlicer/OrcaSlicer/issues/12277) |
+
+**OrcaSlicer CLI root cause:** Initializes GTK3 components in headless mode -> segfault on NULL plater pointer. Architectural flaw, not a simple bug.
+
+**Recommendation:** PrusaSlicer CLI for validation (stable, proven). Keep slicer-agnostic so Bambu Studio or SuperSlicer can substitute.
+
+### XLeRobot Reference
+
+[XLeRobot](https://github.com/Vector-Wangel/XLeRobot) — dual SO-101 mobile platform ($660, <4h assembly).
+
+- Uses STEP + 3MF workflow (no code-generated CAD)
+- Distributes STEP files for modification, STL/3MF for printing
+- Addresses gravity/support via documentation + manual slicer orientation
+- Z-axis scaling in slicer for fit adjustments (not in CAD)
+- No automated printability checking
+- Proves slicer-based workflow is viable for SO-101 ecosystem
+
+### Validation Pipeline (planned)
+
+```
+OpenSCAD (.scad) ──→ STL ──→ PrusaSlicer CLI ──→ printability report
+CadQuery (.py)   ──→ STL ──→ (same)              (fallback path)
+```
+
+- OpenSCAD: primary parametric generator (reliable CLI, SVG export)
+- PrusaSlicer: printability validator (optional, graceful fallback if unavailable)
+- CadQuery: frozen as fallback
+
 ## STL Files Plan
 
 Add draft STL files to `hardware/stl/` for custom parts. Mark as experimental — these are starting points for iteration once hardware arrives.
