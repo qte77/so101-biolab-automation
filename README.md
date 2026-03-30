@@ -32,6 +32,14 @@ Two [SO-101](https://github.com/therobotstudio/so-arm100) follower arms + one le
 # Setup
 make setup
 
+# Generate 3D-printed parts (OpenSCAD)
+make setup_scad
+make render_scad
+
+# Optional: validate printability (PrusaSlicer)
+make setup_slicer
+make check_prints
+
 # Calibrate arms
 make calibrate
 
@@ -61,11 +69,13 @@ src/biolab/        Core: arm control, pipette, plate coords, tool changer, safet
 src/dashboard/     FastAPI server, WebSocket commands, browser UI
 scripts/           CLI entry points for use cases and demo orchestration
 configs/           Arm ports, plate layout, tool dock positions (YAML)
-hardware/cad/      CadQuery scripts for 3D-printed parts (Python, parametric)
-hardware/stl/      Generated STL files (via make render_parts, gitignored)
+hardware/scad/     OpenSCAD parametric scripts (STL+SVG generation)
+hardware/cad/      Legacy CadQuery scripts (reference only)
+hardware/slicer/   PrusaSlicer CLI printability validation (optional)
+hardware/stl/      Generated STL files (via make render_scad, gitignored)
 hardware/svg/      SVG 2D projections of parts (tracked, for documentation)
 docs/              Architecture, user stories, demo scenarios, BOM, research
-tests/             92 tests across 10 test files
+tests/             104 tests across 11 test files
 ```
 
 ## Documentation
@@ -81,8 +91,24 @@ tests/             92 tests across 10 test files
 - [LeRobot](https://github.com/huggingface/lerobot) — Teleoperation + imitation learning
 - [PyLabRobot](https://github.com/PyLabRobot/pylabrobot) — Liquid handling abstractions
 - [digital-pipette-v2](https://github.com/ac-rad/digital-pipette-v2) — 3D-printed pipette reference
+- [OpenSCAD](https://openscad.org/) — Parametric CAD for 3D-printed parts
+- [PrusaSlicer](https://github.com/prusa3d/PrusaSlicer) — Printability validation (optional)
 - FastAPI + WebRTC — Remote dashboard
 - OpenCV — Camera pipeline
+
+## Roadmap
+
+Toward general-purpose voice/agent-to-print. This repo is the first showcase.
+
+**Human loop** — voice/text → LLM → OpenSCAD → slicer → print → human inspects → iterate
+
+**Agent loop** — goal spec → agent generates CAD → slicer validates → printer API → camera + VLM inspects → agent fixes → reprints autonomously
+
+1. **Done** — OpenSCAD + PrusaSlicer CLI pipeline (`make render_scad`, `make check_prints`)
+2. **Next** — LLM-assisted OpenSCAD generation from text prompts
+3. **Future** — Autonomous agent loop with Bambu camera + VLM print inspection
+
+See [docs/research.md](docs/research.md) § "Closed-Loop 3D Printing" for prior art.
 
 ## License
 

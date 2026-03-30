@@ -173,6 +173,138 @@ No community design for a pipette attachment specifically for SO-101. This is an
 6. **PyLabRobot backend driver** — writing one for SO-101 makes all existing protocols work on our arms
 7. **8-channel pipette head** — 8x efficiency for 96-well work; design as a specialized end-effector
 
+## Slicer CLI & Parametric CAD Research
+
+**Problem:** CadQuery generates geometrically correct STLs but has no FDM awareness. Vertical empty rows, unsupported overhangs, and gravity failures are invisible until a print fails.
+
+### OpenSCAD CLI
+
+Mature, stable parametric CAD. `.scad` -> STL/SVG/DXF/PNG via CLI.
+
+```bash
+openscad -o out.stl input.scad                    # export STL
+openscad -o out.svg --projection=ortho input.scad  # export SVG
+openscad -D 'length=100' -o out.stl input.scad     # parametric override
+openscad -p params.json -P set_name -o out.stl input.scad  # parameter file
+```
+
+- Install: `apt install openscad`, snap, flatpak, or AppImage
+- CSG maps 1:1 from CadQuery: `box`->`cube`, `cylinder`->`cylinder`, `cut`->`difference()`, `revolve`->`rotate_extrude()`
+- No printability validation (must pair with slicer)
+
+### Slicer CLI Comparison
+
+| Tool | CLI Maturity | Headless Linux | Overhang Detection | Notes |
+|------|-------------|----------------|-------------------|-------|
+| **PrusaSlicer** | Mature | Yes | Yes | `prusa-slicer --export-gcode model.stl --load config.ini`. Most stable. [Wiki](https://github.com/prusa3d/PrusaSlicer/wiki/Command-Line-Interface) |
+| **Bambu Studio** | Modern | Yes (Docker avail) | Yes | `--slice`, `--orient`, `--arrange`, JSON config. Best error codes. [Wiki](https://github.com/bambulab/BambuStudio/wiki/Command-Line-Usage) |
+| **SuperSlicer** | Mature | Yes | Enhanced | PrusaSlicer fork with better overhang detection. [Docs](https://docs.superslicer.org/advanced-usage-guides/cmd-line-guide/) |
+| **CuraEngine** | Stable | Yes | Limited | Pure engine, no GUI deps. JSON settings. [GitHub](https://github.com/Ultimaker/CuraEngine) |
+| **OrcaSlicer** | **Broken** | **No** (GTK3 crashes) | Yes (when it works) | CLI shares GUI code, segfaults headless. [#2714](https://github.com/OrcaSlicer/OrcaSlicer/issues/2714), [#12277](https://github.com/OrcaSlicer/OrcaSlicer/issues/12277) |
+
+**OrcaSlicer CLI root cause:** wxWidgets 3.1.7 (GTK3 backend) initializes display context even in CLI mode. Stack: `libslic3r` (core, decoupled) → `libslic3r_gui` (wxWidgets) → single binary. Fix paths: guard GTK3 init behind `DISPLAY` check, or build headless binary from `libslic3r` only. Fork lineage: Slic3r → PrusaSlicer → Bambu Studio → OrcaSlicer (all share `libslic3r` core).
+
+**Recommendation:** PrusaSlicer CLI for validation (stable, proven). Keep slicer-agnostic so Bambu Studio or SuperSlicer can substitute.
+
+### Closed-Loop 3D Printing
+
+#### Human Loop (voice/text → print)
+
+```
+Human (voice/text) → LLM → OpenSCAD → STL → Slicer → Print
+       ↑                                          |
+       └── human inspects, describes fix ──────────┘
+```
+
+Human describes a part or modification in natural language (via CC `/voice` or text). LLM generates OpenSCAD, slicer validates, human inspects result and iterates.
+
+#### Agent Loop (goal → autonomous design-print-inspect)
+
+```
+Goal/Task spec ──→ Agent ──→ OpenSCAD → STL → Slicer validate
+                     ↑                              |
+                     |                         Printer API (MQTT)
+                     |                              ↓
+                     |                         Camera (RTSP/JPEG)
+                     |                              ↓
+                     └── VLM analyzes print ←───────┘
+                         Agent adjusts design/params
+```
+
+Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm with 0.5mm clearance, PLA+, must pass printability check"). Autonomously:
+1. Generates OpenSCAD from spec
+2. Validates via slicer CLI
+3. Sends GCode to printer via MQTT API
+4. Monitors print via camera feed (RTSP/JPEG)
+5. VLM (vision-language model) analyzes camera frames for defects
+6. On failure: agent adjusts design/params, re-slices, reprints
+
+**Bambu camera + printer API (enables agent feedback):**
+- Built-in cameras: X1 (RTSP), A1/P1 (JPEG frames)
+- Local MQTT: `<printer-ip>:8883`, topic `device/<serial>/report`
+- Python: [`bambu-connect`](https://pypi.org/project/bambu-connect/), [`bambulabs-api`](https://pypi.org/project/bambulabs-api/)
+- Cloud API: [`Bambu-Lab-Cloud-API`](https://github.com/coelacant1/Bambu-Lab-Cloud-API) (unofficial)
+
+**Camera-based failure detection:**
+
+| Tool | How | Printers |
+|------|-----|----------|
+| [Obico](https://github.com/TheSpaghettiDetective/obico-server) | Vision model, 30-60s intervals, auto-pause | OctoPrint, Klipper, Bambu |
+| [OctoEverywhere Gadget](https://octoeverywhere.com/gadget) | Neural net trained on millions of prints | OctoPrint |
+| [PrintWatch](https://plugins.octoprint.org/plugins/printwatch/) | AI video feed, auto-pause | OctoPrint |
+
+**LLM/VLM agent loops for 3D printing:**
+
+| Project | Architecture | Result |
+|---------|-------------|--------|
+| [LLM-3D Print](https://arxiv.org/abs/2408.14307) | Multi-agent: supervisor + VLM image reasoning + planner + executor → camera → corrects → reprints | 5x structural integrity, expert-level error ID |
+| [Build Great AI](https://zenml.io/llmops-database/llm-powered-3d-model-generation-for-3d-printing) | Text → LLaMA/GPT/Claude → OpenSCAD → STL | Hours to minutes for design |
+| [CADialogue](https://www.sciencedirect.com/science/article/abs/pii/S0010448525001678) | Multimodal LLM: text + speech + images → parametric CAD | Conversational CAD |
+
+**Related projects (LLM + CAD/print):**
+
+| Project | What | Relation to us |
+|---------|------|---------------|
+| [ClaudeCAD](https://github.com/niklasmh/ClaudeCAD) | Claude + voice + web UI → STL download | Similar voice→CAD idea, web-only, no slicing or print control |
+| [claude-3d-playground](https://github.com/ivanearisty/claude-3d-playground) | Claude Code for design, validate, slice | Closest competitor; no voice, no agent loop, no camera inspect |
+| [openscad-agent](https://github.com/iancanderson/openscad-agent) | Claude Code agent for OpenSCAD modeling | Single-tool agent; no slicer, no print, no feedback loop |
+| [CQAsk](https://github.com/OpenOrion/CQAsk) | LLM + CadQuery → STL/STEP with UI | Uses CadQuery not OpenSCAD; no print pipeline |
+| [ScadLM](https://github.com/KrishKrosh/ScadLM) | Agentic AI + OpenSCAD generation | Early stage; no slicer validation or print control |
+| [Text2CAD](https://github.com/SadilKhan/Text2CAD) | NeurIPS 2024: text → parametric CAD operations | Academic; 170K models dataset; no print integration |
+| [text-2-cad](https://github.com/roberto-ceraolo/text-2-cad) | OpenAI + RAG over OpenSCAD docs → .scad | Early; similar LLM+OpenSCAD approach, minimal |
+| [Speech-to-Reality](https://arxiv.org/html/2409.18390) | Voice → 3D generative AI → robotic assembly | Research; broader scope includes assembly, not printing |
+
+**MCP servers (integration layer):**
+
+| Server | What | Use for us |
+|--------|------|-----------|
+| [OctoEverywhere MCP](https://github.com/OctoEverywhere/mcp) | Printer control, camera, AI failure detection (OctoPrint/Klipper/Bambu) | Agent loop: send jobs, read camera, pause on failure |
+| [OpenSCAD MCP](https://www.pulsemcp.com/servers/jhacksman-openscad) | Generate 3D models from text/images via OpenSCAD | Alternative to direct CLI; Claude Desktop integration |
+| [CADQuery MCP](https://github.com/rishigundakaram/cadquery-mcp-server) | CAD generation + STL/STEP export + SVG feedback | CadQuery path if needed |
+
+**Key insight:** No project integrates all layers (voice → design → validate → print → camera+VLM inspect → agent fix). The MCP ecosystem provides the building blocks.
+
+### XLeRobot Reference
+
+[XLeRobot](https://github.com/Vector-Wangel/XLeRobot) — dual SO-101 mobile platform ($660, <4h assembly).
+
+- Uses STEP + 3MF workflow (no code-generated CAD)
+- Distributes STEP files for modification, STL/3MF for printing
+- Addresses gravity/support via documentation + manual slicer orientation
+- Z-axis scaling in slicer for fit adjustments (not in CAD)
+- No automated printability checking
+- Proves slicer-based workflow is viable for SO-101 ecosystem
+
+### Validation Pipeline (planned)
+
+```
+OpenSCAD (.scad) ──→ STL ──→ PrusaSlicer CLI ──→ printability report
+```
+
+- OpenSCAD: parametric generator (reliable CLI, SVG via projection)
+- PrusaSlicer: printability validator (optional, graceful fallback if unavailable)
+- CadQuery: legacy reference in `hardware/cad/` (no longer used for generation)
+
 ## STL Files Plan
 
 Add draft STL files to `hardware/stl/` for custom parts. Mark as experimental — these are starting points for iteration once hardware arrives.

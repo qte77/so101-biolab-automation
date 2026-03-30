@@ -1,4 +1,4 @@
-"""Post-process CadQuery SVGs to add light/dark theme support.
+"""Post-process SVGs (CadQuery or OpenSCAD) to add light/dark theme support.
 
 Injects CSS with @media (prefers-color-scheme: dark) into each SVG.
 Adds a themed background rect and inverts stroke colors for dark mode.
@@ -16,8 +16,13 @@ THEME_STYLE = """\
       .cq-bg { fill: #ffffff; }
       @media (prefers-color-scheme: dark) {
         .cq-bg { fill: #0d1117; }
+        /* CadQuery SVG selectors */
         g[stroke="rgb(0,0,0)"] { stroke: #c9d1d9 !important; }
         g[stroke="rgb(160,160,160)"] { stroke: #484f58 !important; }
+        /* OpenSCAD SVG selectors */
+        path { stroke: #c9d1d9 !important; }
+        polygon { stroke: #c9d1d9 !important; fill: #161b22 !important; }
+        /* Common selectors */
         line { stroke: #c9d1d9 !important; }
         text { stroke: #c9d1d9 !important; fill: #c9d1d9 !important; }
       }

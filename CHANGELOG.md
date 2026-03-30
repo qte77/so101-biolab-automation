@@ -11,7 +11,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `create_workflow_context()` factory wiring all modules from YAML
 - `--use-case` CLI dispatch in `run_demo.py`
 - Dashboard: `run_workflow` WebSocket command, full component lifespan wiring
-- CadQuery CAD scripts for experimental 3D-printed parts (`hardware/cad/`)
+- OpenSCAD parametric scripts (`hardware/scad/`) as primary STL+SVG generator with PrusaSlicer CLI printability validation — CadQuery generates geometrically correct STLs but has no awareness of FDM printing constraints; vertical empty rows, unsupported overhangs, and gravity-related failures are invisible until a print fails physically
+- PrusaSlicer validation script (`hardware/slicer/validate.py`) with graceful fallback when slicer unavailable
+- Makefile targets: `setup_scad`, `setup_slicer`, `render_scad`, `check_prints`, `render_all`
+- Legacy CadQuery CAD scripts (`hardware/cad/`) — reference only, replaced by OpenSCAD
 - Generated STL + SVG: plate holder, tool changer cones, fridge hook
 - `docs/architecture.md`, `docs/UserStory.md`, `docs/demo-scenarios.md`
 - `docs/hardware/BOM.md` with first-party sourced links
@@ -23,7 +26,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `.claude/` harness: settings.json, rules (core-principles, context-management, compound-learning, robotics-safety, testing), statusline
 - CC plugins: python-dev, docs-governance, commit-helper, codebase-tools
 - `LICENSE` (Apache-2.0)
-- 92 tests across 10 test files
+- 104 tests across 11 test files
 
 ### Changed
 
@@ -31,5 +34,6 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `camera.py`: cv2 import deferred to `start()` for headless environments
 - `arms.py`: stub-safe `get_observation`/`send_action`, added `send_to_well()` + `park_all()`
 - `pipette.py`: fill state tracking with over-aspiration/over-dispense guards
-- Makefile: `.SILENT`/`.ONESHELL`, `help`, `validate`, `quick_validate`, `type_check`, `render_parts`
-- `pyproject.toml`: dependency-groups, pytest ini_options, ruff N/UP, pyright, cadquery optional
+- Makefile: `.SILENT`/`.ONESHELL`, `.DEFAULT_GOAL`, `# MARK:` grouped help, removed `render_parts`/`setup_cad`
+- SVGs now generated as 2D top-down projections from STLs (via `projection() import()`) with dark mode theming
+- `pyproject.toml`: dependency-groups, pytest ini_options, ruff N/UP, pyright; removed cadquery dep
