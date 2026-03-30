@@ -261,6 +261,29 @@ Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm wi
 | [Build Great AI](https://zenml.io/llmops-database/llm-powered-3d-model-generation-for-3d-printing) | Text → LLaMA/GPT/Claude → OpenSCAD → STL | Hours to minutes for design |
 | [CADialogue](https://www.sciencedirect.com/science/article/abs/pii/S0010448525001678) | Multimodal LLM: text + speech + images → parametric CAD | Conversational CAD |
 
+**Related projects (LLM + CAD/print):**
+
+| Project | What | Relation to us |
+|---------|------|---------------|
+| [ClaudeCAD](https://github.com/niklasmh/ClaudeCAD) | Claude + voice + web UI → STL download | Similar voice→CAD idea, web-only, no slicing or print control |
+| [claude-3d-playground](https://github.com/ivanearisty/claude-3d-playground) | Claude Code for design, validate, slice | Closest competitor; no voice, no agent loop, no camera inspect |
+| [openscad-agent](https://github.com/iancanderson/openscad-agent) | Claude Code agent for OpenSCAD modeling | Single-tool agent; no slicer, no print, no feedback loop |
+| [CQAsk](https://github.com/OpenOrion/CQAsk) | LLM + CadQuery → STL/STEP with UI | Uses CadQuery not OpenSCAD; no print pipeline |
+| [ScadLM](https://github.com/KrishKrosh/ScadLM) | Agentic AI + OpenSCAD generation | Early stage; no slicer validation or print control |
+| [Text2CAD](https://github.com/SadilKhan/Text2CAD) | NeurIPS 2024: text → parametric CAD operations | Academic; 170K models dataset; no print integration |
+| [text-2-cad](https://github.com/roberto-ceraolo/text-2-cad) | OpenAI + RAG over OpenSCAD docs → .scad | Early; similar LLM+OpenSCAD approach, minimal |
+| [Speech-to-Reality](https://arxiv.org/html/2409.18390) | Voice → 3D generative AI → robotic assembly | Research; broader scope includes assembly, not printing |
+
+**MCP servers (integration layer):**
+
+| Server | What | Use for us |
+|--------|------|-----------|
+| [OctoEverywhere MCP](https://github.com/OctoEverywhere/mcp) | Printer control, camera, AI failure detection (OctoPrint/Klipper/Bambu) | Agent loop: send jobs, read camera, pause on failure |
+| [OpenSCAD MCP](https://www.pulsemcp.com/servers/jhacksman-openscad) | Generate 3D models from text/images via OpenSCAD | Alternative to direct CLI; Claude Desktop integration |
+| [CADQuery MCP](https://github.com/rishigundakaram/cadquery-mcp-server) | CAD generation + STL/STEP export + SVG feedback | CadQuery path if needed |
+
+**Key insight:** No project integrates all layers (voice → design → validate → print → camera+VLM inspect → agent fix). The MCP ecosystem provides the building blocks.
+
 ### XLeRobot Reference
 
 [XLeRobot](https://github.com/Vector-Wangel/XLeRobot) — dual SO-101 mobile platform ($660, <4h assembly).
