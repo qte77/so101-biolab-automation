@@ -22,8 +22,14 @@ SVG_DIR = Path(__file__).resolve().parent.parent / "svg"
 def stl_to_svg(stl_path: Path, svg_path: Path) -> None:
     """Import STL and export as isometric wireframe SVG."""
     import cadquery as cq
+    from OCP.StlAPI import StlAPI_Reader
+    from OCP.TopoDS import TopoDS_Shape
 
-    shape = cq.Workplane("XY").add(cq.Shape.importStl(str(stl_path)))
+    reader = StlAPI_Reader()
+    ocp_shape = TopoDS_Shape()
+    reader.Read(ocp_shape, str(stl_path))
+
+    shape = cq.Workplane("XY").add(cq.Shape(ocp_shape))
     cq.exporters.export(shape, str(svg_path), exportType="SVG")
     print(f"  {svg_path.name}")
 
