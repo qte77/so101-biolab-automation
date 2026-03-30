@@ -202,9 +202,64 @@ openscad -p params.json -P set_name -o out.stl input.scad  # parameter file
 | **CuraEngine** | Stable | Yes | Limited | Pure engine, no GUI deps. JSON settings. [GitHub](https://github.com/Ultimaker/CuraEngine) |
 | **OrcaSlicer** | **Broken** | **No** (GTK3 crashes) | Yes (when it works) | CLI shares GUI code, segfaults headless. [#2714](https://github.com/OrcaSlicer/OrcaSlicer/issues/2714), [#12277](https://github.com/OrcaSlicer/OrcaSlicer/issues/12277) |
 
-**OrcaSlicer CLI root cause:** Initializes GTK3 components in headless mode -> segfault on NULL plater pointer. Architectural flaw, not a simple bug.
+**OrcaSlicer CLI root cause:** wxWidgets 3.1.7 (GTK3 backend) initializes display context even in CLI mode. Stack: `libslic3r` (core, decoupled) → `libslic3r_gui` (wxWidgets) → single binary. Fix paths: guard GTK3 init behind `DISPLAY` check, or build headless binary from `libslic3r` only. Fork lineage: Slic3r → PrusaSlicer → Bambu Studio → OrcaSlicer (all share `libslic3r` core).
 
 **Recommendation:** PrusaSlicer CLI for validation (stable, proven). Keep slicer-agnostic so Bambu Studio or SuperSlicer can substitute.
+
+### Closed-Loop 3D Printing
+
+#### Human Loop (voice/text → print)
+
+```
+Human (voice/text) → LLM → OpenSCAD → STL → Slicer → Print
+       ↑                                          |
+       └── human inspects, describes fix ──────────┘
+```
+
+Human describes a part or modification in natural language (via CC `/voice` or text). LLM generates OpenSCAD, slicer validates, human inspects result and iterates.
+
+#### Agent Loop (goal → autonomous design-print-inspect)
+
+```
+Goal/Task spec ──→ Agent ──→ OpenSCAD → STL → Slicer validate
+                     ↑                              |
+                     |                         Printer API (MQTT)
+                     |                              ↓
+                     |                         Camera (RTSP/JPEG)
+                     |                              ↓
+                     └── VLM analyzes print ←───────┘
+                         Agent adjusts design/params
+```
+
+Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm with 0.5mm clearance, PLA+, must pass printability check"). Autonomously:
+1. Generates OpenSCAD from spec
+2. Validates via slicer CLI
+3. Sends GCode to printer via MQTT API
+4. Monitors print via camera feed (RTSP/JPEG)
+5. VLM (vision-language model) analyzes camera frames for defects
+6. On failure: agent adjusts design/params, re-slices, reprints
+
+**Bambu camera + printer API (enables agent feedback):**
+- Built-in cameras: X1 (RTSP), A1/P1 (JPEG frames)
+- Local MQTT: `<printer-ip>:8883`, topic `device/<serial>/report`
+- Python: [`bambu-connect`](https://pypi.org/project/bambu-connect/), [`bambulabs-api`](https://pypi.org/project/bambulabs-api/)
+- Cloud API: [`Bambu-Lab-Cloud-API`](https://github.com/coelacant1/Bambu-Lab-Cloud-API) (unofficial)
+
+**Camera-based failure detection:**
+
+| Tool | How | Printers |
+|------|-----|----------|
+| [Obico](https://github.com/TheSpaghettiDetective/obico-server) | Vision model, 30-60s intervals, auto-pause | OctoPrint, Klipper, Bambu |
+| [OctoEverywhere Gadget](https://octoeverywhere.com/gadget) | Neural net trained on millions of prints | OctoPrint |
+| [PrintWatch](https://plugins.octoprint.org/plugins/printwatch/) | AI video feed, auto-pause | OctoPrint |
+
+**LLM/VLM agent loops for 3D printing:**
+
+| Project | Architecture | Result |
+|---------|-------------|--------|
+| [LLM-3D Print](https://arxiv.org/abs/2408.14307) | Multi-agent: supervisor + VLM image reasoning + planner + executor → camera → corrects → reprints | 5x structural integrity, expert-level error ID |
+| [Build Great AI](https://zenml.io/llmops-database/llm-powered-3d-model-generation-for-3d-printing) | Text → LLaMA/GPT/Claude → OpenSCAD → STL | Hours to minutes for design |
+| [CADialogue](https://www.sciencedirect.com/science/article/abs/pii/S0010448525001678) | Multimodal LLM: text + speech + images → parametric CAD | Conversational CAD |
 
 ### XLeRobot Reference
 

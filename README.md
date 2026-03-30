@@ -96,6 +96,20 @@ tests/             104 tests across 11 test files
 - FastAPI + WebRTC — Remote dashboard
 - OpenCV — Camera pipeline
 
+## Roadmap
+
+Toward general-purpose voice/agent-to-print. This repo is the first showcase.
+
+**Human loop** — voice/text → LLM → OpenSCAD → slicer → print → human inspects → iterate
+
+**Agent loop** — goal spec → agent generates CAD → slicer validates → printer API → camera + VLM inspects → agent fixes → reprints autonomously
+
+1. **Done** — OpenSCAD + PrusaSlicer CLI pipeline (`make render_scad`, `make check_prints`)
+2. **Next** — LLM-assisted OpenSCAD generation from text prompts
+3. **Future** — Autonomous agent loop with Bambu camera + VLM print inspection
+
+See [docs/research.md](docs/research.md) § "Closed-Loop 3D Printing" for prior art.
+
 ## License
 
 Apache-2.0
