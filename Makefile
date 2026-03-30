@@ -101,7 +101,7 @@ render_scad: ## Generate STL + SVG from OpenSCAD scripts (requires setup_scad)
 	for stl in hardware/stl/*.stl; do
 		base=$$(basename "$$stl" .stl)
 		echo "  $$base.svg"
-		echo "projection() import(\"$$STL_DIR/$$base.stl\");" \
+		echo "projection() rotate([55, 0, 25]) import(\"$$STL_DIR/$$base.stl\");" \
 			| openscad -o "hardware/svg/$$base.svg" /dev/stdin 2>/dev/null
 	done
 	python3 hardware/cad/theme_svgs.py

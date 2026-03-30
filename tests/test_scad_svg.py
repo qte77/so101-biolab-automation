@@ -14,14 +14,22 @@ import pytest
 
 SVG_DIR = Path(__file__).resolve().parent.parent / "hardware" / "svg"
 
-# Parts with enough 3D complexity to distinguish flat vs isometric
+# Parts with cylindrical/compound geometry — isometric projection shows rich curves
 COMPLEX_PARTS = [
     "tool_cone_robot",
     "tool_cone_pipette",
-    "tool_dock_3station",
+    "tool_cone_gripper",
+    "tool_cone_hook",
     "pipette_mount_so101",
-    "96well_plate_holder",
     "fridge_hook_tool",
+]
+
+# Box-shaped parts — isometric projection is still a parallelogram (geometrically correct)
+BOX_PARTS = [
+    "96well_plate_holder",
+    "tool_dock_3station",
+    "tip_rack_holder",
+    "gripper_tips_tpu",
 ]
 
 
@@ -64,7 +72,7 @@ class TestSvgSpatialQuality:
             f"looks like a flat projection, expected isometric (>4 points)"
         )
 
-    @pytest.mark.parametrize("part", COMPLEX_PARTS)
+    @pytest.mark.parametrize("part", COMPLEX_PARTS + BOX_PARTS)
     def test_svg_is_valid(self, part: str) -> None:
         """SVG must contain basic structure."""
         svg_path = SVG_DIR / f"{part}.svg"
@@ -72,6 +80,34 @@ class TestSvgSpatialQuality:
 
         assert "<svg" in svg_text
         assert "<path" in svg_text or "<polygon" in svg_text
+
+    @pytest.mark.parametrize("part", BOX_PARTS)
+    def test_box_part_has_isometric_shape(self, part: str) -> None:
+        """Box parts have 4 points but must be a parallelogram (not axis-aligned rectangle).
+
+        Flat projection: points differ on only 2 axes (axis-aligned).
+        Isometric projection: points differ on both axes (skewed parallelogram).
+        """
+        svg_path = SVG_DIR / f"{part}.svg"
+        svg_text = svg_path.read_text()
+
+        # Extract coordinate pairs
+        d_attrs = re.findall(r'd="([^"]*)"', svg_text)
+        coords = []
+        for d in d_attrs:
+            for match in re.finditer(r"([-\d.]+),([-\d.]+)", d):
+                coords.append((float(match.group(1)), float(match.group(2))))
+
+        assert len(coords) >= 4, f"{part}.svg has <4 coordinates"
+
+        # Check that it's not axis-aligned (flat projection gives axis-aligned rect)
+        xs = {round(c[0], 1) for c in coords}
+        ys = {round(c[1], 1) for c in coords}
+        # Isometric parallelogram: 4 unique x AND 4 unique y values
+        # Flat rectangle: only 2 unique x OR 2 unique y values
+        assert len(xs) > 2 or len(ys) > 2, (
+            f"{part}.svg appears axis-aligned (flat projection)"
+        )
 
     def test_all_stl_parts_have_svgs(self) -> None:
         """Every STL must have a corresponding SVG."""

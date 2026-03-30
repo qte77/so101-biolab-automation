@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="20mm" height="4mm" viewBox="-10 -2 20 4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<svg width="28mm" height="30mm" viewBox="-14 -15 28 30" xmlns="http://www.w3.org/2000/svg" version="1.1">
   <defs>
     <style>
       .cq-bg { fill: #ffffff; }
@@ -18,9 +18,9 @@
       }
     </style>
   </defs>
-  <rect width="20mm" height="4mm" class="cq-bg"/>
+  <rect width="28mm" height="30mm" class="cq-bg"/>
 <title>OpenSCAD Model</title>
 <path d="
-M 10,-1.5 L -10,-1.5 L -10,1.5 L 10,1.5 z
+M 13.754,5.83362 L 4.3721,-14.286 L -13.754,-5.83362 L -4.3721,14.286 z
 " stroke="black" fill="lightgray" stroke-width="0.5"/>
 </svg>

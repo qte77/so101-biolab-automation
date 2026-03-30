@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="36mm" height="36mm" viewBox="-18 -18 36 36" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<svg width="50mm" height="60mm" viewBox="-21 -17 50 60" xmlns="http://www.w3.org/2000/svg" version="1.1">
   <defs>
     <style>
       .cq-bg { fill: #ffffff; }
@@ -18,9 +18,14 @@
       }
     </style>
   </defs>
-  <rect width="36mm" height="36mm" class="cq-bg"/>
+  <rect width="50mm" height="60mm" class="cq-bg"/>
 <title>OpenSCAD Model</title>
 <path d="
-M 18,-18 L -18,-18 L -18,18 L 18,18 z
+M 12.1004,42.8676 L 13.8214,42.5887 L 15.5724,42.1527 L 17.3236,41.5671 L 18.1227,41.2304 L 5.18791,13.4917
+ L 7.0005,12.6465 L 19.9353,40.3852 L 20.7068,39.9894 L 22.2811,39.0244 L 23.7406,37.9633 L 25.0606,36.8242
+ L 26.2182,35.6267 L 27.1938,34.3912 L 27.9707,33.1389 L 28.5356,31.8912 L 28.8787,30.6695 L 28.9942,29.4946
+ L 28.8803,28.3867 L 28.5387,27.3647 L 19.0544,7.02563 L 22.4077,5.46194 L 11.9503,-16.9642 L -20.6768,-1.74992
+ L -10.2193,20.6762 L -6.86598,19.1125 L 2.61829,39.4516 L 3.18156,40.3702 L 3.95709,41.1696 L 4.93132,41.8363
+ L 6.08777,42.3588 L 7.40662,42.7281 L 8.86536,42.9379 L 10.4389,42.9847 z
 " stroke="black" fill="lightgray" stroke-width="0.5"/>
 </svg>
