@@ -284,6 +284,55 @@ Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm wi
 
 **Key insight:** No project integrates all layers (voice → design → validate → print → camera+VLM inspect → agent fix). The MCP ecosystem provides the building blocks.
 
+### SO-101 Simulation & Digital Twin
+
+**Goal:** Catch hardware problems in software. Shift-left testing for robotics.
+
+**Official SO-101 sim models:** URDF + MJCF at [TheRobotStudio/SO-ARM100/Simulation/SO101](https://github.com/TheRobotStudio/SO-ARM100/tree/main/Simulation/SO101). Includes `so101_new_calib.urdf`, `so101_new_calib.xml` (MuJoCo), `scene.xml`, joint properties, mesh assets. Generated via onshape-to-robot.
+
+**Simulation stacks:**
+
+| Stack | Physics | GPU | SO-101 Tasks | Headless CI | Use for |
+|-------|---------|-----|-------------|------------|---------|
+| [MuJoCo](https://mujoco.readthedocs.io/) direct | MuJoCo 3.0+ | No | Via URDF/MJCF | Yes (`MUJOCO_GL=osmesa`) | CI tests, lightweight sim, control dev |
+| [LeIsaac](https://github.com/LightwheelAI/leisaac) | Isaac Lab | Yes | `PickOrange`, `LiftCube`, `CleanToyTable`, `FoldCloth-BiArm` | Cloud (NVIDIA Brev) | Teleoperation, data collection, policy training |
+| [ManiSkill](https://github.com/haosulab/ManiSkill) | SAPIEN | Yes | Via custom robot loading | Limited | RL training, GPU-parallelized (200k+ FPS) |
+| [gym_hil](https://github.com/huggingface/gym-hil) | MuJoCo | No | Panda only (extensible) | Yes | Human-in-the-loop RL |
+
+**LeIsaac details:**
+- Official LeRobot EnvHub integration by [LightwheelAI](https://lightwheelai.github.io/leisaac/)
+- SO101 follower + leader teleoperation in sim
+- HDF5 → LeRobot dataset conversion built-in
+- Cloud sim: no local GPU required via NVIDIA Brev
+- Usage: `make_env("LightwheelAI/leisaac_env:envs/so101_pick_orange.py", n_envs=1, trust_remote_code=True)`
+
+**MuJoCo in CI (headless GitHub Actions):**
+- Set `MUJOCO_GL=osmesa` for software rendering (no GPU, no X11)
+- Install: `sudo apt-get install libosmesa6-dev`
+- Proven pattern: MuJoCo official CI, openai/mujoco-py, community SO-100 sim
+
+**OpenSCAD STL → MuJoCo collision mesh:**
+- Export binary STL from OpenSCAD → reference in MJCF `<mesh>` tag
+- MuJoCo auto-converts to convex hull for collision (sufficient for simple parts)
+- Works for plate holders, tool changer cones, dock — may need simplification for complex geometry
+
+**Sim-to-real for SO-101:**
+- [lerobot-sim2real](https://github.com/StoneT2000/lerobot-sim2real): train in ManiSkill, deploy zero-shot to real SO-101
+- GR00T-N1.5 policy fine-tuning on SO-101 via LeIsaac sim data
+- Domain randomization (colors, textures, dynamics) for robust transfer
+- Community SO-100 MuJoCo: [lachlanhurst/so100-mujoco-sim](https://github.com/lachlanhurst/so100-mujoco-sim) with Qt GUI + LeRobot sync
+
+**Digital twin for 3D print inspection:**
+- Real-time layer-by-layer CNN inspection for over/under-extrusion ([MDPI 2025](https://www.mdpi.com/2075-1702/13/6/448))
+- Zero-shot multi-criteria inspection via digital twin ([arXiv 2511.23214](https://arxiv.org/abs/2511.23214))
+- 3D Gaussian Splatting for photorealistic rendering of printed parts
+- [Systematic review: Digital Twins in 3D Printing](https://arxiv.org/html/2409.00877v1)
+
+**Recommendation:**
+1. **CI testing now:** MuJoCo + OSMesa (no GPU, headless, free)
+2. **Policy training later:** LeIsaac when GPU available (or NVIDIA Brev cloud)
+3. **Print inspection future:** Prototype with real camera + simulated geometry comparison
+
 ### XLeRobot Reference
 
 [XLeRobot](https://github.com/Vector-Wangel/XLeRobot) — dual SO-101 mobile platform ($660, <4h assembly).
