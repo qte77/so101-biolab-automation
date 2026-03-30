@@ -1,0 +1,4 @@
+[submodule "ralph"]
+	path = ralph
+	url = https://github.com/qte77/ralph-loop-cc-tdd-wt-vibe-kanban-template.git
+	branch = main
