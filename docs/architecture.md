@@ -93,7 +93,7 @@ Every hardware-dependent module gracefully degrades when its dependency is unava
 | pipette.py | `ImportError` on `serial` | Fill state tracked in memory; `_move_to` is a no-op |
 | camera.py | `ImportError` on `cv2` | `start()` returns; `get_frames()` returns `{}` |
 
-This allows the full workflow to run end-to-end without any hardware attached. Run `make test` to verify.
+This allows the full workflow to run end-to-end without any hardware attached. Run `make run_tests` to verify.
 
 ## Key Design Decisions
 

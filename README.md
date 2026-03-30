@@ -41,19 +41,19 @@ make setup_slicer
 make check_prints
 
 # Calibrate arms
-make calibrate
+make calibrate_arms
 
 # Teleoperate (teacher-student)
-make teleop
+make start_teleop
 
 # Record pipetting episodes
-make record TASK="pipette row A"
+make record_episodes TASK="pipette row A"
 
 # Train policy
-make train
+make train_policy
 
 # Run demo
-make demo
+make run_demo
 ```
 
 ## Architecture
