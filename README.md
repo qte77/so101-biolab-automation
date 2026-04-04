@@ -63,7 +63,7 @@ See [docs/architecture.md](docs/architecture.md) for full system design, module 
 
 ## Project Structure
 
-```
+```text
 src/biolab/        Core: arm control, pipette, plate coords, tool changer, safety, workflow
 src/dashboard/     FastAPI server, WebSocket commands, browser UI
 scripts/           CLI entry points for use cases and demo orchestration

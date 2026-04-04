@@ -1,0 +1,10 @@
+{
+  "default": true,
+  "MD003": { "style": "atx" },
+  "MD010": false,
+  "MD013": false,
+  "MD024": { "siblings_only": true },
+  "MD025": false,
+  "MD041": { "front_matter_title": "^\\s*title\\s*[:=]" },
+  "MD060": false
+}

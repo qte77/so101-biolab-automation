@@ -29,7 +29,7 @@ python scripts/run_demo.py --use-case uc1_single --well A1 --volume 50
 
 Expected output:
 
-```
+```text
 [UC1] Move arm_a → TROUGH (200.0, 0.0 mm)
 [UC1] Aspirate 50.0 µL
 Moving arm_a to well A1 (14.38, 11.24 mm)
@@ -77,7 +77,7 @@ python scripts/run_demo.py --use-case uc2
 
 Expected output:
 
-```
+```text
 [UC2] Starting fridge sequence
 Tool changed to fridge_hook
 [UC2] Approach fridge
@@ -100,7 +100,7 @@ python scripts/run_demo.py --use-case uc3
 
 Expected output:
 
-```
+```text
 [UC3] Starting tool cycle: ['pipette', 'gripper', 'fridge_hook', 'gripper']
 [UC3] Equipped pipette
 [UC3] Equipped gripper
