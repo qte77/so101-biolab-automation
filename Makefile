@@ -7,7 +7,7 @@ endif
 .ONESHELL:
 .PHONY: \
 	setup setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
-	render_scad check_prints render_all \
+	render_parts check_prints render_all \
 	lint_code check_links check_types run_tests rerun_tests quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
 	eval_policy serve_dashboard run_demo \
@@ -55,20 +55,25 @@ setup_scad: ## Install OpenSCAD for parametric STL generation
 		fi
 	fi
 
-setup_slicer: ## Install PrusaSlicer for printability validation (optional)
-	if command -v prusa-slicer > /dev/null 2>&1; then
-		echo "PrusaSlicer already installed: $$(prusa-slicer --version 2>&1 | head -1)"
+setup_slicer: ## Install OrcaSlicer (preferred) or PrusaSlicer (fallback)
+	if command -v orca-slicer > /dev/null 2>&1; then
+		echo "OrcaSlicer already installed: $$(orca-slicer --version 2>&1 | head -1)"
+	elif command -v prusa-slicer > /dev/null 2>&1; then
+		echo "PrusaSlicer already installed (fallback): $$(prusa-slicer --version 2>&1 | head -1)"
 	else
-		echo "Installing PrusaSlicer ..."
-		if command -v apt-get > /dev/null 2>&1; then
-			sudo apt-get update -qq && sudo apt-get install -y -qq prusa-slicer
+		echo "Installing OrcaSlicer ..."
+		if command -v flatpak > /dev/null 2>&1; then
+			flatpak install -y flathub com.github.SoftFever.OrcaSlicer
 		elif command -v brew > /dev/null 2>&1; then
-			brew install --cask prusaslicer
-		elif command -v flatpak > /dev/null 2>&1; then
-			flatpak install -y flathub com.prusa3d.PrusaSlicer
+			brew install --cask orcaslicer
 		else
-			echo "WARN: Install manually from https://github.com/prusa3d/PrusaSlicer/releases"
+			echo "WARN: OrcaSlicer not available via package manager"
+			echo "  Install manually: https://github.com/SoftFever/OrcaSlicer/releases"
+			echo "  Or install PrusaSlicer as fallback: sudo apt install prusa-slicer"
 		fi
+	fi
+	if command -v apt-get > /dev/null 2>&1; then
+		sudo apt-get install -y -qq xvfb 2>/dev/null || true
 	fi
 
 setup_rtk: ## Install RTK CLI for token-optimized LLM output
@@ -92,32 +97,38 @@ setup_lychee: ## Install lychee link checker
 # MARK: HARDWARE
 
 
-render_scad: ## Generate STL + SVG from OpenSCAD scripts (requires setup_scad + setup_cad)
-	command -v openscad > /dev/null 2>&1 || { echo "ERROR: openscad not found — run: make setup_scad"; exit 1; }
-	echo "--- STL generation"
-	openscad -o hardware/stl/tip_rack_holder.stl hardware/scad/tip_rack_holder.scad 2>/dev/null
-	openscad -o hardware/stl/gripper_tips_tpu.stl hardware/scad/gripper_tips.scad 2>/dev/null
-	openscad -o hardware/stl/96well_plate_holder.stl hardware/scad/plate_holder.scad 2>/dev/null
-	openscad -o hardware/stl/fridge_hook_tool.stl hardware/scad/fridge_hook.scad 2>/dev/null
-	openscad -o hardware/stl/tool_dock_3station.stl hardware/scad/tool_dock.scad 2>/dev/null
-	openscad -o hardware/stl/pipette_mount_so101.stl hardware/scad/pipette_mount.scad 2>/dev/null
-	openscad -o hardware/stl/tool_cone_robot.stl -D 'PART="robot"' hardware/scad/tool_changer.scad 2>/dev/null
-	openscad -o hardware/stl/tool_cone_pipette.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
-	openscad -o hardware/stl/tool_cone_gripper.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
-	openscad -o hardware/stl/tool_cone_hook.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
-	echo "--- SVG wireframe from STLs (CadQuery)"
-	uv run --group cad python3 hardware/cad/stl_to_svg.py --all
-	python3 hardware/cad/theme_svgs.py
-	echo "=== render_scad: done ==="
-
-check_prints: ## Run PrusaSlicer printability checks on STLs (optional, requires setup_slicer)
-	if command -v prusa-slicer > /dev/null 2>&1; then
-		python hardware/slicer/validate.py --all
+render_parts: ## Generate STL + SVG (CadQuery preferred, OpenSCAD fallback)
+	if uv run --group cad python -c "import cadquery" 2>/dev/null; then
+		echo "--- Rendering via CadQuery"
+		for f in hardware/cad/*.py; do
+			case "$$(basename $$f)" in stl_to_svg.py|theme_svgs.py) continue ;; esac
+			uv run --group cad python "$$f"
+		done
+	elif command -v openscad > /dev/null 2>&1; then
+		echo "--- Rendering via OpenSCAD (fallback)"
+		openscad -o hardware/stl/tip_rack_holder.stl hardware/scad/tip_rack_holder.scad 2>/dev/null
+		openscad -o hardware/stl/gripper_tips_tpu.stl hardware/scad/gripper_tips.scad 2>/dev/null
+		openscad -o hardware/stl/96well_plate_holder.stl hardware/scad/plate_holder.scad 2>/dev/null
+		openscad -o hardware/stl/fridge_hook_tool.stl hardware/scad/fridge_hook.scad 2>/dev/null
+		openscad -o hardware/stl/tool_dock_3station.stl hardware/scad/tool_dock.scad 2>/dev/null
+		openscad -o hardware/stl/pipette_mount_so101.stl hardware/scad/pipette_mount.scad 2>/dev/null
+		openscad -o hardware/stl/tool_cone_robot.stl -D 'PART="robot"' hardware/scad/tool_changer.scad 2>/dev/null
+		openscad -o hardware/stl/tool_cone_pipette.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
+		openscad -o hardware/stl/tool_cone_gripper.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
+		openscad -o hardware/stl/tool_cone_hook.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
+		uv run --group cad python3 hardware/cad/stl_to_svg.py --all
 	else
-		echo "SKIP: PrusaSlicer not installed — run 'make setup_slicer' to enable validation"
+		echo "ERROR: Neither CadQuery nor OpenSCAD found"
+		echo "  Run: make setup_cad   (preferred)"
+		echo "  Or:  make setup_scad  (fallback)"
+		exit 1
 	fi
+	python3 hardware/cad/theme_svgs.py
 
-render_all: render_scad check_prints ## Generate parts (OpenSCAD) + validate printability
+check_prints: ## Run slicer printability checks (OrcaSlicer preferred, PrusaSlicer fallback)
+	python hardware/slicer/validate.py --all
+
+render_all: render_parts check_prints ## Generate parts + validate printability
 
 calibrate_arms: ## Calibrate all arms (leader + followers)
 	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_A_PORT) --robot.id=arm_a
