@@ -13,12 +13,12 @@ Generated from CadQuery scripts in `../cad/` (preferred) or OpenSCAD scripts in 
 make setup_cad            # Install CadQuery (preferred)
 make setup_scad           # Install OpenSCAD (fallback)
 make render_parts         # Generate STL + SVG
-make setup_slicer         # Install OrcaSlicer or PrusaSlicer (optional)
+make setup_slicer         # Install PrusaSlicer (optional)
 make check_prints         # Check printability
 make render_all           # Generate + validate
 ```
 
-**Why CadQuery + slicer?** CadQuery generates parametric STLs with isometric wireframe SVGs. OrcaSlicer (or PrusaSlicer fallback) validates FDM printability (overhangs, unsupported regions, gravity failures) as fast CLI feedback.
+**Why CadQuery + slicer?** CadQuery generates parametric STLs with isometric wireframe SVGs. PrusaSlicer validates FDM printability (overhangs, unsupported regions, gravity failures) as fast CLI feedback.
 
 **Status:** EXPERIMENTAL = draft dimensions, untested on hardware.
 

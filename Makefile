@@ -55,34 +55,20 @@ setup_scad: ## Install OpenSCAD for parametric STL generation
 		fi
 	fi
 
-setup_slicer: ## Install OrcaSlicer (preferred) or PrusaSlicer (fallback)
-	if command -v orca-slicer > /dev/null 2>&1; then
-		echo "OrcaSlicer already installed: $$(orca-slicer --version 2>&1 | head -1)"
-	elif command -v prusa-slicer > /dev/null 2>&1; then
-		echo "PrusaSlicer already installed (fallback): $$(prusa-slicer --version 2>&1 | head -1)"
+setup_slicer: ## Install PrusaSlicer for printability validation (optional)
+	if command -v prusa-slicer > /dev/null 2>&1; then
+		echo "PrusaSlicer already installed: $$(prusa-slicer --version 2>&1 | head -1)"
 	else
-		INSTALLED=false
-		if command -v flatpak > /dev/null 2>&1; then
-			echo "Installing OrcaSlicer via flatpak ..."
-			flatpak install -y flathub com.github.SoftFever.OrcaSlicer && INSTALLED=true
+		echo "Installing PrusaSlicer ..."
+		if command -v apt-get > /dev/null 2>&1; then
+			sudo apt-get update -qq && sudo apt-get install -y -qq prusa-slicer
 		elif command -v brew > /dev/null 2>&1; then
-			echo "Installing OrcaSlicer via brew ..."
-			brew install --cask orcaslicer && INSTALLED=true
+			brew install --cask prusaslicer
+		elif command -v flatpak > /dev/null 2>&1; then
+			flatpak install -y flathub com.prusa3d.PrusaSlicer
+		else
+			echo "WARN: Install manually from https://github.com/prusa3d/PrusaSlicer/releases"
 		fi
-		if [ "$$INSTALLED" = "false" ]; then
-			echo "OrcaSlicer unavailable — installing PrusaSlicer as fallback"
-			if command -v apt-get > /dev/null 2>&1; then
-				sudo apt-get update -qq && sudo apt-get install -y -qq prusa-slicer
-			else
-				echo "ERROR: No supported package manager. Install manually:"
-				echo "  OrcaSlicer: https://github.com/SoftFever/OrcaSlicer/releases"
-				echo "  PrusaSlicer: https://github.com/prusa3d/PrusaSlicer/releases"
-				exit 1
-			fi
-		fi
-	fi
-	if command -v apt-get > /dev/null 2>&1; then
-		sudo apt-get install -y -qq xvfb 2>/dev/null || true
 	fi
 
 setup_rtk: ## Install RTK CLI for token-optimized LLM output

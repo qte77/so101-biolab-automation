@@ -12,8 +12,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `--use-case` CLI dispatch in `run_demo.py`
 - Dashboard: `run_workflow` WebSocket command, full component lifespan wiring
 - CadQuery scripts (`hardware/cad/`) as primary STL+SVG generator, OpenSCAD (`hardware/scad/`) as runtime fallback
-- Slicer validation (`hardware/slicer/validate.py`) with OrcaSlicer→PrusaSlicer fallback chain and xvfb headless workaround
-- OrcaSlicer JSON profiles alongside PrusaSlicer INI profiles
+- PrusaSlicer validation script (`hardware/slicer/validate.py`) with graceful fallback when slicer unavailable
 - Makefile targets: `setup_cad`, `setup_scad`, `setup_slicer`, `render_parts`, `check_prints`, `render_all`
 - Generated STL + SVG: plate holder, tool changer cones, fridge hook
 - `docs/architecture.md`, `docs/UserStory.md`, `docs/demo-scenarios.md`
