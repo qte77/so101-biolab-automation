@@ -6,7 +6,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
+	setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
 	render_parts check_prints render_all \
 	lint_code check_links check_types run_tests rerun_tests quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
@@ -29,8 +29,10 @@ POLICY ?= act
 # MARK: SETUP
 
 
-setup: ## Install dev + test dependencies
+setup_dev: ## Install dev + test dependencies
 	uv sync
+
+setup_all: setup_dev setup_cad setup_slicer setup_lychee ## Install all dependencies + tools
 
 setup_train: ## Install training dependencies (torch, wandb)
 	uv sync --group train
