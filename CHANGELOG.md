@@ -11,6 +11,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `create_workflow_context()` factory wiring all modules from YAML
 - `--use-case` CLI dispatch in `run_demo.py`
 - Dashboard: `run_workflow` WebSocket command, full component lifespan wiring
+- `hardware/parts.json` manifest as single source of truth for all 10 printable parts
+- `hardware/render.py` unified runner — reads manifest, dispatches CadQuery or OpenSCAD
 - CadQuery scripts (`hardware/cad/`) as primary STL+SVG generator, OpenSCAD (`hardware/scad/`) as runtime fallback
 - PrusaSlicer validation script (`hardware/slicer/validate.py`) with graceful fallback when slicer unavailable
 - Makefile targets: `setup_cad`, `setup_scad`, `setup_slicer`, `render_parts`, `check_prints`, `render_all`
