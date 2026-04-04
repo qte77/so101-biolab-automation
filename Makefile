@@ -1,3 +1,8 @@
+# Require GNU Make >= 3.82 (.ONESHELL support)
+ifeq ($(filter oneshell,$(.FEATURES)),)
+$(error GNU Make >= 3.82 required (.ONESHELL). macOS ships 3.81 — install via: brew install make, then use gmake)
+endif
+
 .SILENT:
 .ONESHELL:
 .PHONY: \
