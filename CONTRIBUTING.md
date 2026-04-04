@@ -7,10 +7,12 @@ For AI agent behavioral rules, see [AGENTS.md](AGENTS.md).
 
 | Command | Purpose |
 |---------|---------|
-| `make setup` | Install all dependencies |
-| `make setup_scad` | Install OpenSCAD for parametric STL/SVG generation |
-| `make setup_slicer` | Install PrusaSlicer for printability validation (optional) |
-| `make render_scad` | Generate STL + SVG from OpenSCAD scripts |
+| `make setup_dev` | Install dev + test dependencies |
+| `make setup_all` | Install all dependencies + tools (CadQuery, PrusaSlicer, lychee) |
+| `make setup_cad` | Install CadQuery for STL+SVG generation |
+| `make setup_scad` | Install OpenSCAD (fallback CAD) |
+| `make setup_slicer` | Install PrusaSlicer for printability validation |
+| `make render_parts` | Generate STL + SVG (CadQuery preferred, OpenSCAD fallback) |
 | `make check_prints` | Run PrusaSlicer printability checks on STLs |
 | `make render_all` | Generate parts + validate printability |
 | `make validate` | Complete pre-commit validation (lint + type check + test) |
