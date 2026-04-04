@@ -45,30 +45,35 @@ def detect_backend() -> str:
     sys.exit(1)
 
 
+def _load_module(cad_path: Path):
+    """Import a CadQuery script as a module."""
+    spec = importlib.util.spec_from_file_location(cad_path.stem, cad_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def render_cad(parts: list[dict]) -> None:
-    """Render all parts via CadQuery — import each script's build function."""
+    """Render all parts via CadQuery — import build functions, export using manifest filenames."""
+    import cadquery as cq
+
     print("--- Rendering via CadQuery")
 
-    # Group parts by cad script (tool_changer.py serves multiple parts)
-    by_script: dict[str, list[dict]] = {}
+    # Cache modules (tool_changer.py is used by multiple parts)
+    _modules: dict[str, object] = {}
+
     for part in parts:
-        by_script.setdefault(part["cad"], []).append(part)
+        cad_rel = part["cad"]
+        if cad_rel not in _modules:
+            _modules[cad_rel] = _load_module(HARDWARE_DIR / cad_rel)
 
-    for cad_rel, script_parts in by_script.items():
-        cad_path = HARDWARE_DIR / cad_rel
-        spec = importlib.util.spec_from_file_location(cad_path.stem, cad_path)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
+        mod = _modules[cad_rel]
+        build_fn = getattr(mod, part["build_func"])
+        shape = build_fn()
 
-        # Each CadQuery script has build_*() functions and an export_all() or export()
-        # For simplicity, call the __main__ block via subprocess
-        subprocess.run(
-            [sys.executable, str(cad_path)],
-            check=True,
-        )
-        # Mark all parts from this script as done
-        for p in script_parts:
-            print(f"  {p['stl']}")
+        cq.exporters.export(shape, str(STL_DIR / part["stl"]))
+        cq.exporters.export(shape, str(SVG_DIR / part["svg"]), exportType="SVG")
+        print(f"  {part['stl']} + {part['svg']}")
 
 
 def render_scad(parts: list[dict]) -> None:

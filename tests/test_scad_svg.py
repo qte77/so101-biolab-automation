@@ -117,7 +117,7 @@ class TestManifest:
             assert path.exists(), f"Manifest references missing .py: {cad}"
 
     def test_manifest_has_required_fields(self) -> None:
-        required = {"name", "stl", "svg", "cad", "scad", "shape"}
+        required = {"name", "stl", "svg", "cad", "build_func", "scad", "shape"}
         for part in MANIFEST:
             missing = required - set(part.keys())
             assert not missing, f"{part['name']} missing fields: {missing}"
