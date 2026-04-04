@@ -29,12 +29,11 @@ Two [SO-101](https://github.com/therobotstudio/so-arm100) follower arms + one le
 ## Quick Start
 
 ```bash
-# Setup
-make setup
+# Setup (all deps + tools)
+make setup_all
 
-# Generate 3D-printed parts (OpenSCAD)
-make setup_scad
-make render_scad
+# Generate 3D-printed parts (CadQuery preferred, OpenSCAD fallback)
+make render_parts
 
 # Optional: validate printability (PrusaSlicer)
 make setup_slicer
@@ -69,10 +68,10 @@ src/biolab/        Core: arm control, pipette, plate coords, tool changer, safet
 src/dashboard/     FastAPI server, WebSocket commands, browser UI
 scripts/           CLI entry points for use cases and demo orchestration
 configs/           Arm ports, plate layout, tool dock positions (YAML)
-hardware/scad/     OpenSCAD parametric scripts (STL+SVG generation)
-hardware/cad/      Legacy CadQuery scripts (reference only)
+hardware/cad/      CadQuery scripts — primary STL+SVG generation
+hardware/scad/     OpenSCAD scripts — fallback STL generation
 hardware/slicer/   PrusaSlicer CLI printability validation (optional)
-hardware/stl/      Generated STL files (via make render_scad, gitignored)
+hardware/stl/      Generated STL files (via make render_parts, gitignored)
 hardware/svg/      SVG 2D projections of parts (tracked, for documentation)
 docs/              Architecture, user stories, demo scenarios, BOM, research
 tests/             104 tests across 11 test files
@@ -104,8 +103,8 @@ Toward general-purpose voice/agent-to-print. This repo is the first showcase.
 
 **Agent loop** — goal spec → agent generates CAD → slicer validates → printer API → camera + VLM inspects → agent fixes → reprints autonomously
 
-1. **Done** — OpenSCAD + PrusaSlicer CLI pipeline (`make render_scad`, `make check_prints`)
-2. **Next** — LLM-assisted OpenSCAD generation from text prompts
+1. **Done** — CadQuery + PrusaSlicer CLI pipeline (`make render_parts`, `make check_prints`)
+2. **Next** — LLM-assisted CadQuery generation from text prompts
 3. **Future** — Autonomous agent loop with Bambu camera + VLM print inspection
 
 See [docs/research.md](docs/research.md) § "Closed-Loop 3D Printing" for prior art.
