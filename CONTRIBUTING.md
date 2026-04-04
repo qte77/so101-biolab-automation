@@ -8,14 +8,19 @@ For AI agent behavioral rules, see [AGENTS.md](AGENTS.md).
 | Command | Purpose |
 |---------|---------|
 | `make setup` | Install all dependencies |
+| `make setup_scad` | Install OpenSCAD for parametric STL/SVG generation |
+| `make setup_slicer` | Install PrusaSlicer for printability validation (optional) |
+| `make render_scad` | Generate STL + SVG from OpenSCAD scripts |
+| `make check_prints` | Run PrusaSlicer printability checks on STLs |
+| `make render_all` | Generate parts + validate printability |
 | `make validate` | Complete pre-commit validation (lint + type check + test) |
 | `make quick_validate` | Fast development validation (lint + type check) |
-| `make test` | Run all non-hardware tests with pytest |
-| `make calibrate` | Calibrate all arms |
-| `make teleop` | Start teleoperation |
-| `make record` | Record training episodes |
-| `make train` | Train ACT policy |
-| `make serve` | Start remote dashboard |
+| `make run_tests` | Run all non-hardware tests with pytest |
+| `make calibrate_arms` | Calibrate all arms |
+| `make start_teleop` | Start teleoperation |
+| `make record_episodes` | Record training episodes |
+| `make train_policy` | Train ACT policy |
+| `make serve_dashboard` | Start remote dashboard |
 
 **Emergency fallback** (if make commands fail):
 ```bash
@@ -32,7 +37,7 @@ uv run pytest -m "not hardware"
 - Mirror `src/` structure in `tests/`
 
 ### Hardware Tests (opt-in)
-- Tag with `@pytest.mark.hardware` — excluded from `make test` by default
+- Tag with `@pytest.mark.hardware` — excluded from `make run_tests` by default
 - Run explicitly: `uv run pytest -m hardware`
 - Require physical arms connected and calibrated
 
@@ -60,7 +65,7 @@ uv run pytest -m "not hardware"
 ## Conventional Commits
 
 Types: `feat | fix | build | chore | ci | docs | style | refactor | perf | test`
-Scopes: `biolab | dashboard | configs | scripts | tests | docs`
+Scopes: `biolab | dashboard | configs | scripts | tests | docs | hardware`
 
 ## Documentation Hierarchy
 

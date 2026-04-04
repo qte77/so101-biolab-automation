@@ -127,7 +127,7 @@ python scripts/run_demo.py --use-case all
 Start the dashboard and trigger the workflow via WebSocket:
 
 ```bash
-make serve
+make serve_dashboard
 ```
 
 Open `http://localhost:8080` in a browser. Click "Run Demo" button. The full UC4 sequence runs in the background. Check `GET /api/status` for current state.

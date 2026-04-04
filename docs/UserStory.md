@@ -102,7 +102,7 @@ updated: 2026-03-27
 - [ ] E-stop triggers SafetyMonitor and parks all arms
 - [ ] Heartbeat resets watchdog timer (5s timeout → auto-park)
 
-**Command:** `make serve`
+**Command:** `make serve_dashboard`
 
 ### US-4.2: Run Full Demo Remotely
 
