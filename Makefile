@@ -35,7 +35,7 @@ setup: ## Install dev + test dependencies
 setup_train: ## Install training dependencies (torch, wandb)
 	uv sync --group train
 
-setup_cad: ## Install CadQuery for SVG wireframe generation (requires Python 3.10-3.12)
+setup_cad: ## Install CadQuery for SVG wireframe generation (requires Python 3.12)
 	uv sync --group cad
 
 setup_scad: ## Install OpenSCAD for parametric STL generation

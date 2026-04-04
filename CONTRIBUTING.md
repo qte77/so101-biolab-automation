@@ -47,7 +47,7 @@ uv run pytest -m "not hardware"
 
 ## Code Style
 
-- **Python 3.10+** with full type hints
+- **Python 3.12+** with full type hints
 - **Google-style docstrings** for all functions, classes, methods
 - **Absolute imports** only (no relative imports)
 - **Ruff** for formatting and linting, **pyright** for type checking
