@@ -35,6 +35,7 @@ No community design for a pipette attachment specifically for SO-101. This is an
 **Repo: [BerkeleyAutomation/RobotToolChanger](https://github.com/BerkeleyAutomation/RobotToolChanger)** (branch: `tool-changer`)
 
 **What we reuse directly:**
+
 - Design geometry: 10° truncated cone angle, 5N magnets, spring-loaded dowel pins
 - 3-part architecture: robot-side adapter, tool-side base, parking housing
 - STL reference: 3 dirs (robot component, tool component, tool housing) — adapt dimensions from ABB YuMi flange to SO-101 wrist flange
@@ -42,6 +43,7 @@ No community design for a pipette attachment specifically for SO-101. This is an
 - ArUco marker guidance idea from paper's failure analysis (positioning errors, not mechanism)
 
 **What we adapt:**
+
 - Flange interface: redesign robot-side adapter for SO-101 motor 5 horn mount (M3 screw pattern, ~25mm diameter)
 - Tool parking rack: design for 3 tools side-by-side at fixed workspace position
 - Cable routing: add flat flex cable channel for pipette power (not in Berkeley design)
@@ -98,6 +100,7 @@ No community design for a pipette attachment specifically for SO-101. This is an
 ## Academic Papers (Most Actionable)
 
 **What we reuse from papers:**
+
 - **AutoBio**: open-source eval harness at `autobio-bench/AutoBio` — validate our policies against standard bio-lab tasks
 - **DexMimicGen**: NVIDIA data amplification — 20 real demos → 2000 synthetic for ACT training
 - **ArticuBot**: pre-trained fridge/door policy — zero-shot transfer for UC2, skip real fridge demos
@@ -210,7 +213,7 @@ openscad -p params.json -P set_name -o out.stl input.scad  # parameter file
 
 #### Human Loop (voice/text → print)
 
-```
+```text
 Human (voice/text) → LLM → OpenSCAD → STL → Slicer → Print
        ↑                                          |
        └── human inspects, describes fix ──────────┘
@@ -220,7 +223,7 @@ Human describes a part or modification in natural language (via CC `/voice` or t
 
 #### Agent Loop (goal → autonomous design-print-inspect)
 
-```
+```text
 Goal/Task spec ──→ Agent ──→ OpenSCAD → STL → Slicer validate
                      ↑                              |
                      |                         Printer API (MQTT)
@@ -232,6 +235,7 @@ Goal/Task spec ──→ Agent ──→ OpenSCAD → STL → Slicer validate
 ```
 
 Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm with 0.5mm clearance, PLA+, must pass printability check"). Autonomously:
+
 1. Generates OpenSCAD from spec
 2. Validates via slicer CLI
 3. Sends GCode to printer via MQTT API
@@ -240,6 +244,7 @@ Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm wi
 6. On failure: agent adjusts design/params, re-slices, reprints
 
 **Bambu camera + printer API (enables agent feedback):**
+
 - Built-in cameras: X1 (RTSP), A1/P1 (JPEG frames)
 - Local MQTT: `<printer-ip>:8883`, topic `device/<serial>/report`
 - Python: [`bambu-connect`](https://pypi.org/project/bambu-connect/), [`bambulabs-api`](https://pypi.org/project/bambulabs-api/)
@@ -300,6 +305,7 @@ Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm wi
 | [gym_hil](https://github.com/huggingface/gym-hil) | MuJoCo | No | Panda only (extensible) | Yes | Human-in-the-loop RL |
 
 **LeIsaac details:**
+
 - Official LeRobot EnvHub integration by [LightwheelAI](https://lightwheelai.github.io/leisaac/)
 - SO101 follower + leader teleoperation in sim
 - HDF5 → LeRobot dataset conversion built-in
@@ -307,28 +313,33 @@ Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm wi
 - Usage: `make_env("LightwheelAI/leisaac_env:envs/so101_pick_orange.py", n_envs=1, trust_remote_code=True)`
 
 **MuJoCo in CI (headless GitHub Actions):**
+
 - Set `MUJOCO_GL=osmesa` for software rendering (no GPU, no X11)
 - Install: `sudo apt-get install libosmesa6-dev`
 - Proven pattern: MuJoCo official CI, openai/mujoco-py, community SO-100 sim
 
 **OpenSCAD STL → MuJoCo collision mesh:**
+
 - Export binary STL from OpenSCAD → reference in MJCF `<mesh>` tag
 - MuJoCo auto-converts to convex hull for collision (sufficient for simple parts)
 - Works for plate holders, tool changer cones, dock — may need simplification for complex geometry
 
 **Sim-to-real for SO-101:**
+
 - [lerobot-sim2real](https://github.com/StoneT2000/lerobot-sim2real): train in ManiSkill, deploy zero-shot to real SO-101
 - GR00T-N1.5 policy fine-tuning on SO-101 via LeIsaac sim data
 - Domain randomization (colors, textures, dynamics) for robust transfer
 - Community SO-100 MuJoCo: [lachlanhurst/so100-mujoco-sim](https://github.com/lachlanhurst/so100-mujoco-sim) with Qt GUI + LeRobot sync
 
 **Digital twin for 3D print inspection:**
+
 - Real-time layer-by-layer CNN inspection for over/under-extrusion ([MDPI 2025](https://www.mdpi.com/2075-1702/13/6/448))
 - Zero-shot multi-criteria inspection via digital twin ([arXiv 2511.23214](https://arxiv.org/abs/2511.23214))
 - 3D Gaussian Splatting for photorealistic rendering of printed parts
 - [Systematic review: Digital Twins in 3D Printing](https://arxiv.org/html/2409.00877v1)
 
 **Recommendation:**
+
 1. **CI testing now:** MuJoCo + OSMesa (no GPU, headless, free)
 2. **Policy training later:** LeIsaac when GPU available (or NVIDIA Brev cloud)
 3. **Print inspection future:** Prototype with real camera + simulated geometry comparison
@@ -346,7 +357,7 @@ Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm wi
 
 ### Validation Pipeline (planned)
 
-```
+```text
 OpenSCAD (.scad) ──→ STL ──→ PrusaSlicer CLI ──→ printability report
 ```
 
@@ -386,12 +397,14 @@ Add draft STL files to `hardware/stl/` for custom parts. Mark as experimental �
 - **Workflow:** Prepare 1.1x master mix in trough → distribute to 96-well PCR plate → add template per well → seal plate
 
 **PCR plate setup sequence (UC1 extension):**
+
 1. Arm A equips pipette, aspirates master mix from trough
 2. Dispense 20 µL per well across plate (uc1_full_plate or uc1_row)
 3. Arm A or B adds template DNA per well (different source per well or strip tube)
 4. Arm swaps to gripper, moves plate to thermocycler (fridge-like door operation)
 
 **Why ±1-3 µL is achievable:**
+
 - [FINDUS](https://github.com/FBarthels/FINDUS) achieves <0.3% error with 3D-printed mechanics
 - Digital-pipette-v2 uses Actuonix L16 linear actuator (0.05mm resolution over 50mm stroke)
 - At 20 µL target: ±3 µL = ±15% tolerance — well within DIY capability
@@ -414,7 +427,7 @@ Add draft STL files to `hardware/stl/` for custom parts. Mark as experimental �
 
 ### Operation Modes (Progressive)
 
-```
+```text
 Phase 1 (current)    → Stub mode, coordinate commands, remote dashboard
 Phase 2 (hardware)   → Teleoperation + ACT policy training, in-situ operator
 Phase 3 (remote)     → Remote-controlled via dashboard, human oversight

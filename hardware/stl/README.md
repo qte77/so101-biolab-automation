@@ -7,16 +7,18 @@ updated: 2026-03-30
 
 # STL Files
 
-Generated from CadQuery scripts in `../cad/` (preferred) or OpenSCAD scripts in `../scad/` (fallback).
+Generated from `../parts.json` manifest via `../render.py` (CadQuery preferred, OpenSCAD fallback).
 
 ```bash
 make setup_cad            # Install CadQuery (preferred)
 make setup_scad           # Install OpenSCAD (fallback)
-make render_parts         # Generate STL + SVG
+make render_parts         # Generate STL + SVG from parts.json
 make setup_slicer         # Install PrusaSlicer (optional)
 make check_prints         # Check printability
 make render_all           # Generate + validate
 ```
+
+**How it works:** `hardware/parts.json` defines all parts (names, filenames, scripts, build functions). `hardware/render.py` reads the manifest and dispatches to CadQuery (imports `build_func`, exports STL+SVG) or OpenSCAD (CLI calls with `scad_args`). Adding a part means editing `parts.json` and writing the script.
 
 **Why CadQuery + slicer?** CadQuery generates parametric STLs with isometric wireframe SVGs. PrusaSlicer validates FDM printability (overhangs, unsupported regions, gravity failures) as fast CLI feedback.
 

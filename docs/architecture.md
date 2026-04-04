@@ -10,7 +10,7 @@ updated: 2026-03-27
 
 ## System Overview
 
-```
+```text
 ┌──────────────────────────────────────────────────────┐
 │                  Remote Dashboard                     │
 │  FastAPI + WebSocket commands + REST /api/status      │
@@ -56,7 +56,7 @@ updated: 2026-03-27
 
 ## Data Flow: Pipetting a Well
 
-```
+```text
 User/Dashboard → workflow.pipette_well()
   1. arm.send_to_well("arm_a", "TROUGH")  → arms.py → LeRobot (stub: log only)
   2. pipette.aspirate(50.0)                → pipette.py → Arduino serial (stub: track fill)
@@ -66,7 +66,7 @@ User/Dashboard → workflow.pipette_well()
 
 ## Data Flow: Tool Change
 
-```
+```text
 workflow.uc2_fridge_open_grab_move()
   1. changer.change_tool(FRIDGE_HOOK)      → tool_changer.py → arms.send_action (dock sequence)
   2. arm.send_action(FRIDGE_APPROACH)       → arms.py → LeRobot
