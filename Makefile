@@ -6,7 +6,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
+	setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
 	render_parts check_prints render_all \
 	lint_code check_links check_types run_tests rerun_tests quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
@@ -16,6 +16,17 @@ endif
 
 
 # -- config --
+VERBOSE ?= 0
+ifeq ($(VERBOSE),0)
+RUFF_QUIET := --quiet
+PYTEST_QUIET := -q --tb=short --no-header
+PYRIGHT_QUIET := > /dev/null
+else
+RUFF_QUIET :=
+PYTEST_QUIET :=
+PYRIGHT_QUIET :=
+endif
+
 LEADER_PORT ?= /dev/ttyACM0
 FOLLOWER_A_PORT ?= /dev/ttyACM1
 FOLLOWER_B_PORT ?= /dev/ttyACM2
@@ -29,13 +40,15 @@ POLICY ?= act
 # MARK: SETUP
 
 
-setup: ## Install dev + test dependencies
+setup_dev: ## Install dev + test dependencies
 	uv sync
+
+setup_all: setup_dev setup_cad setup_slicer setup_lychee ## Install all dependencies + tools
 
 setup_train: ## Install training dependencies (torch, wandb)
 	uv sync --group train
 
-setup_cad: ## Install CadQuery for SVG wireframe generation (requires Python 3.10-3.12)
+setup_cad: ## Install CadQuery for SVG wireframe generation (requires Python 3.12)
 	uv sync --group cad
 
 setup_scad: ## Install OpenSCAD for parametric STL generation
@@ -170,7 +183,7 @@ train_policy: ## Train policy on recorded data
 
 
 lint_code: ## Format and lint with ruff
-	uv run ruff format . && uv run ruff check . --fix
+	uv run ruff format . $(RUFF_QUIET) && uv run ruff check . --fix $(RUFF_QUIET)
 
 check_links: ## Check links with lychee
 	if command -v lychee > /dev/null 2>&1; then
@@ -180,10 +193,10 @@ check_links: ## Check links with lychee
 	fi
 
 check_types: ## Run pyright type checking
-	uv run pyright src
+	uv run pyright src $(PYRIGHT_QUIET)
 
 run_tests: ## Run all tests with pytest
-	uv run pytest
+	uv run pytest $(PYTEST_QUIET)
 
 rerun_tests: ## Rerun last failed tests only
 	uv run pytest --lf -x

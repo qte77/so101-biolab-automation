@@ -13,7 +13,7 @@ How to run and verify each use case. All commands work in stub mode (no hardware
 ## Prerequisites
 
 ```bash
-make setup          # install dependencies
+make setup_all      # install all dependencies + tools
 make serve          # (optional) start dashboard on :8080
 ```
 
