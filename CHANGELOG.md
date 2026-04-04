@@ -11,10 +11,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `create_workflow_context()` factory wiring all modules from YAML
 - `--use-case` CLI dispatch in `run_demo.py`
 - Dashboard: `run_workflow` WebSocket command, full component lifespan wiring
-- OpenSCAD parametric scripts (`hardware/scad/`) as primary STL+SVG generator with PrusaSlicer CLI printability validation — CadQuery generates geometrically correct STLs but has no awareness of FDM printing constraints; vertical empty rows, unsupported overhangs, and gravity-related failures are invisible until a print fails physically
+- CadQuery scripts (`hardware/cad/`) as primary STL+SVG generator, OpenSCAD (`hardware/scad/`) as runtime fallback
 - PrusaSlicer validation script (`hardware/slicer/validate.py`) with graceful fallback when slicer unavailable
-- Makefile targets: `setup_scad`, `setup_slicer`, `render_scad`, `check_prints`, `render_all`
-- Legacy CadQuery CAD scripts (`hardware/cad/`) — reference only, replaced by OpenSCAD
+- Makefile targets: `setup_cad`, `setup_scad`, `setup_slicer`, `render_parts`, `check_prints`, `render_all`
 - Generated STL + SVG: plate holder, tool changer cones, fridge hook
 - `docs/architecture.md`, `docs/UserStory.md`, `docs/demo-scenarios.md`
 - `docs/hardware/BOM.md` with first-party sourced links
@@ -35,5 +34,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `arms.py`: stub-safe `get_observation`/`send_action`, added `send_to_well()` + `park_all()`
 - `pipette.py`: fill state tracking with over-aspiration/over-dispense guards
 - Makefile: `.SILENT`/`.ONESHELL`, `.DEFAULT_GOAL`, `# MARK:` grouped help, removed `render_parts`/`setup_cad`
-- SVGs now generated as 2D top-down projections from STLs (via `projection() import()`) with dark mode theming
-- `pyproject.toml`: dependency-groups, pytest ini_options, ruff N/UP, pyright; removed cadquery dep
+- SVGs generated as isometric wireframes (CadQuery) or 2D projections (OpenSCAD fallback) with dark mode theming
+- `render_scad` renamed to `render_parts` with CadQuery/OpenSCAD fallback logic
+- `check_prints` now delegates slicer detection to `validate.py` (no Makefile binary check)
+- `pyproject.toml`: dependency-groups, pytest ini_options, ruff N/UP, pyright

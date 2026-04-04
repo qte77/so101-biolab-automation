@@ -152,7 +152,8 @@ def export_all() -> None:
     male_cone = build_male_cone()
     for name in ["pipette", "gripper", "hook"]:
         cq.exporters.export(male_cone, str(stl_dir / f"tool_cone_{name}.stl"))
-        print(f"Exported: tool_cone_{name}.stl")
+        cq.exporters.export(male_cone, str(svg_dir / f"tool_cone_{name}.svg"), exportType="SVG")
+        print(f"Exported: tool_cone_{name}.stl + .svg")
 
     cq.exporters.export(male_cone, str(svg_dir / "tool_cone_male.svg"), exportType="SVG")
     print("Exported: tool_cone_male.svg")

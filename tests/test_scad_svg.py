@@ -1,8 +1,8 @@
-"""Tests for OpenSCAD SVG generation quality.
+"""Tests for CAD SVG generation quality (CadQuery primary, OpenSCAD fallback).
 
-Verifies that SVGs are isometric projections (rotated) rather than flat
-top-down outlines. Flat projection of a cylinder yields a circle (few segments);
-isometric projection yields an ellipse with rich path data.
+Verifies that SVGs are isometric projections rather than flat top-down outlines.
+Flat projection of a cylinder yields a circle (few segments); isometric
+projection yields an ellipse with rich path data.
 """
 
 from __future__ import annotations

@@ -156,7 +156,7 @@ def main() -> int:
         return 1
 
     if not stls:
-        print(f"No STL files found in {STL_DIR}. Run: make render_scad")
+        print(f"No STL files found in {STL_DIR}. Run: make render_parts")
         return 1
 
     results = [validate_stl(stl, get_profile(stl.name, args.profile)) for stl in stls]

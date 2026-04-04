@@ -7,17 +7,18 @@ updated: 2026-03-30
 
 # STL Files
 
-Generated from OpenSCAD scripts in `../scad/`. Legacy CadQuery scripts in `../cad/` kept for reference only.
+Generated from CadQuery scripts in `../cad/` (preferred) or OpenSCAD scripts in `../scad/` (fallback).
 
 ```bash
-make setup_scad           # Install OpenSCAD
-make render_scad          # Generate STL + SVG
+make setup_cad            # Install CadQuery (preferred)
+make setup_scad           # Install OpenSCAD (fallback)
+make render_parts         # Generate STL + SVG
 make setup_slicer         # Install PrusaSlicer (optional)
 make check_prints         # Check printability
 make render_all           # Generate + validate
 ```
 
-**Why OpenSCAD + slicer?** OpenSCAD generates parametric STLs, PrusaSlicer validates FDM printability (overhangs, unsupported regions, gravity failures) as fast CLI feedback.
+**Why CadQuery + slicer?** CadQuery generates parametric STLs with isometric wireframe SVGs. PrusaSlicer validates FDM printability (overhangs, unsupported regions, gravity failures) as fast CLI feedback.
 
 **Status:** EXPERIMENTAL = draft dimensions, untested on hardware.
 
@@ -100,16 +101,16 @@ Passive tool changing based on [Berkeley design](https://goldberg.berkeley.edu/p
 
 | STL File | SVG | Source | Description |
 |----------|-----|--------|-------------|
-| `tool_cone_robot.stl` | [svg](../svg/tool_cone_robot.svg) | `tool_changer.scad` | Female cone — mounts on SO-101 wrist |
-| `tool_cone_pipette.stl` | [svg](../svg/tool_cone_pipette.svg) | `tool_changer.scad` | Male cone — pipette tool base |
-| `tool_cone_gripper.stl` | [svg](../svg/tool_cone_gripper.svg) | `tool_changer.scad` | Male cone — gripper tool base |
-| `tool_cone_hook.stl` | [svg](../svg/tool_cone_hook.svg) | `tool_changer.scad` | Male cone — fridge hook tool base |
-| `tool_dock_3station.stl` | [svg](../svg/tool_dock_3station.svg) | `tool_dock.scad` | 3-slot parking rack with magnet pockets |
-| `pipette_mount_so101.stl` | [svg](../svg/pipette_mount_so101.svg) | `pipette_mount.scad` | Barrel clamp for digital-pipette-v2 |
-| `96well_plate_holder.stl` | [svg](../svg/96well_plate_holder.svg) | `plate_holder.scad` | SBS plate holder with alignment pins |
-| `fridge_hook_tool.stl` | [svg](../svg/fridge_hook_tool.svg) | `fridge_hook.scad` | Hook for fridge door handle |
-| `tip_rack_holder.stl` | [svg](../svg/tip_rack_holder.svg) | `tip_rack_holder.scad` | Tip rack tray |
-| `gripper_tips_tpu.stl` | [svg](../svg/gripper_tips_tpu.svg) | `gripper_tips.scad` | Compliant fingertips (TPU 95A) |
+| `tool_cone_robot.stl` | [svg](../svg/tool_cone_robot.svg) | `tool_changer.py` | Female cone — mounts on SO-101 wrist |
+| `tool_cone_pipette.stl` | [svg](../svg/tool_cone_pipette.svg) | `tool_changer.py` | Male cone — pipette tool base |
+| `tool_cone_gripper.stl` | [svg](../svg/tool_cone_gripper.svg) | `tool_changer.py` | Male cone — gripper tool base |
+| `tool_cone_hook.stl` | [svg](../svg/tool_cone_hook.svg) | `tool_changer.py` | Male cone — fridge hook tool base |
+| `tool_dock_3station.stl` | [svg](../svg/tool_dock_3station.svg) | `tool_dock.py` | 3-slot parking rack with magnet pockets |
+| `pipette_mount_so101.stl` | [svg](../svg/pipette_mount_so101.svg) | `pipette_mount.py` | Barrel clamp for digital-pipette-v2 |
+| `96well_plate_holder.stl` | [svg](../svg/96well_plate_holder.svg) | `plate_holder.py` | SBS plate holder with alignment pins |
+| `fridge_hook_tool.stl` | [svg](../svg/fridge_hook_tool.svg) | `fridge_hook.py` | Hook for fridge door handle |
+| `tip_rack_holder.stl` | [svg](../svg/tip_rack_holder.svg) | `tip_rack_holder.py` | Tip rack tray |
+| `gripper_tips_tpu.stl` | [svg](../svg/gripper_tips_tpu.svg) | `gripper_tips.py` | Compliant fingertips (TPU 95A) |
 
 ## Hardware Needed (Non-Printed)
 
