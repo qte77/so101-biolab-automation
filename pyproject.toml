@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Dual SO-101 robotic arm bio-lab automation: pipetting, tool changing, remote oversight"
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
@@ -45,7 +45,7 @@ default-groups = ["dev", "test"]
 exclude-newer = "2026-03-25T00:00:00Z"
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py312"
 line-length = 100
 src = ["src", "tests"]
 
@@ -56,7 +56,7 @@ select = ["E", "F", "I", "N", "W", "UP"]
 convention = "google"
 
 [tool.pyright]
-pythonVersion = "3.10"
+pythonVersion = "3.12"
 typeCheckingMode = "basic"
 include = ["src"]
 reportMissingImports = "warning"
