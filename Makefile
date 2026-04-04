@@ -61,15 +61,24 @@ setup_slicer: ## Install OrcaSlicer (preferred) or PrusaSlicer (fallback)
 	elif command -v prusa-slicer > /dev/null 2>&1; then
 		echo "PrusaSlicer already installed (fallback): $$(prusa-slicer --version 2>&1 | head -1)"
 	else
-		echo "Installing OrcaSlicer ..."
+		INSTALLED=false
 		if command -v flatpak > /dev/null 2>&1; then
-			flatpak install -y flathub com.github.SoftFever.OrcaSlicer
+			echo "Installing OrcaSlicer via flatpak ..."
+			flatpak install -y flathub com.github.SoftFever.OrcaSlicer && INSTALLED=true
 		elif command -v brew > /dev/null 2>&1; then
-			brew install --cask orcaslicer
-		else
-			echo "WARN: OrcaSlicer not available via package manager"
-			echo "  Install manually: https://github.com/SoftFever/OrcaSlicer/releases"
-			echo "  Or install PrusaSlicer as fallback: sudo apt install prusa-slicer"
+			echo "Installing OrcaSlicer via brew ..."
+			brew install --cask orcaslicer && INSTALLED=true
+		fi
+		if [ "$$INSTALLED" = "false" ]; then
+			echo "OrcaSlicer unavailable — installing PrusaSlicer as fallback"
+			if command -v apt-get > /dev/null 2>&1; then
+				sudo apt-get update -qq && sudo apt-get install -y -qq prusa-slicer
+			else
+				echo "ERROR: No supported package manager. Install manually:"
+				echo "  OrcaSlicer: https://github.com/SoftFever/OrcaSlicer/releases"
+				echo "  PrusaSlicer: https://github.com/prusa3d/PrusaSlicer/releases"
+				exit 1
+			fi
 		fi
 	fi
 	if command -v apt-get > /dev/null 2>&1; then
