@@ -16,6 +16,17 @@ endif
 
 
 # -- config --
+VERBOSE ?= 0
+ifeq ($(VERBOSE),0)
+RUFF_QUIET := --quiet
+PYTEST_QUIET := -q --tb=short --no-header
+PYRIGHT_QUIET := > /dev/null
+else
+RUFF_QUIET :=
+PYTEST_QUIET :=
+PYRIGHT_QUIET :=
+endif
+
 LEADER_PORT ?= /dev/ttyACM0
 FOLLOWER_A_PORT ?= /dev/ttyACM1
 FOLLOWER_B_PORT ?= /dev/ttyACM2
@@ -172,7 +183,7 @@ train_policy: ## Train policy on recorded data
 
 
 lint_code: ## Format and lint with ruff
-	uv run ruff format . && uv run ruff check . --fix
+	uv run ruff format . $(RUFF_QUIET) && uv run ruff check . --fix $(RUFF_QUIET)
 
 check_links: ## Check links with lychee
 	if command -v lychee > /dev/null 2>&1; then
@@ -182,10 +193,10 @@ check_links: ## Check links with lychee
 	fi
 
 check_types: ## Run pyright type checking
-	uv run pyright src
+	uv run pyright src $(PYRIGHT_QUIET)
 
 run_tests: ## Run all tests with pytest
-	uv run pytest
+	uv run pytest $(PYTEST_QUIET)
 
 rerun_tests: ## Rerun last failed tests only
 	uv run pytest --lf -x

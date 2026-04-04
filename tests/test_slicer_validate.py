@@ -45,9 +45,7 @@ class TestGetProfile:
 
 class TestValidateStl:
     @patch("subprocess.run")
-    def test_pass_on_clean_slice(
-        self, mock_run, tmp_stl: Path, profile_path: Path
-    ) -> None:
+    def test_pass_on_clean_slice(self, mock_run, tmp_stl: Path, profile_path: Path) -> None:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[], returncode=0, stdout="Slicing done\n", stderr=""
         )
@@ -56,9 +54,7 @@ class TestValidateStl:
         assert result["warnings"] == []
 
     @patch("subprocess.run")
-    def test_warn_on_overhang(
-        self, mock_run, tmp_stl: Path, profile_path: Path
-    ) -> None:
+    def test_warn_on_overhang(self, mock_run, tmp_stl: Path, profile_path: Path) -> None:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[],
             returncode=0,
@@ -70,9 +66,7 @@ class TestValidateStl:
         assert "overhang" in result["warnings"]
 
     @patch("subprocess.run")
-    def test_fail_on_nonzero_exit(
-        self, mock_run, tmp_stl: Path, profile_path: Path
-    ) -> None:
+    def test_fail_on_nonzero_exit(self, mock_run, tmp_stl: Path, profile_path: Path) -> None:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[], returncode=1, stdout="", stderr="Error: invalid mesh"
         )
@@ -81,24 +75,18 @@ class TestValidateStl:
         assert result["error"] is not None
 
     @patch("subprocess.run", side_effect=subprocess.TimeoutExpired(cmd="", timeout=120))
-    def test_skip_on_timeout(
-        self, mock_run, tmp_stl: Path, profile_path: Path
-    ) -> None:
+    def test_skip_on_timeout(self, mock_run, tmp_stl: Path, profile_path: Path) -> None:
         result = validate.validate_stl(tmp_stl, profile_path)
         assert result["status"] == "SKIP"
         assert "Timeout" in result["error"]
 
     @patch("subprocess.run", side_effect=FileNotFoundError)
-    def test_skip_on_missing_binary(
-        self, mock_run, tmp_stl: Path, profile_path: Path
-    ) -> None:
+    def test_skip_on_missing_binary(self, mock_run, tmp_stl: Path, profile_path: Path) -> None:
         result = validate.validate_stl(tmp_stl, profile_path)
         assert result["status"] == "SKIP"
 
     @patch("subprocess.run")
-    def test_detects_multiple_keywords(
-        self, mock_run, tmp_stl: Path, profile_path: Path
-    ) -> None:
+    def test_detects_multiple_keywords(self, mock_run, tmp_stl: Path, profile_path: Path) -> None:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[],
             returncode=0,
