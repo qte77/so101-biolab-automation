@@ -105,35 +105,10 @@ setup_lychee: ## Install lychee link checker
 # MARK: HARDWARE
 
 
-render_parts: ## Generate STL + SVG (CadQuery preferred, OpenSCAD fallback)
-	if uv run --group cad python -c "import cadquery" 2>/dev/null; then
-		echo "--- Rendering via CadQuery"
-		for f in hardware/cad/*.py; do
-			case "$$(basename $$f)" in stl_to_svg.py|theme_svgs.py) continue ;; esac
-			uv run --group cad python "$$f"
-		done
-	elif command -v openscad > /dev/null 2>&1; then
-		echo "--- Rendering via OpenSCAD (fallback)"
-		openscad -o hardware/stl/tip_rack_holder.stl hardware/scad/tip_rack_holder.scad 2>/dev/null
-		openscad -o hardware/stl/gripper_tips_tpu.stl hardware/scad/gripper_tips.scad 2>/dev/null
-		openscad -o hardware/stl/96well_plate_holder.stl hardware/scad/plate_holder.scad 2>/dev/null
-		openscad -o hardware/stl/fridge_hook_tool.stl hardware/scad/fridge_hook.scad 2>/dev/null
-		openscad -o hardware/stl/tool_dock_3station.stl hardware/scad/tool_dock.scad 2>/dev/null
-		openscad -o hardware/stl/pipette_mount_so101.stl hardware/scad/pipette_mount.scad 2>/dev/null
-		openscad -o hardware/stl/tool_cone_robot.stl -D 'PART="robot"' hardware/scad/tool_changer.scad 2>/dev/null
-		openscad -o hardware/stl/tool_cone_pipette.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
-		openscad -o hardware/stl/tool_cone_gripper.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
-		openscad -o hardware/stl/tool_cone_hook.stl -D 'PART="male"' hardware/scad/tool_changer.scad 2>/dev/null
-		uv run --group cad python3 hardware/cad/stl_to_svg.py --all
-	else
-		echo "ERROR: Neither CadQuery nor OpenSCAD found"
-		echo "  Run: make setup_cad   (preferred)"
-		echo "  Or:  make setup_scad  (fallback)"
-		exit 1
-	fi
-	python3 hardware/cad/theme_svgs.py
+render_parts: ## Generate STL + SVG from hardware/parts.json (CadQuery preferred, OpenSCAD fallback)
+	uv run --group cad python hardware/render.py || python3 hardware/render.py
 
-check_prints: ## Run slicer printability checks (OrcaSlicer preferred, PrusaSlicer fallback)
+check_prints: ## Run PrusaSlicer printability checks on STLs (optional)
 	python hardware/slicer/validate.py --all
 
 render_all: render_parts check_prints ## Generate parts + validate printability
