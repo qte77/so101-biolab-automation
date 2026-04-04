@@ -1,7 +1,7 @@
-"""Validate STL printability via PrusaSlicer CLI.
+"""Validate STL printability via slicer CLI.
 
-Slices each STL and reports overhang/support warnings.
-PrusaSlicer is optional — graceful skip if unavailable.
+Tries OrcaSlicer first, falls back to PrusaSlicer if unavailable.
+Both are optional — graceful skip if neither is found.
 
 Usage:
     python hardware/slicer/validate.py --all
@@ -12,13 +12,14 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
-SLICER_CMD = "prusa-slicer"
+SLICER_PREFERENCE = ["orca-slicer", "prusa-slicer"]
 TIMEOUT_SEC = 120
 STL_DIR = Path(__file__).resolve().parent.parent / "stl"
 PROFILE_DIR = Path(__file__).resolve().parent / "profiles"
@@ -35,19 +36,66 @@ OVERHANG_KEYWORDS = [
 ]
 
 
-def get_profile(stl_name: str, override: str | None = None) -> Path:
-    """Return the slicer profile path for a given STL."""
+def get_profile(
+    stl_name: str, override: str | None = None, slicer_name: str = "prusa-slicer"
+) -> Path:
+    """Return the slicer profile path for a given STL and slicer."""
+    ext = ".json" if slicer_name == "orca-slicer" else ".ini"
     if override == "tpu" or stl_name in TPU_PARTS:
-        return PROFILE_DIR / "tpu_95a_02mm.ini"
-    return PROFILE_DIR / "pla_plus_02mm.ini"
+        return PROFILE_DIR / f"tpu_95a_02mm{ext}"
+    return PROFILE_DIR / f"pla_plus_02mm{ext}"
 
 
-def find_slicer() -> str | None:
-    """Return slicer binary path or None."""
-    return shutil.which(SLICER_CMD)
+def find_slicer() -> tuple[str, str] | None:
+    """Return (slicer_name, path) for the first available slicer, or None."""
+    for cmd in SLICER_PREFERENCE:
+        path = shutil.which(cmd)
+        if path:
+            return (cmd, path)
+    return None
 
 
-def validate_stl(stl_path: Path, profile: Path) -> dict:
+def _build_cmd(
+    slicer_name: str, profile: Path, gcode_out: Path, stl_path: Path
+) -> list[str]:
+    """Build slicer CLI command based on slicer type."""
+    if slicer_name == "orca-slicer":
+        return [
+            slicer_name,
+            "--slice", "1",
+            "--load-settings", str(profile),
+            "--export-gcode",
+            "--output", str(gcode_out),
+            str(stl_path),
+        ]
+    return [
+        slicer_name,
+        "--export-gcode",
+        "--load", str(profile),
+        "--output", str(gcode_out),
+        str(stl_path),
+    ]
+
+
+def _run_with_xvfb_fallback(cmd: list[str], slicer_name: str) -> subprocess.CompletedProcess:
+    """Run slicer command, retrying with xvfb-run on OrcaSlicer segfault."""
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT_SEC)
+
+    if slicer_name == "orca-slicer" and proc.returncode == -11 and not os.environ.get("DISPLAY"):
+        if shutil.which("xvfb-run"):
+            proc = subprocess.run(
+                ["xvfb-run", "--auto-servernum", *cmd],
+                capture_output=True, text=True, timeout=TIMEOUT_SEC,
+            )
+        else:
+            proc.stderr = "SKIP: OrcaSlicer segfault — install xvfb: sudo apt install xvfb"
+
+    return proc
+
+
+def validate_stl(
+    stl_path: Path, profile: Path, slicer_name: str = "prusa-slicer"
+) -> dict:
     """Slice an STL and parse output for printability issues."""
     result = {
         "file": stl_path.name,
@@ -59,24 +107,17 @@ def validate_stl(stl_path: Path, profile: Path) -> dict:
 
     with tempfile.TemporaryDirectory() as tmp:
         gcode_out = Path(tmp) / (stl_path.stem + ".gcode")
-        cmd = [
-            SLICER_CMD,
-            "--export-gcode",
-            "--load",
-            str(profile),
-            "--output",
-            str(gcode_out),
-            str(stl_path),
-        ]
+        cmd = _build_cmd(slicer_name, profile, gcode_out, stl_path)
 
         try:
-            proc = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=TIMEOUT_SEC,
-            )
+            proc = _run_with_xvfb_fallback(cmd, slicer_name)
             output = (proc.stdout + "\n" + proc.stderr).lower()
+
+            # Segfault without xvfb — graceful skip
+            if proc.returncode == -11:
+                result["status"] = "SKIP"
+                result["error"] = proc.stderr.strip()[:200] or "Slicer segfault (no display)"
+                return result
 
             # Parse warnings
             for keyword in OVERHANG_KEYWORDS:
@@ -143,9 +184,13 @@ def main() -> int:
     parser.add_argument("--profile", choices=["pla", "tpu"], help="Force profile override")
     args = parser.parse_args()
 
-    if not find_slicer():
-        print(f"SKIP: {SLICER_CMD} not found. Install via: make setup_slicer")
+    slicer = find_slicer()
+    if not slicer:
+        names = ", ".join(SLICER_PREFERENCE)
+        print(f"SKIP: No slicer found ({names}). Install via: make setup_slicer")
         return 0
+
+    slicer_name, _slicer_path = slicer
 
     if args.all:
         stls = sorted(STL_DIR.glob("*.stl"))
@@ -156,10 +201,13 @@ def main() -> int:
         return 1
 
     if not stls:
-        print(f"No STL files found in {STL_DIR}. Run: make render_scad")
+        print(f"No STL files found in {STL_DIR}. Run: make render_parts")
         return 1
 
-    results = [validate_stl(stl, get_profile(stl.name, args.profile)) for stl in stls]
+    results = [
+        validate_stl(stl, get_profile(stl.name, args.profile, slicer_name), slicer_name)
+        for stl in stls
+    ]
     return print_report(results)
 
 

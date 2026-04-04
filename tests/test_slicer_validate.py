@@ -112,6 +112,84 @@ class TestValidateStl:
         assert "unsupported" in result["warnings"]
 
 
+class TestFindSlicer:
+    """Tests for slicer discovery with OrcaSlicer→PrusaSlicer fallback."""
+
+    @patch("shutil.which")
+    def test_prefers_orca_over_prusa(self, mock_which) -> None:
+        both = ("orca-slicer", "prusa-slicer")
+        mock_which.side_effect = lambda cmd: f"/usr/bin/{cmd}" if cmd in both else None
+        name, path = validate.find_slicer()
+        assert name == "orca-slicer"
+
+    @patch("shutil.which")
+    def test_falls_back_to_prusa(self, mock_which) -> None:
+        mock_which.side_effect = (
+            lambda cmd: "/usr/bin/prusa-slicer" if cmd == "prusa-slicer" else None
+        )
+        name, path = validate.find_slicer()
+        assert name == "prusa-slicer"
+
+    @patch("shutil.which", return_value=None)
+    def test_returns_none_when_neither(self, mock_which) -> None:
+        result = validate.find_slicer()
+        assert result is None
+
+
+class TestProfileSelection:
+    """Tests for profile format selection based on detected slicer."""
+
+    def test_orca_uses_json_profile(self) -> None:
+        profile = validate.get_profile("plate_holder.stl", slicer_name="orca-slicer")
+        assert profile.suffix == ".json"
+
+    def test_prusa_uses_ini_profile(self) -> None:
+        profile = validate.get_profile("plate_holder.stl", slicer_name="prusa-slicer")
+        assert profile.suffix == ".ini"
+
+    def test_orca_tpu_uses_json(self) -> None:
+        profile = validate.get_profile("gripper_tips_tpu.stl", slicer_name="orca-slicer")
+        assert "tpu" in profile.name.lower()
+        assert profile.suffix == ".json"
+
+
+class TestOrcaHeadless:
+    """Tests for OrcaSlicer xvfb headless workaround."""
+
+    @patch("subprocess.run")
+    @patch("shutil.which")
+    @patch.dict("os.environ", {}, clear=True)
+    def test_xvfb_retry_on_segfault(self, mock_which, mock_run, tmp_stl: Path) -> None:
+        """On segfault without DISPLAY, retry with xvfb-run."""
+        mock_which.side_effect = lambda cmd: "/usr/bin/xvfb-run" if cmd == "xvfb-run" else None
+        # First call segfaults, second (with xvfb) succeeds
+        segfault = subprocess.CompletedProcess(
+            args=[], returncode=-11, stdout="", stderr="Segmentation fault",
+        )
+        success = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout="Slicing done\n", stderr="",
+        )
+        mock_run.side_effect = [segfault, success]
+        profile = validate.PROFILE_DIR / "pla_plus_02mm.json"
+        result = validate.validate_stl(tmp_stl, profile, slicer_name="orca-slicer")
+        assert result["status"] == "PASS"
+        # Second call should have xvfb-run prepended
+        assert "xvfb-run" in mock_run.call_args_list[1].args[0][0]
+
+    @patch("subprocess.run")
+    @patch("shutil.which", return_value=None)
+    @patch.dict("os.environ", {}, clear=True)
+    def test_skip_without_xvfb(self, mock_which, mock_run, tmp_stl: Path) -> None:
+        """On segfault without DISPLAY and no xvfb, graceful SKIP."""
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=-11, stdout="", stderr="Segmentation fault"
+        )
+        profile = validate.PROFILE_DIR / "pla_plus_02mm.json"
+        result = validate.validate_stl(tmp_stl, profile, slicer_name="orca-slicer")
+        assert result["status"] == "SKIP"
+        assert "xvfb" in result["error"].lower()
+
+
 class TestPrintReport:
     def test_all_pass(self, capsys) -> None:
         results = [
