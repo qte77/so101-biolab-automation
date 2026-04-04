@@ -1,6 +1,6 @@
 {
   "name": "so101-biolab-automation",
-  "image": "mcr.microsoft.com/vscode/devcontainers/python:3.10",
+  "image": "mcr.microsoft.com/vscode/devcontainers/python:3.12",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {}
   },
