@@ -3,34 +3,25 @@
 Verifies that SVGs are isometric projections rather than flat top-down outlines.
 Flat projection of a cylinder yields a circle (few segments); isometric
 projection yields an ellipse with rich path data.
+
+Part lists are driven by hardware/parts.json manifest.
 """
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
 import pytest
 
-SVG_DIR = Path(__file__).resolve().parent.parent / "hardware" / "svg"
+HARDWARE_DIR = Path(__file__).resolve().parent.parent / "hardware"
+SVG_DIR = HARDWARE_DIR / "svg"
+MANIFEST = json.loads((HARDWARE_DIR / "parts.json").read_text())
 
-# Parts with cylindrical/compound geometry — isometric projection shows rich curves
-COMPLEX_PARTS = [
-    "tool_cone_robot",
-    "tool_cone_pipette",
-    "tool_cone_gripper",
-    "tool_cone_hook",
-    "pipette_mount_so101",
-    "fridge_hook_tool",
-]
-
-# Box-shaped parts — isometric projection is still a parallelogram (geometrically correct)
-BOX_PARTS = [
-    "96well_plate_holder",
-    "tool_dock_3station",
-    "tip_rack_holder",
-    "gripper_tips_tpu",
-]
+# Derive part lists from manifest "shape" field
+COMPLEX_PARTS = [p["svg"].removesuffix(".svg") for p in MANIFEST if p["shape"] == "complex"]
+BOX_PARTS = [p["svg"].removesuffix(".svg") for p in MANIFEST if p["shape"] == "box"]
 
 
 def _count_path_points(svg_text: str) -> int:
@@ -108,3 +99,30 @@ class TestSvgSpatialQuality:
 
         missing = stls - svgs
         assert not missing, f"STLs without SVGs: {missing}"
+
+
+class TestManifest:
+    """Validate hardware/parts.json against files on disk."""
+
+    def test_manifest_scad_files_exist(self) -> None:
+        scad_files = {p["scad"] for p in MANIFEST}
+        for scad in scad_files:
+            path = HARDWARE_DIR / scad
+            assert path.exists(), f"Manifest references missing .scad: {scad}"
+
+    def test_manifest_cad_files_exist(self) -> None:
+        cad_files = {p["cad"] for p in MANIFEST}
+        for cad in cad_files:
+            path = HARDWARE_DIR / cad
+            assert path.exists(), f"Manifest references missing .py: {cad}"
+
+    def test_manifest_has_required_fields(self) -> None:
+        required = {"name", "stl", "svg", "cad", "scad", "shape"}
+        for part in MANIFEST:
+            missing = required - set(part.keys())
+            assert not missing, f"{part['name']} missing fields: {missing}"
+
+    def test_manifest_shapes_are_valid(self) -> None:
+        valid = {"complex", "box"}
+        for part in MANIFEST:
+            assert part["shape"] in valid, f"{part['name']} has invalid shape: {part['shape']}"
