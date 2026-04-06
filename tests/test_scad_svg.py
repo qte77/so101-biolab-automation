@@ -19,9 +19,10 @@ HARDWARE_DIR = Path(__file__).resolve().parent.parent / "hardware"
 SVG_DIR = HARDWARE_DIR / "svg"
 MANIFEST = json.loads((HARDWARE_DIR / "parts.json").read_text())
 
-# Derive part lists from manifest "shape" field
-COMPLEX_PARTS = [p["svg"].removesuffix(".svg") for p in MANIFEST if p["shape"] == "complex"]
-BOX_PARTS = [p["svg"].removesuffix(".svg") for p in MANIFEST if p["shape"] == "box"]
+# Derive part lists from manifest "shape" field — skip planned parts (no SVGs yet)
+_RENDERABLE = [p for p in MANIFEST if p.get("status") != "planned"]
+COMPLEX_PARTS = [p["svg"].removesuffix(".svg") for p in _RENDERABLE if p["shape"] == "complex"]
+BOX_PARTS = [p["svg"].removesuffix(".svg") for p in _RENDERABLE if p["shape"] == "box"]
 
 
 def _count_path_points(svg_text: str) -> int:
@@ -105,22 +106,28 @@ class TestManifest:
     """Validate hardware/parts.json against files on disk."""
 
     def test_manifest_scad_files_exist(self) -> None:
-        scad_files = {p["scad"] for p in MANIFEST}
-        for scad in scad_files:
-            path = HARDWARE_DIR / scad
-            assert path.exists(), f"Manifest references missing .scad: {scad}"
+        for p in MANIFEST:
+            if "scad" not in p:
+                continue
+            path = HARDWARE_DIR / p["scad"]
+            assert path.exists(), f"Manifest references missing .scad: {p['scad']}"
 
     def test_manifest_cad_files_exist(self) -> None:
-        cad_files = {p["cad"] for p in MANIFEST}
-        for cad in cad_files:
-            path = HARDWARE_DIR / cad
-            assert path.exists(), f"Manifest references missing .py: {cad}"
+        for p in MANIFEST:
+            if "cad" not in p:
+                continue
+            path = HARDWARE_DIR / p["cad"]
+            assert path.exists(), f"Manifest references missing .py: {p['cad']}"
 
     def test_manifest_has_required_fields(self) -> None:
-        required = {"name", "stl", "svg", "cad", "build_func", "scad", "shape"}
+        always_required = {"name", "stl", "svg", "shape", "status"}
+        impl_required = {"cad", "build_func"}  # required unless status=planned
         for part in MANIFEST:
-            missing = required - set(part.keys())
+            missing = always_required - set(part.keys())
             assert not missing, f"{part['name']} missing fields: {missing}"
+            if part.get("status") != "planned":
+                missing_impl = impl_required - set(part.keys())
+                assert not missing_impl, f"{part['name']} missing fields: {missing_impl}"
 
     def test_manifest_shapes_are_valid(self) -> None:
         valid = {"complex", "box"}
@@ -128,7 +135,7 @@ class TestManifest:
             assert part["shape"] in valid, f"{part['name']} has invalid shape: {part['shape']}"
 
     def test_manifest_status_field_valid(self) -> None:
-        valid = {"active", "redesign", "deferred"}
+        valid = {"active", "redesign", "deferred", "planned"}
         for part in MANIFEST:
             assert "status" in part, f"{part['name']} missing status field"
             assert part["status"] in valid, f"{part['name']} has invalid status: {part['status']}"

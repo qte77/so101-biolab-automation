@@ -63,6 +63,9 @@ def render_cad(parts: list[dict]) -> None:
     _modules: dict[str, object] = {}
 
     for part in parts:
+        if "cad" not in part or "build_func" not in part:
+            print(f"  SKIP {part['name']} — no CadQuery script")
+            continue
         cad_rel = part["cad"]
         if cad_rel not in _modules:
             _modules[cad_rel] = _load_module(HARDWARE_DIR / cad_rel)
@@ -81,6 +84,9 @@ def render_scad(parts: list[dict]) -> None:
     print("--- Rendering via OpenSCAD (fallback)")
 
     for part in parts:
+        if "scad" not in part:
+            print(f"  SKIP {part['name']} — no .scad script")
+            continue
         scad_path = HARDWARE_DIR / part["scad"]
         stl_path = STL_DIR / part["stl"]
         args = part.get("scad_args", "").split()
