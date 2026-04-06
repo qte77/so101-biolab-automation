@@ -10,6 +10,7 @@ Supported controllers: Pololu Maestro (USB servo), Raspberry Pi Pico W.
 from __future__ import annotations
 
 import logging
+import struct
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -123,10 +124,68 @@ class XZGantry:
         self._current_z = self.config.safe_z_mm
         logger.info("Raised to z=%.1f mm", self._current_z)
 
+    def teach_position(self, name: str) -> None:
+        """Save current X/Z as a named position.
+
+        Args:
+            name: Position name to save.
+        """
+        self.config.positions[name] = (self._current_x, self._current_z)
+        logger.info("Taught position %r = (%.1f, %.1f)", name, self._current_x, self._current_z)
+
+    def save_config(self, path: str) -> None:
+        """Write current configuration (including taught positions) to YAML.
+
+        Args:
+            path: Output YAML file path.
+        """
+        import yaml
+
+        data = {
+            "serial_port": self.config.serial_port,
+            "baud_rate": self.config.baud_rate,
+            "controller": self.config.controller,
+            "x_range_mm": self.config.x_range_mm,
+            "z_range_mm": self.config.z_range_mm,
+            "safe_z_mm": self.config.safe_z_mm,
+            "approach_z_mm": self.config.approach_z_mm,
+            "positions": {k: list(v) for k, v in self.config.positions.items()},
+        }
+        with open(path, "w") as fh:
+            yaml.safe_dump(data, fh, default_flow_style=False)
+        logger.info("Config saved to %s", path)
+
     def _send_command(self, cmd: str) -> None:
-        """Send a command over serial (no-op in stub mode)."""
+        """Send a command via the configured controller protocol."""
         if self._serial:
-            self._serial.write(f"{cmd}\n".encode())
-            self._serial.readline()
+            if self.config.controller == "pololu_maestro":
+                self._send_maestro(cmd)
+            else:
+                self._send_pico(cmd)
         else:
             logger.debug("Stub mode — skipping command: %s", cmd)
+
+    def _send_maestro(self, cmd: str) -> None:
+        """Send command using Pololu Maestro compact binary protocol.
+
+        Protocol: 0x84, channel, target_low_bits, target_high_bits
+        Channel 0 = X axis servo, Channel 1 = Z axis servo.
+        Target is in quarter-microseconds (e.g., 6000 = 1500µs center).
+        """
+        # Parse axis and value from command string
+        parts = cmd.split()
+        channel = 0 if "X" in parts[0] else 1
+        value_mm = float(parts[1])
+
+        # Map mm to servo pulse (quarter-microseconds): 1000-2000µs → 4000-8000 qµs
+        axis_range = self.config.x_range_mm if channel == 0 else self.config.z_range_mm
+        fraction = max(0.0, min(1.0, value_mm / axis_range)) if axis_range > 0 else 0.0
+        target = int(4000 + fraction * 4000)  # 4000-8000 range
+
+        data = struct.pack("<BBH", 0x84, channel, target)
+        self._serial.write(data)
+
+    def _send_pico(self, cmd: str) -> None:
+        """Send command as plain text to Pico W over USB serial."""
+        self._serial.write(f"{cmd}\n".encode())
+        self._serial.readline()
