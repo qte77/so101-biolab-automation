@@ -1,6 +1,6 @@
 ---
 title: Demo Scenarios
-purpose: Runnable commands and expected output for every use case (UC1-4)
+purpose: Runnable commands and expected output for every use case (UC1-5)
 authority: Operations (AUTHORITY)
 created: 2026-03-27
 updated: 2026-03-27
@@ -8,7 +8,7 @@ updated: 2026-03-27
 
 # Demo Scenarios
 
-How to run and verify each use case. All commands work in stub mode (no hardware).
+How to run and verify each use case (UC). All commands work in stub mode (no hardware).
 
 ## Prerequisites
 

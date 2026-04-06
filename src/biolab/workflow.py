@@ -1,6 +1,6 @@
-"""Workflow orchestration — E2E use cases composing existing modules.
+"""Workflow orchestration — E2E use cases (UC) composing existing modules.
 
-Use cases:
+Use cases (UC):
 - UC1: Pipette a 96-well plate (single, row, column, full)
 - UC2: Open fridge, grab item, move out
 - UC3: Tool interchange cycle

@@ -45,7 +45,7 @@ updated: 2026-03-27
 
 | Module | File | Responsibility | Dependencies |
 |--------|------|----------------|--------------|
-| **Workflow** | `src/biolab/workflow.py` | Orchestrates UC1-4 by composing other modules | arms, pipette, plate, tool_changer |
+| **Workflow** | `src/biolab/workflow.py` | Orchestrates use cases (UC1-5) by composing other modules | arms, pipette, plate, tool_changer, xz_gantry |
 | **Arms** | `src/biolab/arms.py` | Dual SO-101 arm control via LeRobot. Stub mode when lerobot absent. | plate (for send_to_well), safety (for PARK_POSITION) |
 | **Pipette** | `src/biolab/pipette.py` | Multi-backend pipette control (`PipetteProtocol`). Backends: `DigitalPipette` (DIY/Arduino), `ElectronicPipette` (AELAB/DLAB). Stub mode when pyserial absent. | None |
 | **XZ Gantry** | `src/biolab/xz_gantry.py` | Dedicated 2-axis pipetting arm (simpler than SO-101). Stub mode when serial absent. | None |
