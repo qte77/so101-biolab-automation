@@ -40,15 +40,19 @@
    "scad": "scad/tool_changer.scad", "scad_args": "-D PART=\"male\"", "shape": "complex",
    "status": "deferred", "primary_backend": "cadquery", "notes": "Paired with fridge_hook — deferred from immediate scope"},
   {"name": "xz_gantry_frame", "stl": "xz_gantry_frame.stl", "svg": "xz_gantry_frame.svg",
+   "cad": "cad/xz_gantry_frame.py", "build_func": "build_xz_gantry_frame",
    "shape": "box",
-   "status": "planned", "primary_backend": "cadquery", "notes": "XZ bridge frame brackets — spans mini cooler to PCR block (~300mm)"},
+   "status": "active", "primary_backend": "cadquery", "notes": "XZ bridge frame L-bracket for 2020 extrusion + MGN12 rail"},
   {"name": "xz_carriage_pipette_dock", "stl": "xz_carriage_pipette_dock.stl", "svg": "xz_carriage_pipette_dock.svg",
+   "cad": "cad/xz_carriage.py", "build_func": "build_xz_carriage",
    "shape": "complex",
-   "status": "planned", "primary_backend": "cadquery", "notes": "Z-axis carriage with magnetic quick-swap pipette dock"},
+   "status": "active", "primary_backend": "cadquery", "notes": "Z-axis carriage with magnetic quick-swap pipette dock"},
   {"name": "dpette_single_cradle", "stl": "dpette_single_cradle.stl", "svg": "dpette_single_cradle.svg",
+   "cad": "cad/dpette_cradle.py", "build_func": "build_dpette_single_cradle",
    "shape": "box",
-   "status": "planned", "primary_backend": "cadquery", "notes": "Rest cradle for AELAB dPette 7016 single-channel"},
+   "status": "active", "primary_backend": "cadquery", "notes": "Rest cradle for AELAB dPette 7016 single-channel"},
   {"name": "dpette_multi_cradle", "stl": "dpette_multi_cradle.stl", "svg": "dpette_multi_cradle.svg",
+   "cad": "cad/dpette_cradle.py", "build_func": "build_dpette_multi_cradle",
    "shape": "box",
-   "status": "planned", "primary_backend": "cadquery", "notes": "Rest cradle for DLAB dPette+ 8-channel — must keep all 8 tips level"}
+   "status": "active", "primary_backend": "cadquery", "notes": "Rest cradle for DLAB dPette+ 8-channel — must keep all 8 tips level"}
 ]
