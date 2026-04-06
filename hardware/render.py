@@ -108,16 +108,34 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    backend = args.backend or detect_backend()
+    force_backend = args.backend
     parts = load_manifest()
 
-    if backend == "cad":
-        render_cad(parts)
-    else:
-        render_scad(parts)
+    # Split parts by primary_backend (or use forced backend)
+    cad_parts = []
+    scad_parts = []
+    for part in parts:
+        backend = force_backend or part.get("primary_backend", "cadquery")
+        if backend in ("cad", "cadquery"):
+            cad_parts.append(part)
+        else:
+            scad_parts.append(part)
+
+    # Render each group with the appropriate backend
+    if cad_parts:
+        available = detect_backend()
+        if available == "cad" or force_backend == "cad":
+            render_cad(cad_parts)
+        else:
+            print(f"  CadQuery unavailable — falling back to OpenSCAD for {len(cad_parts)} parts")
+            render_scad(cad_parts)
+
+    if scad_parts:
+        render_scad(scad_parts)
 
     run_theme()
-    print(f"=== {len(parts)} parts rendered via {backend} ===")
+    total = len(cad_parts) + len(scad_parts)
+    print(f"=== {total} parts rendered (cad:{len(cad_parts)}, scad:{len(scad_parts)}) ===")
     return 0
 
 
