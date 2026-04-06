@@ -1,8 +1,14 @@
-"""Tests for DigitalPipette over-aspiration guard and basic operations."""
+"""Tests for pipette backends: DigitalPipette, ElectronicPipette, PipetteProtocol."""
 
 import pytest
 
-from biolab.pipette import DigitalPipette, PipetteConfig
+from biolab.pipette import (
+    DigitalPipette,
+    ElectronicPipette,
+    ElectronicPipetteConfig,
+    PipetteConfig,
+    PipetteProtocol,
+)
 
 
 @pytest.fixture
@@ -62,3 +68,78 @@ class TestVolumeToSteps:
     def test_volume_to_steps_max(self, pipette: DigitalPipette) -> None:
         steps = pipette._volume_to_steps(pipette.config.max_volume_ul)
         assert steps == 1023
+
+
+# ---------------------------------------------------------------------------
+# ElectronicPipette tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def electronic_pipette() -> ElectronicPipette:
+    """Return an electronic pipette in stub mode."""
+    p = ElectronicPipette(
+        ElectronicPipetteConfig(serial_port="/dev/ttyACM_MISSING", max_volume_ul=1000.0)
+    )
+    p.connect()
+    return p
+
+
+class TestElectronicPipetteConnect:
+    """Tests for connection and stub mode."""
+
+    def test_connect_stub_mode(self) -> None:
+        p = ElectronicPipette(ElectronicPipetteConfig(serial_port="/dev/ttyACM_MISSING"))
+        p.connect()  # should not raise
+
+    def test_default_model(self) -> None:
+        p = ElectronicPipette(ElectronicPipetteConfig())
+        assert p.config.model == "aelab_dpette_7016"
+
+
+class TestElectronicPipetteAspirate:
+    """Tests for aspirate guard logic."""
+
+    def test_aspirate_within_capacity(self, electronic_pipette: ElectronicPipette) -> None:
+        electronic_pipette.aspirate(500.0)
+        assert electronic_pipette._current_fill == pytest.approx(500.0)
+
+    def test_aspirate_exceeds_capacity(self, electronic_pipette: ElectronicPipette) -> None:
+        with pytest.raises(ValueError, match="exceeds max"):
+            electronic_pipette.aspirate(1500.0)
+
+    def test_cumulative_aspirate_exceeds(self, electronic_pipette: ElectronicPipette) -> None:
+        electronic_pipette.aspirate(800.0)
+        with pytest.raises(ValueError, match="exceed"):
+            electronic_pipette.aspirate(300.0)
+
+
+class TestElectronicPipetteDispense:
+    """Tests for dispense guard logic."""
+
+    def test_dispense_within_fill(self, electronic_pipette: ElectronicPipette) -> None:
+        electronic_pipette.aspirate(500.0)
+        electronic_pipette.dispense(200.0)
+        assert electronic_pipette._current_fill == pytest.approx(300.0)
+
+    def test_dispense_exceeds_fill(self, electronic_pipette: ElectronicPipette) -> None:
+        electronic_pipette.aspirate(50.0)
+        with pytest.raises(ValueError, match="exceed"):
+            electronic_pipette.dispense(100.0)
+
+
+# ---------------------------------------------------------------------------
+# PipetteProtocol tests
+# ---------------------------------------------------------------------------
+
+
+class TestPipetteProtocol:
+    """Verify both backends satisfy PipetteProtocol."""
+
+    def test_digital_pipette_satisfies_protocol(self) -> None:
+        p = DigitalPipette(PipetteConfig())
+        assert isinstance(p, PipetteProtocol)
+
+    def test_electronic_pipette_satisfies_protocol(self) -> None:
+        p = ElectronicPipette(ElectronicPipetteConfig())
+        assert isinstance(p, PipetteProtocol)
