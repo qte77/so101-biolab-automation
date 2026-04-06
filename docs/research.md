@@ -66,6 +66,37 @@ No community design for a pipette attachment specifically for SO-101. This is an
 | [OptoBot](https://github.com/nicolaegues/OptoBot) | GitHub | — | 2024 | OT-2 + Python for automated experimental optimization loops. Closed-loop observe→decide→pipette pattern. |
 | [OT-2 Plate Handler](https://doi.org/10.26434/chemrxiv-2025-n95kk) | ChemRxiv | — | 2025 (Bolt et al.) | 3D-printed robotic claw for Opentrons OT-2. Plate gripping geometry + positioning tolerances reusable. |
 
+## USB Serial & Reverse Engineering Tools
+
+| Tool | URL | Purpose |
+|------|-----|---------|
+| [ac-rad/digital-pipette](https://github.com/ac-rad/digital-pipette) | GitHub | Original (v1) digital pipette — Arduino + Python controller architecture reference |
+| [pyserial](https://pypi.org/project/pyserial/) | PyPI | Python serial port library — foundation for USB serial communication with pipettes |
+| [USBREVue](https://github.com/wcooley/usbrevue) | GitHub | USB traffic capture and replay for reverse-engineering device protocols |
+
+## Commercial Electronic Pipettes
+
+| Equipment | Vendor | Channels | Volume Range | USB Control | Status |
+|-----------|--------|----------|-------------|-------------|--------|
+| AELAB dPette 7016 | AELAB / DLAB OEM | 1 | 0.5–10,000 µL (6 ranges) | USB port (calibration only, no public SDK) | In lab — protocol TBD |
+| DLAB dPette+ | DLAB | 8 | 0.5–300 µL (4 ranges) | USB port (calibration only, no public SDK) | In lab — protocol TBD |
+
+**Control paths (priority order):**
+
+1. **USB reverse engineering** — connect via pyserial, capture traffic with USBREVue/Wireshark during calibration software use, identify aspirate/dispense command bytes, replay from Python
+2. **GPIO button bypass** — solder to 2 button contacts, trigger via optocoupler from RPi/Arduino
+3. **Mechanical button press** — second arm or servo physically presses pipette buttons
+
+Both pipettes use 2 physical buttons for all operations. No public API or serial protocol documentation exists.
+
+## PCR Equipment
+
+| Equipment | Vendor | Features | Control | Status |
+|-----------|--------|----------|---------|--------|
+| [Bento Lab](https://www.bento.bio/) | Bento Bioworks | Portable PCR (centrifuge + thermocycler + gel electrophoresis) | USB — protocol TBD | In lab |
+
+The Bento Lab display shows PCR programs (95°C denature, 55–65°C anneal, 72°C extend, 30 cycles). Automation requires: open/close lid, start/stop program, read status. Control interface needs the same reverse-engineering approach as the electronic pipettes.
+
 ## Bimanual SO-101 Support
 
 **[AIDASLab/lerobot-so101-bimanual](https://github.com/AIDASLab/lerobot-so101-bimanual)** (2026-01, 5 stars) — Drop-in LeRobot fork with `bi_so101_follower`/`bi_so101_leader` types. Calibration, teleoperation, recording all work dual-arm. **Use this instead of patching upstream.**
@@ -416,12 +447,14 @@ Add draft STL files to `hardware/stl/` for custom parts. Mark as experimental �
 
 | Option | Type | Control | Cost | Status |
 |--------|------|---------|------|--------|
-| [digital-pipette-v2](https://github.com/ac-rad/digital-pipette-v2) | DIY syringe | Arduino serial | ~$95 | Available now (v2.0.0, 2025-11) |
+| [digital-pipette-v2](https://github.com/ac-rad/digital-pipette-v2) | DIY syringe | Arduino serial | ~$95 | `DigitalPipette` backend (available now) |
+| AELAB dPette 7016 | Commercial electronic (1-ch) | USB serial (TBD) | ~$200 | `ElectronicPipette` backend (stub, needs USB RE) |
+| DLAB dPette+ | Commercial electronic (8-ch) | USB serial (TBD) | ~$600 | `ElectronicPipette` backend (stub, needs USB RE) |
 | [Sartorius Picus 2](https://www.sartorius.com/en/products/pipetting/electronic-pipettes) | Commercial electronic | Bluetooth/serial | ~$800-2000 | Future — see [GormleyLab Python interface](https://github.com/GormleyLab/Pipette-Liquid-Handler) |
 | [Integra VIAFLO](https://www.integra-biosciences.com/global/en/electronic-pipettes) | Commercial electronic | Bluetooth | ~$1000-3000 | Future — 8/12-channel for 96-well efficiency |
 | Custom 8-channel head | DIY multi-channel | Arduino/stepper | ~$200 | Future — 8x efficiency for 96-well |
 
-**`src/biolab/pipette.py` is already abstracted** — `aspirate(volume)`, `dispense(volume)`, `eject_tip()`. Adding a Sartorius/Integra backend is a new class implementing the same interface.
+**`src/biolab/pipette.py` defines `PipetteProtocol`** — `aspirate(volume)`, `dispense(volume)`, `eject_tip()`. Both `DigitalPipette` and `ElectronicPipette` satisfy this protocol. Backend selected via `configs/pipette.yaml`.
 
 ## Future Vision: VLM + Embodied AI for Hands-Off Autonomous Operation
 

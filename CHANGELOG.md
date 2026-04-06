@@ -28,13 +28,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - CC plugins: python-dev, docs-governance, commit-helper, codebase-tools
 - `LICENSE` (Apache-2.0)
 - 104 tests across 11 test files
+- `PipetteProtocol` interface + `ElectronicPipette` backend for AELAB dPette 7016 / DLAB dPette+ (`src/biolab/pipette.py`)
+- `XZGantry` dedicated pipetting arm controller (`src/biolab/xz_gantry.py`) — simpler 2-axis alternative to SO-101
+- `BentoLab` portable PCR thermocycler module (`src/biolab/bento_lab.py`) — lid, programs, status
+- YAML configs: `configs/pipette.yaml`, `configs/xz_gantry.yaml`, `configs/bento_lab.yaml`
+- USB RE tools, commercial pipettes, Bento Lab, XZ gantry in `docs/research.md` and `docs/hardware/BOM.md`
+- 149 tests across 14 test files
 
 ### Changed
 
 - Dashboard wired to real `DualArmController` + `SafetyMonitor` via FastAPI lifespan
 - `camera.py`: cv2 import deferred to `start()` for headless environments
 - `arms.py`: stub-safe `get_observation`/`send_action`, added `send_to_well()` + `park_all()`
-- `pipette.py`: fill state tracking with over-aspiration/over-dispense guards
+- `pipette.py`: fill state tracking with over-aspiration/over-dispense guards; multi-backend via `PipetteProtocol`
+- `workflow.py`: accepts `PipetteProtocol` instead of concrete `DigitalPipette`; `_create_pipette()` factory reads `configs/pipette.yaml`
 - Makefile: `.SILENT`/`.ONESHELL`, `.DEFAULT_GOAL`, `# MARK:` grouped help, removed `render_parts`/`setup_cad`
 - SVGs generated as isometric wireframes (CadQuery) or 2D projections (OpenSCAD fallback) with dark mode theming
 - `render_scad` renamed to `render_parts` with CadQuery/OpenSCAD fallback logic
