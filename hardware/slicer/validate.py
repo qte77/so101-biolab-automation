@@ -1,10 +1,12 @@
-"""Validate STL printability via PrusaSlicer CLI.
+"""Validate STL printability via PrusaSlicer CLI and mesh integrity.
 
 Slices each STL and reports overhang/support warnings.
 PrusaSlicer is optional — graceful skip if unavailable.
+Mesh integrity check uses stdlib only (struct) — no external deps.
 
 Usage:
     python hardware/slicer/validate.py --all
+    python hardware/slicer/validate.py --all --structural
     python hardware/slicer/validate.py hardware/stl/plate_holder.stl
     python hardware/slicer/validate.py --all --profile tpu
 """
@@ -13,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -99,6 +102,51 @@ def validate_stl(stl_path: Path, profile: Path) -> dict:
     return result
 
 
+def check_mesh_integrity(stl_path: Path) -> dict:
+    """Check STL binary mesh integrity (no external deps).
+
+    Parses the 80-byte header + 4-byte triangle count from a binary STL.
+    Verifies the file is non-empty, has > 0 triangles, and the file size
+    matches the expected size (80 + 4 + 50 * num_triangles).
+
+    Args:
+        stl_path: Path to the STL file.
+
+    Returns:
+        Dict with status (PASS/FAIL), triangle_count, and optional error.
+    """
+    result: dict = {"file": stl_path.name, "status": "PASS", "triangle_count": 0, "error": None}
+
+    try:
+        data = stl_path.read_bytes()
+    except OSError as exc:
+        result["status"] = "FAIL"
+        result["error"] = str(exc)
+        return result
+
+    # Binary STL: 80-byte header + 4-byte uint32 triangle count
+    if len(data) < 84:
+        result["status"] = "FAIL"
+        result["error"] = f"File too small ({len(data)} bytes, need >= 84)"
+        return result
+
+    (num_triangles,) = struct.unpack_from("<I", data, 80)
+    result["triangle_count"] = num_triangles
+
+    if num_triangles == 0:
+        result["status"] = "FAIL"
+        result["error"] = "Zero triangles in STL"
+        return result
+
+    expected_size = 84 + 50 * num_triangles
+    if len(data) < expected_size:
+        result["status"] = "FAIL"
+        result["error"] = f"File truncated ({len(data)} bytes, expected {expected_size})"
+        return result
+
+    return result
+
+
 def collect_stls(paths: list[str]) -> list[Path]:
     """Collect STL files from args or --all."""
     stls = []
@@ -141,9 +189,10 @@ def main() -> int:
     parser.add_argument("files", nargs="*", help="STL files to validate")
     parser.add_argument("--all", action="store_true", help="Validate all STLs in hardware/stl/")
     parser.add_argument("--profile", choices=["pla", "tpu"], help="Force profile override")
+    parser.add_argument("--structural", action="store_true", help="Run mesh integrity check")
     args = parser.parse_args()
 
-    if not find_slicer():
+    if not find_slicer() and not args.structural:
         print(f"SKIP: {SLICER_CMD} not found. Install via: make setup_slicer")
         return 0
 
@@ -158,6 +207,21 @@ def main() -> int:
     if not stls:
         print(f"No STL files found in {STL_DIR}. Run: make render_parts")
         return 1
+
+    if args.structural:
+        print("\n=== Mesh Integrity Check ===")
+        mesh_results = [check_mesh_integrity(stl) for stl in stls]
+        failed = [r for r in mesh_results if r["status"] == "FAIL"]
+        for r in mesh_results:
+            status = r["status"]
+            err = f" ({r['error']})" if r["error"] else ""
+            print(f"  {r['file']:<35} {r['triangle_count']:>6} triangles  {status}{err}")
+        if failed:
+            print(f"\n{len(failed)} STL(s) failed mesh integrity check.\n")
+            return 1
+        print(f"\n{len(mesh_results)}/{len(mesh_results)} STLs passed mesh integrity.\n")
+        if not find_slicer():
+            return 0
 
     results = [validate_stl(stl, get_profile(stl.name, args.profile)) for stl in stls]
     return print_report(results)

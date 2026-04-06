@@ -114,6 +114,17 @@ Passive tool changing based on [Berkeley design](https://goldberg.berkeley.edu/p
 | `tip_rack_holder.stl` | [svg](../svg/tip_rack_holder.svg) | `tip_rack_holder.py` | Tip rack tray |
 | `gripper_tips_tpu.stl` | [svg](../svg/gripper_tips_tpu.svg) | `gripper_tips.py` | Compliant fingertips (TPU 95A) |
 
+## Structural Review Checklist
+
+Before printing, verify each STL:
+
+- [ ] **Mesh integrity** — run `python hardware/slicer/validate.py --all --structural` (checks triangle count, file size)
+- [ ] **Connected geometry** — no floating/disconnected features (open in slicer preview, rotate all angles)
+- [ ] **Minimum wall thickness** — 0.8mm for 0.4mm nozzle (2 perimeters minimum)
+- [ ] **Overhangs** — no unsupported angles > 45° (or add supports)
+- [ ] **Bed adhesion** — flat bottom face exists (no point/edge contact)
+- [ ] **Fit check** — mating dimensions match hardware (servo horns, magnets, pipette barrel)
+
 ## Hardware Needed (Non-Printed)
 
 - 5mm × 3mm neodymium magnets (3 for dock, 4 for cone pairs)

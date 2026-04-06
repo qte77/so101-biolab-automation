@@ -112,6 +112,40 @@ class TestValidateStl:
         assert "unsupported" in result["warnings"]
 
 
+class TestMeshIntegrity:
+    """Tests for STL binary mesh integrity check."""
+
+    def test_structural_valid_stl(self, tmp_path: Path) -> None:
+        """A valid binary STL with triangles passes."""
+        import struct
+
+        stl = tmp_path / "valid.stl"
+        header = b"\x00" * 80
+        num_triangles = 2
+        # Each triangle: normal (3 floats) + 3 vertices (9 floats) + attribute (1 short) = 50 bytes
+        triangle = struct.pack("<12fH", 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0)
+        stl.write_bytes(header + struct.pack("<I", num_triangles) + triangle * num_triangles)
+        result = validate.check_mesh_integrity(stl)
+        assert result["status"] == "PASS"
+        assert result["triangle_count"] == 2
+
+    def test_structural_empty_file_fails(self, tmp_path: Path) -> None:
+        """An empty file fails integrity check."""
+        stl = tmp_path / "empty.stl"
+        stl.write_bytes(b"")
+        result = validate.check_mesh_integrity(stl)
+        assert result["status"] == "FAIL"
+
+    def test_structural_zero_triangles_fails(self, tmp_path: Path) -> None:
+        """A file with 0 triangles fails."""
+        import struct
+
+        stl = tmp_path / "zero.stl"
+        stl.write_bytes(b"\x00" * 80 + struct.pack("<I", 0))
+        result = validate.check_mesh_integrity(stl)
+        assert result["status"] == "FAIL"
+
+
 class TestPrintReport:
     def test_all_pass(self, capsys) -> None:
         results = [
