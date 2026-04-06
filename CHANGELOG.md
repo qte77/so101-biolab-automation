@@ -33,7 +33,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `BentoLab` portable PCR thermocycler module (`src/biolab/bento_lab.py`) — lid, programs, status
 - YAML configs: `configs/pipette.yaml`, `configs/xz_gantry.yaml`, `configs/bento_lab.yaml`
 - USB RE tools, commercial pipettes, Bento Lab, XZ gantry in `docs/research.md` and `docs/hardware/BOM.md`
-- 149 tests across 14 test files
+- UC5 gantry-based pipetting workflow (`uc5_gantry_pipette`, `uc5_gantry_strip`) — XZ gantry + any PipetteProtocol backend
+- `status`, `notes`, `primary_backend` fields in `hardware/parts.json` manifest
+- 158+ tests across 16 test files
 
 ### Changed
 
@@ -42,6 +44,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `arms.py`: stub-safe `get_observation`/`send_action`, added `send_to_well()` + `park_all()`
 - `pipette.py`: fill state tracking with over-aspiration/over-dispense guards; multi-backend via `PipetteProtocol`
 - `workflow.py`: accepts `PipetteProtocol` instead of concrete `DigitalPipette`; `_create_pipette()` factory reads `configs/pipette.yaml`
+- `hardware/render.py`: respects per-part `primary_backend` field from manifest
+- `hardware/parts.json`: parts audited — 7 active, 1 redesign (pipette_mount), 2 deferred (fridge_hook, tool_cone_hook)
 - Makefile: `.SILENT`/`.ONESHELL`, `.DEFAULT_GOAL`, `# MARK:` grouped help, removed `render_parts`/`setup_cad`
 - SVGs generated as isometric wireframes (CadQuery) or 2D projections (OpenSCAD fallback) with dark mode theming
 - `render_scad` renamed to `render_parts` with CadQuery/OpenSCAD fallback logic
