@@ -16,7 +16,13 @@ from pathlib import Path
 import yaml
 
 from biolab.arms import DualArmConfig, DualArmController
-from biolab.pipette import DigitalPipette, PipetteConfig
+from biolab.pipette import (
+    DigitalPipette,
+    ElectronicPipette,
+    ElectronicPipetteConfig,
+    PipetteConfig,
+    PipetteProtocol,
+)
 from biolab.plate import ROWS, all_wells, parse_well_name
 from biolab.tool_changer import Tool, ToolChanger, ToolDockConfig
 
@@ -81,7 +87,7 @@ class PlateLayout:
 
 def pipette_well(
     arm: DualArmController,
-    pipette: DigitalPipette,
+    pipette: PipetteProtocol,
     layout: PlateLayout,
     arm_id: str,
     source: str,
@@ -133,7 +139,7 @@ def pipette_well(
 
 def uc1_single_well(
     arm: DualArmController,
-    pipette: DigitalPipette,
+    pipette: PipetteProtocol,
     layout: PlateLayout,
     arm_id: str,
     dest: str,
@@ -154,7 +160,7 @@ def uc1_single_well(
 
 def uc1_row(
     arm: DualArmController,
-    pipette: DigitalPipette,
+    pipette: PipetteProtocol,
     layout: PlateLayout,
     arm_id: str,
     row: str,
@@ -185,7 +191,7 @@ def uc1_row(
 
 def uc1_col(
     arm: DualArmController,
-    pipette: DigitalPipette,
+    pipette: PipetteProtocol,
     layout: PlateLayout,
     arm_id: str,
     col: int,
@@ -215,7 +221,7 @@ def uc1_col(
 
 def uc1_full_plate(
     arm: DualArmController,
-    pipette: DigitalPipette,
+    pipette: PipetteProtocol,
     layout: PlateLayout,
     arm_id: str,
     volume_ul: float,
@@ -307,7 +313,7 @@ def uc3_tool_cycle(
 
 def uc4_demo_all(
     arm: DualArmController,
-    pipette: DigitalPipette,
+    pipette: PipetteProtocol,
     changer: ToolChanger,
     layout: PlateLayout,
     arm_id: str = "arm_a",
@@ -346,21 +352,66 @@ def uc4_demo_all(
     logger.info("=== Demo complete ===")
 
 
+def _create_pipette(pipette_config_path: str = "configs/pipette.yaml") -> PipetteProtocol:
+    """Instantiate the correct pipette backend from config.
+
+    Args:
+        pipette_config_path: Path to pipette.yaml.
+
+    Returns:
+        A connected pipette satisfying PipetteProtocol.
+    """
+    try:
+        with open(pipette_config_path) as f:
+            data = yaml.safe_load(f)
+        backend = data.get("backend", "digital_pipette_v2")
+    except FileNotFoundError:
+        backend = "digital_pipette_v2"
+        data = {}
+
+    if backend.startswith("electronic_"):
+        section = data.get(backend, {})
+        pipette: PipetteProtocol = ElectronicPipette(
+            ElectronicPipetteConfig(
+                serial_port=section.get("serial_port", "/dev/ttyACM0"),
+                baud_rate=section.get("baud_rate", 9600),
+                max_volume_ul=section.get("max_volume_ul", 1000.0),
+                channels=section.get("channels", 1),
+                model=section.get("model", "aelab_dpette_7016"),
+            )
+        )
+    else:
+        section = data.get("digital_pipette_v2", {})
+        pipette = DigitalPipette(
+            PipetteConfig(
+                serial_port=section.get("serial_port", "/dev/ttyUSB0"),
+                baud_rate=section.get("baud_rate", 9600),
+                max_volume_ul=section.get("max_volume_ul", 200.0),
+                actuator_stroke_mm=section.get("actuator_stroke_mm", 50.0),
+            )
+        )
+
+    pipette.connect()
+    return pipette
+
+
 def create_workflow_context(
     arm_config_path: str = "configs/arms.yaml",
     dock_config_path: str = "configs/tool_dock.yaml",
     layout_path: str = "configs/plate_layout.yaml",
+    pipette_config_path: str = "configs/pipette.yaml",
     arm_id: str = "arm_a",
-) -> tuple[DualArmController, DigitalPipette, ToolChanger, PlateLayout]:
+) -> tuple[DualArmController, PipetteProtocol, ToolChanger, PlateLayout]:
     """Wire up all modules from config files.
 
-    Returns connected controller, stub pipette, tool changer, and plate layout.
+    Returns connected controller, pipette, tool changer, and plate layout.
     All components work in stub mode when hardware is unavailable.
 
     Args:
         arm_config_path: Path to arms YAML config.
         dock_config_path: Path to tool dock YAML config.
         layout_path: Path to plate layout YAML config.
+        pipette_config_path: Path to pipette backend YAML config.
         arm_id: Default arm ID for tool changer.
 
     Returns:
@@ -371,8 +422,7 @@ def create_workflow_context(
     arm = DualArmController(arm_config)
     arm.connect()
 
-    pipette = DigitalPipette(PipetteConfig())
-    pipette.connect()
+    pipette = _create_pipette(pipette_config_path)
 
     dock_config = ToolDockConfig.from_yaml(dock_config_path)
     changer = ToolChanger(dock_config, arm, arm_id)
