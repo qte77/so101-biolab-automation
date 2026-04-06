@@ -80,7 +80,7 @@ hardware/slicer/   PrusaSlicer CLI printability validation (optional)
 hardware/stl/      Generated STL files (via make render_parts, gitignored)
 hardware/svg/      SVG 2D projections of parts (tracked, for documentation)
 docs/              Architecture, user stories, demo scenarios, BOM, research
-tests/             158+ tests across 16 test files
+tests/             165 tests across 16 test files
 ```
 
 ## Documentation

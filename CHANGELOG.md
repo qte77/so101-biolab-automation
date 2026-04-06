@@ -35,7 +35,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - USB RE tools, commercial pipettes, Bento Lab, XZ gantry in `docs/research.md` and `docs/hardware/BOM.md`
 - UC5 gantry-based pipetting workflow (`uc5_gantry_pipette`, `uc5_gantry_strip`) — XZ gantry + any PipetteProtocol backend
 - `status`, `notes`, `primary_backend` fields in `hardware/parts.json` manifest
-- 158+ tests across 16 test files
+- Pololu Maestro + Pico W serial protocols in XZ gantry (`xz_gantry.py`)
+- Position teaching (`teach_position`) and config persistence (`save_config`) for XZ gantry
+- STL mesh integrity check (`check_mesh_integrity` in `validate.py`, `--structural` CLI flag)
+- Structural review checklist in `hardware/stl/README.md`
+- 4 planned XZ gantry parts in manifest (frame, carriage, dPette cradles)
+- OpenSCAD scripts marked as archived fallback (`hardware/scad/README.md`)
+- 165 tests across 16 test files
 
 ### Changed
 
