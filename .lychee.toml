@@ -36,6 +36,7 @@ exclude = [
     "^https://www\\.printables\\.com",
     "^https://grabcad\\.com",
     # Academic publishers — 403/timeout to bots
+    "^https://www\\.mdpi\\.com",
     "^https://doi\\.org",
     "^https://www\\.biorxiv\\.org",
     "^https://huggingface\\.co",
