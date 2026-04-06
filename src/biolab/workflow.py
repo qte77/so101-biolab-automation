@@ -5,6 +5,7 @@ Use cases:
 - UC2: Open fridge, grab item, move out
 - UC3: Tool interchange cycle
 - UC4: Demo mode (all use cases in sequence)
+- UC5: Gantry-based pipetting (XZ gantry + any PipetteProtocol backend)
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -350,6 +352,66 @@ def uc4_demo_all(
 
     arm.park_all()
     logger.info("=== Demo complete ===")
+
+
+def uc5_gantry_pipette(
+    gantry: Any,
+    pipette: PipetteProtocol,
+    source: str,
+    dest: str,
+    volume_ul: float,
+) -> None:
+    """UC5: Pipette using XZ gantry (no SO-101 arm needed).
+
+    Moves gantry to source, lowers, aspirates, raises, moves to dest, lowers,
+    dispenses, raises. One aspirate-dispense cycle.
+
+    Args:
+        gantry: XZGantry controller (uses move_to_position, lower, raise_z).
+        pipette: Any PipetteProtocol backend.
+        source: Source position name in gantry config.
+        dest: Destination position name in gantry config.
+        volume_ul: Volume to transfer in microliters.
+    """
+    logger.info("[UC5] Gantry pipette: %s → %s (%.1f µL)", source, dest, volume_ul)
+
+    gantry.move_to_position(source)
+    gantry.lower()
+    pipette.aspirate(volume_ul)
+    gantry.raise_z()
+
+    gantry.move_to_position(dest)
+    gantry.lower()
+    pipette.dispense(volume_ul)
+    gantry.raise_z()
+
+    logger.info("[UC5] Gantry pipette complete")
+
+
+def uc5_gantry_strip(
+    gantry: Any,
+    pipette: PipetteProtocol,
+    source: str,
+    destinations: list[str],
+    volume_ul: float,
+) -> None:
+    """UC5: Pipette a strip of positions using XZ gantry.
+
+    Each destination gets an independent aspirate→dispense cycle from source.
+
+    Args:
+        gantry: XZGantry controller.
+        pipette: Any PipetteProtocol backend.
+        source: Source position name.
+        destinations: List of destination position names.
+        volume_ul: Volume per destination in microliters.
+    """
+    logger.info(
+        "[UC5] Gantry strip: %s → %d destinations (%.1f µL each)",
+        source, len(destinations), volume_ul,
+    )
+    for dest in destinations:
+        uc5_gantry_pipette(gantry, pipette, source, dest, volume_ul)
 
 
 def _create_pipette(pipette_config_path: str = "configs/pipette.yaml") -> PipetteProtocol:

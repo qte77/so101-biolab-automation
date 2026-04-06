@@ -114,6 +114,24 @@ updated: 2026-03-27
 - [ ] Workflow runs in background (dashboard stays responsive)
 - [ ] Status endpoint reflects "running" mode during execution
 
+## Gantry Pipetting (UC5)
+
+### US-5.0: Gantry-Based Pipetting
+
+> As a **lab researcher**, I want to pipette using the simpler XZ gantry instead of the SO-101 arm, so that I can run repetitive pipetting at fixed positions with minimal setup.
+
+**Acceptance criteria:**
+
+- [ ] Gantry moves to source position, lowers, pipette aspirates, raises
+- [ ] Gantry moves to destination position, lowers, pipette dispenses, raises
+- [ ] Works with any PipetteProtocol backend (DigitalPipette or ElectronicPipette)
+- [ ] Strip mode pipettes multiple destinations from a single source
+- [ ] Invalid position name raises clear error
+
+**Commands:**
+
+- `python scripts/run_demo.py --use-case uc5_gantry --volume 50`
+
 ## Developer Stories
 
 ### US-5.1: Extend with New Workflow
