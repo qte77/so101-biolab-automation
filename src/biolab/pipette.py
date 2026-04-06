@@ -27,6 +27,7 @@ class PipetteProtocol(Protocol):
     def dispense(self, volume_ul: float) -> None: ...
     def eject_tip(self) -> None: ...
 
+
 # Actuator positions (0-1023 range for 5cm stroke linear actuator)
 ACTUATOR_MIN = 0  # Fully retracted (max suction)
 ACTUATOR_MAX = 1023  # Fully extended (no suction)

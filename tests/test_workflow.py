@@ -273,9 +273,7 @@ class TestUC5GantryPipette:
         uc5_gantry_pipette(stub_gantry, stub_pipette, "trough", "plate_a1", 50.0)
         assert stub_pipette._current_fill == 0.0
 
-    def test_gantry_fill_resets(
-        self, stub_gantry: XZGantry, stub_pipette: DigitalPipette
-    ) -> None:
+    def test_gantry_fill_resets(self, stub_gantry: XZGantry, stub_pipette: DigitalPipette) -> None:
         """Pipette fill returns to 0 after dispense."""
         uc5_gantry_pipette(stub_gantry, stub_pipette, "trough", "plate_a1", 100.0)
         assert stub_pipette._current_fill == 0.0
@@ -304,9 +302,7 @@ class TestUC5GantryStrip:
         self, stub_gantry: XZGantry, stub_pipette: DigitalPipette
     ) -> None:
         """Pipette multiple positions in sequence."""
-        uc5_gantry_strip(
-            stub_gantry, stub_pipette, "trough", ["plate_a1", "plate_a2"], 25.0
-        )
+        uc5_gantry_strip(stub_gantry, stub_pipette, "trough", ["plate_a1", "plate_a2"], 25.0)
         assert stub_pipette._current_fill == 0.0
 
     def test_gantry_strip_empty_list(

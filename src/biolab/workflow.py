@@ -408,7 +408,9 @@ def uc5_gantry_strip(
     """
     logger.info(
         "[UC5] Gantry strip: %s → %d destinations (%.1f µL each)",
-        source, len(destinations), volume_ul,
+        source,
+        len(destinations),
+        volume_ul,
     )
     for dest in destinations:
         uc5_gantry_pipette(gantry, pipette, source, dest, volume_ul)
