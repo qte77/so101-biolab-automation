@@ -126,3 +126,22 @@ class TestManifest:
         valid = {"complex", "box"}
         for part in MANIFEST:
             assert part["shape"] in valid, f"{part['name']} has invalid shape: {part['shape']}"
+
+    def test_manifest_status_field_valid(self) -> None:
+        valid = {"active", "redesign", "deferred"}
+        for part in MANIFEST:
+            assert "status" in part, f"{part['name']} missing status field"
+            assert part["status"] in valid, f"{part['name']} has invalid status: {part['status']}"
+
+    def test_manifest_primary_backend_valid(self) -> None:
+        valid = {"cadquery", "openscad"}
+        for part in MANIFEST:
+            assert "primary_backend" in part, f"{part['name']} missing primary_backend field"
+            assert part["primary_backend"] in valid, (
+                f"{part['name']} has invalid primary_backend: {part['primary_backend']}"
+            )
+
+    def test_manifest_notes_field_present(self) -> None:
+        for part in MANIFEST:
+            assert "notes" in part, f"{part['name']} missing notes field"
+            assert len(part["notes"]) > 0, f"{part['name']} has empty notes"
