@@ -1,7 +1,9 @@
 # so101-biolab-automation
 
+> **PROTOTYPE** — This project is in early development. Hardware designs are untested, CAD dimensions are approximate, and USB protocols are being reverse-engineered. Not ready for production use. Contributions and feedback welcome.
+
 [![License](https://img.shields.io/badge/license-Apache2.0-58f4c2.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-0.1.0-58f4c2.svg)
+![Version](https://img.shields.io/badge/version-0.1.0--alpha-58f4c2.svg)
 [![CodeQL](https://github.com/qte77/so101-biolab-automation/actions/workflows/codeql.yaml/badge.svg)](https://github.com/qte77/so101-biolab-automation/actions/workflows/codeql.yaml)
 [![CodeFactor](https://www.codefactor.io/repository/github/qte77/so101-biolab-automation/badge)](https://www.codefactor.io/repository/github/qte77/so101-biolab-automation)
 [![ruff](https://github.com/qte77/so101-biolab-automation/actions/workflows/ruff.yaml/badge.svg)](https://github.com/qte77/so101-biolab-automation/actions/workflows/ruff.yaml)
