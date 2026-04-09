@@ -54,5 +54,9 @@
   {"name": "dpette_multi_cradle", "stl": "dpette_multi_cradle.stl", "svg": "dpette_multi_cradle.svg",
    "cad": "cad/dpette_cradle.py", "build_func": "build_dpette_multi_cradle",
    "shape": "box",
-   "status": "active", "primary_backend": "cadquery", "notes": "Rest cradle for DLAB dPette+ 8-channel — must keep all 8 tips level"}
+   "status": "active", "primary_backend": "cadquery", "notes": "Rest cradle for DLAB dPette+ 8-channel — must keep all 8 tips level"},
+  {"name": "tip_ejection_bar", "stl": "tip_ejection_bar.stl", "svg": "tip_ejection_bar.svg",
+   "cad": "cad/tip_ejection_bar.py", "build_func": "build_tip_ejection_bar",
+   "shape": "box",
+   "status": "active", "primary_backend": "cadquery", "notes": "Fixed bar at waste position — dPette ejector lever presses against it to pop tips"}
 ]
