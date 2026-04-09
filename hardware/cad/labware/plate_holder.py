@@ -4,7 +4,7 @@ SBS/ANSI standard footprint: 127.76 × 85.48 mm.
 Reference: https://en.wikipedia.org/wiki/Microplate#Standards
 
 Usage:
-    uv run --group cad python hardware/cad/plate_holder.py
+    uv run --group cad python hardware/cad/labware/plate_holder.py
 
 Exports:
     hardware/stl/96well_plate_holder.stl
@@ -92,8 +92,8 @@ def build_plate_holder() -> cq.Workplane:
 
 def export(holder: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl_path = Path(__file__).parent.parent / "stl" / "96well_plate_holder.stl"
-    svg_path = Path(__file__).parent.parent / "svg" / "96well_plate_holder.svg"
+    stl_path = Path(__file__).parent.parent.parent / "stl" / "96well_plate_holder.stl"
+    svg_path = Path(__file__).parent.parent.parent / "svg" / "96well_plate_holder.svg"
 
     cq.exporters.export(holder, str(stl_path))
     cq.exporters.export(holder, str(svg_path), exportType="SVG")

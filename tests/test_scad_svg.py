@@ -19,8 +19,8 @@ HARDWARE_DIR = Path(__file__).resolve().parent.parent / "hardware"
 SVG_DIR = HARDWARE_DIR / "svg"
 MANIFEST = json.loads((HARDWARE_DIR / "parts.json").read_text())
 
-# Derive part lists from manifest "shape" field — skip planned parts (no SVGs yet)
-_RENDERABLE = [p for p in MANIFEST if p.get("status") != "planned"]
+# Derive part lists from manifest "shape" field — skip deferred/planned parts (no SVGs)
+_RENDERABLE = [p for p in MANIFEST if p.get("status") not in ("planned", "deferred")]
 COMPLEX_PARTS = [p["svg"].removesuffix(".svg") for p in _RENDERABLE if p["shape"] == "complex"]
 BOX_PARTS = [p["svg"].removesuffix(".svg") for p in _RENDERABLE if p["shape"] == "box"]
 

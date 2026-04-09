@@ -4,7 +4,7 @@ Rides on MGN12 linear rail. Holds pipette via magnetic quick-swap dock
 (2x 5mm neodymium magnets). Spring clip for security.
 
 Usage:
-    uv run --group cad python hardware/cad/xz_carriage.py
+    uv run --group cad python hardware/cad/deferred/xz_carriage.py
 """
 
 from pathlib import Path
@@ -44,8 +44,8 @@ def build_xz_carriage() -> cq.Workplane:
 
 def export(part: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent / "stl" / "xz_carriage_pipette_dock.stl"
-    svg = Path(__file__).parent.parent / "svg" / "xz_carriage_pipette_dock.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "xz_carriage_pipette_dock.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "xz_carriage_pipette_dock.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")

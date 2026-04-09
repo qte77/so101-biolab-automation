@@ -97,13 +97,13 @@ def render_scad(parts: list[dict]) -> None:
 
     # Generate SVGs from STLs (CadQuery's stl_to_svg.py)
     print("--- SVG wireframe from STLs")
-    stl_to_svg = HARDWARE_DIR / "cad" / "stl_to_svg.py"
+    stl_to_svg = HARDWARE_DIR / "cad" / "util" / "stl_to_svg.py"
     subprocess.run([sys.executable, str(stl_to_svg), "--all"], check=True)
 
 
 def run_theme() -> None:
     """Inject dark mode CSS into all SVGs."""
-    theme_script = HARDWARE_DIR / "cad" / "theme_svgs.py"
+    theme_script = HARDWARE_DIR / "cad" / "util" / "theme_svgs.py"
     subprocess.run([sys.executable, str(theme_script)], check=True)
 
 
@@ -115,7 +115,13 @@ def main() -> int:
     args = parser.parse_args()
 
     force_backend = args.backend
-    parts = load_manifest()
+    all_parts = load_manifest()
+
+    # Skip deferred/planned parts
+    parts = [p for p in all_parts if p.get("status") not in ("deferred", "planned")]
+    skipped = len(all_parts) - len(parts)
+    if skipped:
+        print(f"--- Skipping {skipped} deferred/planned parts")
 
     # Split parts by primary_backend (or use forced backend)
     cad_parts = []

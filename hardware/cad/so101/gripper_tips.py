@@ -4,7 +4,7 @@ Adds soft grip surface to SO-101 stock gripper fingers.
 Reference: https://www.thingiverse.com/thing:7153144 (NekoMaker TPU grip)
 
 Usage:
-    uv run --group cad python hardware/cad/gripper_tips.py
+    uv run --group cad python hardware/cad/so101/gripper_tips.py
 """
 
 from pathlib import Path
@@ -41,8 +41,8 @@ def build_gripper_tip() -> cq.Workplane:
 
 def export(part: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent / "stl" / "gripper_tips_tpu.stl"
-    svg = Path(__file__).parent.parent / "svg" / "gripper_tips_tpu.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "gripper_tips_tpu.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "gripper_tips_tpu.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")

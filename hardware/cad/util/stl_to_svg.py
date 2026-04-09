@@ -5,8 +5,8 @@ producing proper 3D wireframe views — unlike OpenSCAD's projection()
 which only gives silhouette outlines.
 
 Usage:
-    python hardware/cad/stl_to_svg.py hardware/stl/plate_holder.stl hardware/svg/plate_holder.svg
-    python hardware/cad/stl_to_svg.py --all  # convert all STLs in hardware/stl/
+    python hardware/cad/util/stl_to_svg.py hardware/stl/plate_holder.stl hardware/svg/plate_holder.svg
+    python hardware/cad/util/stl_to_svg.py --all  # convert all STLs in hardware/stl/
 """
 
 from __future__ import annotations
@@ -15,8 +15,8 @@ import argparse
 import sys
 from pathlib import Path
 
-STL_DIR = Path(__file__).resolve().parent.parent / "stl"
-SVG_DIR = Path(__file__).resolve().parent.parent / "svg"
+STL_DIR = Path(__file__).resolve().parent.parent.parent / "stl"
+SVG_DIR = Path(__file__).resolve().parent.parent.parent / "svg"
 
 
 def stl_to_svg(stl_path: Path, svg_path: Path) -> None:
