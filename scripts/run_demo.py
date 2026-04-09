@@ -24,12 +24,14 @@ from biolab.workflow import (
     uc2_fridge_open_grab_move,
     uc3_tool_cycle,
     uc4_demo_all,
+    uc5_gantry_pipette,
 )
+from biolab.xz_gantry import XZGantry, XZGantryConfig
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
-USE_CASES = ["all", "uc1_single", "uc1_row", "uc1_col", "uc1_full", "uc2", "uc3"]
+USE_CASES = ["all", "uc1_single", "uc1_row", "uc1_col", "uc1_full", "uc2", "uc3", "uc5_gantry"]
 
 
 def main() -> None:
@@ -63,6 +65,12 @@ def main() -> None:
             uc2_fridge_open_grab_move(arm, changer, args.arm)
         elif args.use_case == "uc3":
             uc3_tool_cycle(arm, changer, args.arm)
+        elif args.use_case == "uc5_gantry":
+            gantry_config = XZGantryConfig.from_yaml("configs/xz_gantry.yaml")
+            gantry = XZGantry(gantry_config)
+            gantry.connect()
+            uc5_gantry_pipette(gantry, pipette, "trough", "plate_a1", args.volume)
+            gantry.disconnect()
     finally:
         arm.disconnect()
 

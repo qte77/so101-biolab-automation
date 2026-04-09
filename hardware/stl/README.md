@@ -49,13 +49,12 @@ Passive tool changing based on [Berkeley design](https://goldberg.berkeley.edu/p
 | Robot-side cone (female) | ![tool_cone_robot](../svg/tool_cone_robot.svg) |
 | Tool-side cone — pipette | ![tool_cone_pipette](../svg/tool_cone_pipette.svg) |
 | Tool-side cone — gripper | ![tool_cone_gripper](../svg/tool_cone_gripper.svg) |
-| Tool-side cone — hook | ![tool_cone_hook](../svg/tool_cone_hook.svg) |
 | 3-station dock | ![tool_dock](../svg/tool_dock_3station.svg) |
 
 **Assembly order:**
 
 1. **`tool_cone_robot.stl`** — Mount on SO-101 wrist (motor 5 horn, 4× M3 screws). Stays on arm permanently.
-2. **`tool_cone_pipette/gripper/hook.stl`** — Attach one to each tool. Glue or screw to tool base.
+2. **`tool_cone_pipette/gripper.stl`** — Attach one to each tool. Glue or screw to tool base.
 3. **`tool_dock_3station.stl`** — Fix to workspace. Insert 5mm neodymium magnets in each slot bottom.
 
 **Tool change sequence:** Approach dock → insert tool → retract → move to new slot → push onto cone → retract with new tool.
@@ -82,15 +81,6 @@ Passive tool changing based on [Berkeley design](https://goldberg.berkeley.edu/p
 
 1. **`96well_plate_holder.stl`** — Place at known position. 4 alignment pins locate the plate.
 
-### Fridge Operations
-
-| Part | Preview |
-|------|---------|
-| Fridge hook | ![fridge_hook](../svg/fridge_hook_tool.svg) |
-
-1. **`fridge_hook_tool.stl`** — Attach `tool_cone_hook.stl` to flat mount face. Hook fits ~20mm bar handles.
-2. Arm equips hook from dock → approaches fridge → hooks handle → pulls door open.
-
 ### Gripper Enhancement
 
 | Part | Preview |
@@ -106,13 +96,25 @@ Passive tool changing based on [Berkeley design](https://goldberg.berkeley.edu/p
 | `tool_cone_robot.stl` | [svg](../svg/tool_cone_robot.svg) | `tool_changer.py` | Female cone — mounts on SO-101 wrist |
 | `tool_cone_pipette.stl` | [svg](../svg/tool_cone_pipette.svg) | `tool_changer.py` | Male cone — pipette tool base |
 | `tool_cone_gripper.stl` | [svg](../svg/tool_cone_gripper.svg) | `tool_changer.py` | Male cone — gripper tool base |
-| `tool_cone_hook.stl` | [svg](../svg/tool_cone_hook.svg) | `tool_changer.py` | Male cone — fridge hook tool base |
-| `tool_dock_3station.stl` | [svg](../svg/tool_dock_3station.svg) | `tool_dock.py` | 3-slot parking rack with magnet pockets |
-| `pipette_mount_so101.stl` | [svg](../svg/pipette_mount_so101.svg) | `pipette_mount.py` | Barrel clamp for digital-pipette-v2 |
-| `96well_plate_holder.stl` | [svg](../svg/96well_plate_holder.svg) | `plate_holder.py` | SBS plate holder with alignment pins |
-| `fridge_hook_tool.stl` | [svg](../svg/fridge_hook_tool.svg) | `fridge_hook.py` | Hook for fridge door handle |
-| `tip_rack_holder.stl` | [svg](../svg/tip_rack_holder.svg) | `tip_rack_holder.py` | Tip rack tray |
-| `gripper_tips_tpu.stl` | [svg](../svg/gripper_tips_tpu.svg) | `gripper_tips.py` | Compliant fingertips (TPU 95A) |
+| `tool_dock_3station.stl` | [svg](../svg/tool_dock_3station.svg) | `so101/tool_dock.py` | 3-slot parking rack with magnet pockets |
+| `pipette_mount_so101.stl` | [svg](../svg/pipette_mount_so101.svg) | `so101/pipette_mount.py` | dPette barrel clamp for SO-101 wrist |
+| `96well_plate_holder.stl` | [svg](../svg/96well_plate_holder.svg) | `labware/plate_holder.py` | SBS plate holder with alignment pins |
+| `tip_rack_holder.stl` | [svg](../svg/tip_rack_holder.svg) | `labware/tip_rack_holder.py` | Tip rack tray |
+| `gripper_tips_tpu.stl` | [svg](../svg/gripper_tips_tpu.svg) | `so101/gripper_tips.py` | Compliant fingertips (TPU 95A) |
+| `dpette_single_cradle.stl` | [svg](../svg/dpette_single_cradle.svg) | `dpette/dpette_cradle.py` | Rest cradle for dPette 7016 |
+| `dpette_multi_cradle.stl` | [svg](../svg/dpette_multi_cradle.svg) | `dpette/dpette_cradle.py` | Rest cradle for dPette+ 8-channel |
+| `tip_ejection_bar.stl` | [svg](../svg/tip_ejection_bar.svg) | `dpette/tip_ejection_bar.py` | Tip ejection post (top-button) |
+
+## Structural Review Checklist
+
+Before printing, verify each STL:
+
+- [ ] **Mesh integrity** — run `python hardware/slicer/validate.py --all --structural` (checks triangle count, file size)
+- [ ] **Connected geometry** — no floating/disconnected features (open in slicer preview, rotate all angles)
+- [ ] **Minimum wall thickness** — 0.8mm for 0.4mm nozzle (2 perimeters minimum)
+- [ ] **Overhangs** — no unsupported angles > 45° (or add supports)
+- [ ] **Bed adhesion** — flat bottom face exists (no point/edge contact)
+- [ ] **Fit check** — mating dimensions match hardware (servo horns, magnets, pipette barrel)
 
 ## Hardware Needed (Non-Printed)
 

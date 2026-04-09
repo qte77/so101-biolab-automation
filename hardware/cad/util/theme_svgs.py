@@ -4,7 +4,7 @@ Injects CSS with @media (prefers-color-scheme: dark) into each SVG.
 Adds a themed background rect and inverts stroke colors for dark mode.
 
 Usage:
-    python hardware/cad/theme_svgs.py
+    python hardware/cad/util/theme_svgs.py
 """
 
 import re
@@ -29,7 +29,7 @@ THEME_STYLE = """\
     </style>
   </defs>"""
 
-SVG_DIR = Path(__file__).parent.parent / "svg"
+SVG_DIR = Path(__file__).parent.parent.parent / "svg"
 SKIP = {"system_overview.svg"}
 
 

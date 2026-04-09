@@ -1,0 +1,17 @@
+# XZ gantry configuration for dedicated pipetting arm.
+# controller: pololu_maestro | pico_w
+
+serial_port: /dev/ttyUSB1
+baud_rate: 115200
+controller: pololu_maestro
+x_range_mm: 200.0
+z_range_mm: 100.0
+safe_z_mm: 80.0
+approach_z_mm: 20.0
+
+positions:
+  trough: [0.0, 0.0]
+  plate_a1: [45.0, 11.24]
+  plate_a2: [54.0, 11.24]
+  tip_box: [100.0, 0.0]
+  waste: [150.0, 0.0]

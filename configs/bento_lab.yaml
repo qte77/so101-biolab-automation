@@ -1,0 +1,26 @@
+# Bento Lab portable PCR thermocycler configuration.
+# Control interface TBD — serial commands are placeholders.
+
+serial_port: /dev/ttyACM0
+baud_rate: 9600
+model: bento_lab_standard
+
+programs:
+  pcr_standard:
+    denature_temp_c: 95
+    denature_time_s: 30
+    anneal_temp_c: 55
+    anneal_time_s: 30
+    extend_temp_c: 72
+    extend_time_s: 60
+    cycles: 30
+    final_extend_s: 300
+  pcr_touch_down:
+    denature_temp_c: 95
+    denature_time_s: 30
+    anneal_temp_c: 65
+    anneal_time_s: 30
+    extend_temp_c: 72
+    extend_time_s: 60
+    cycles: 30
+    final_extend_s: 300

@@ -1,0 +1,24 @@
+# Pipette backend configuration.
+# backend: digital_pipette_v2 | electronic_aelab | electronic_dlab
+
+backend: digital_pipette_v2
+
+digital_pipette_v2:
+  serial_port: /dev/ttyUSB0
+  baud_rate: 9600
+  max_volume_ul: 200.0
+  actuator_stroke_mm: 50.0
+
+electronic_aelab:
+  serial_port: /dev/ttyACM0
+  baud_rate: 9600
+  max_volume_ul: 1000.0
+  channels: 1
+  model: aelab_dpette_7016
+
+electronic_dlab:
+  serial_port: /dev/ttyACM1
+  baud_rate: 9600
+  max_volume_ul: 300.0
+  channels: 8
+  model: dlab_dpette_plus

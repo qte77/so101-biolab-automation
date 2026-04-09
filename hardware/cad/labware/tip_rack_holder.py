@@ -3,7 +3,7 @@
 Holds a standard 96-tip rack (SBS footprint variant).
 
 Usage:
-    uv run --group cad python hardware/cad/tip_rack_holder.py
+    uv run --group cad python hardware/cad/labware/tip_rack_holder.py
 """
 
 from pathlib import Path
@@ -40,8 +40,8 @@ def build_tip_rack_holder() -> cq.Workplane:
 
 def export(part: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent / "stl" / "tip_rack_holder.stl"
-    svg = Path(__file__).parent.parent / "svg" / "tip_rack_holder.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "tip_rack_holder.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "tip_rack_holder.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")

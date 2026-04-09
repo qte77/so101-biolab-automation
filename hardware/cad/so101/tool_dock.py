@@ -4,7 +4,7 @@ Holds 3 tools side-by-side with magnet retention.
 Reference: Berkeley passive tool changer parking housing.
 
 Usage:
-    uv run --group cad python hardware/cad/tool_dock.py
+    uv run --group cad python hardware/cad/so101/tool_dock.py
 """
 
 from pathlib import Path
@@ -44,8 +44,8 @@ def build_tool_dock() -> cq.Workplane:
 
 def export(part: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent / "stl" / "tool_dock_3station.stl"
-    svg = Path(__file__).parent.parent / "svg" / "tool_dock_3station.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "tool_dock_3station.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "tool_dock_3station.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")
