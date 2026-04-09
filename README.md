@@ -113,6 +113,7 @@ Toward general-purpose voice/agent-to-print. This repo is the first showcase.
 1. **Done** — CadQuery + PrusaSlicer CLI pipeline (`make render_parts`, `make check_prints`)
 2. **Next** — LLM-assisted CadQuery generation from text prompts
 3. **Future** — Autonomous agent loop with Bambu camera + VLM print inspection
+4. **Vision** — Closed-loop tool genesis: agent identifies missing tool → generates CadQuery → slices → prints → mounts via tool changer → validates with VLM — true self-evolving multi-tool
 
 See [docs/research.md](docs/research.md) § "Closed-Loop 3D Printing" for prior art.
 
