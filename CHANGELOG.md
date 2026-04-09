@@ -41,7 +41,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - Structural review checklist in `hardware/stl/README.md`
 - 4 planned XZ gantry parts in manifest (frame, carriage, dPette cradles)
 - OpenSCAD scripts marked as archived fallback (`hardware/scad/README.md`)
-- 165 tests across 16 test files
+- Reorganized `hardware/cad/` into topic folders: `so101/`, `dpette/`, `labware/`, `deferred/`, `util/`
+- Redesigned `pipette_mount` for dPette barrel (ejector button cutout) — was digital-pipette-v2
+- Redesigned `tip_ejection_bar` from side-lever bar to top-button post (matches dPette mechanism)
+- `render.py` skips deferred/planned parts automatically
+- XZ gantry parts (`xz_gantry_frame`, `xz_carriage`) deferred — focus on SO-101 arm-held dPette
+- 167 tests across 16 test files
 
 ### Changed
 
