@@ -191,11 +191,15 @@ class ElectronicPipetteConfig:
 
 
 class ElectronicPipette:
-    """Controls a commercial electronic pipette over USB serial.
+    """Controls a commercial electronic pipette via modular driver loading.
 
-    The USB command protocol for AELAB dPette 7016 and DLAB dPette+ is not
-    publicly documented. This backend runs in stub mode until the protocol
-    is reverse-engineered (see docs/research.md for approach).
+    Driver resolution order:
+    1. Try ``import dpette`` (Lambda-Biolab/dpette-usb-driver) — real USB protocol
+    2. Fall back to stub mode (volume tracking only, no hardware commands)
+
+    The dpette package is an optional dependency. Install it to enable real
+    hardware control; without it, all commands are no-ops and fill state is
+    tracked in memory.
 
     Usage:
         pipette = ElectronicPipette(ElectronicPipetteConfig(model="aelab_dpette_7016"))
@@ -207,37 +211,43 @@ class ElectronicPipette:
 
     def __init__(self, config: ElectronicPipetteConfig) -> None:
         self.config = config
-        self._serial: Any = None
+        self._driver: Any = None  # dpette.DPetteDriver when available
         self._stub_mode = False
         self._current_fill: float = 0.0
 
     def connect(self) -> None:
-        """Open USB serial connection to the electronic pipette."""
-        try:
-            import serial
+        """Connect to the electronic pipette via modular driver loading.
 
-            self._serial = serial.Serial(
-                self.config.serial_port,
-                self.config.baud_rate,
-                timeout=2,
+        Tries to import the ``dpette`` package and create a DPetteDriver.
+        Falls back to stub mode if the package or hardware is unavailable.
+        """
+        try:
+            from dpette.config import SerialConfig
+            from dpette.driver import DPetteDriver
+
+            cfg = SerialConfig(
+                port=self.config.serial_port,
+                baudrate=self.config.baud_rate,
             )
+            self._driver = DPetteDriver(cfg)
+            self._driver.connect()
             logger.info(
-                "Electronic pipette (%s) connected on %s",
+                "Electronic pipette (%s) connected via dpette driver on %s",
                 self.config.model,
                 self.config.serial_port,
             )
         except ImportError:
-            logger.warning("pyserial not installed — running in stub mode")
+            logger.warning("dpette package not installed — running in stub mode")
             self._stub_mode = True
         except Exception as exc:  # noqa: BLE001
-            logger.warning("Serial connection failed (%s) — running in stub mode", exc)
+            logger.warning("dpette driver connection failed (%s) — running in stub mode", exc)
             self._stub_mode = True
 
     def disconnect(self) -> None:
-        """Close serial connection."""
-        if self._serial:
-            self._serial.close()
-            self._serial = None
+        """Close driver connection."""
+        if self._driver:
+            self._driver.disconnect()
+            self._driver = None
 
     def aspirate(self, volume_ul: float) -> None:
         """Aspirate a volume of liquid.
@@ -258,7 +268,12 @@ class ElectronicPipette:
                 f"(current fill {self._current_fill} µL, max {self.config.max_volume_ul} µL)"
             )
 
-        self._send_command(f"ASPIRATE {volume_ul}")
+        if self._driver:
+            self._driver.set_volume(volume_ul)
+            self._driver.aspirate()
+        else:
+            logger.debug("Stub mode — skipping aspirate %.1f µL", volume_ul)
+
         self._current_fill += volume_ul
         logger.info("Aspirated %.1f µL (%s)", volume_ul, self.config.model)
 
@@ -278,23 +293,17 @@ class ElectronicPipette:
                 f"Cannot dispense {volume_ul} µL: exceeds current fill of {self._current_fill} µL"
             )
 
-        self._send_command(f"DISPENSE {volume_ul}")
+        if self._driver:
+            self._driver.set_volume(volume_ul)
+            self._driver.dispense()
+        else:
+            logger.debug("Stub mode — skipping dispense %.1f µL", volume_ul)
+
         self._current_fill -= volume_ul
         logger.info("Dispensed %.1f µL (%s)", volume_ul, self.config.model)
 
     def eject_tip(self) -> None:
-        """Signal tip ejection."""
-        logger.info("Ejecting tip (%s)", self.config.model)
-        self._send_command("EJECT")
-
-    def _send_command(self, cmd: str) -> None:
-        """Send a command over serial (no-op in stub mode).
-
-        Args:
-            cmd: Command string to send.
-        """
-        if self._serial:
-            self._serial.write(f"{cmd}\n".encode())
-            self._serial.readline()  # Wait for ACK
-        else:
-            logger.debug("Stub mode — skipping command: %s", cmd)
+        """Signal tip ejection (mechanical — not sent via driver)."""
+        logger.info("Ejecting tip (%s) — mechanical lever", self.config.model)
+        if self._driver:
+            self._driver.eject_tip()
