@@ -86,8 +86,8 @@ def build_tip_ejection_bar() -> cq.Workplane:
 
 def export(part: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent.parent / "stl" / "tip_ejection_bar.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "tip_ejection_bar.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "dpette" / "tip_ejection_bar.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "dpette" / "tip_ejection_bar.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")

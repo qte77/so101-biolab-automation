@@ -42,12 +42,14 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.all:
-        stls = sorted(STL_DIR.glob("*.stl"))
+        stls = sorted(STL_DIR.glob("**/*.stl"))
         if not stls:
             print(f"No STL files in {STL_DIR}")
             return 1
         for stl in stls:
-            svg = SVG_DIR / f"{stl.stem}.svg"
+            rel = stl.relative_to(STL_DIR)
+            svg = SVG_DIR / rel.with_suffix(".svg")
+            svg.parent.mkdir(parents=True, exist_ok=True)
             stl_to_svg(stl, svg)
         return 0
 

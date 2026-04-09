@@ -44,8 +44,8 @@ def build_xz_carriage() -> cq.Workplane:
 
 def export(part: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent.parent / "stl" / "xz_carriage_pipette_dock.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "xz_carriage_pipette_dock.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "deferred" / "xz_carriage_pipette_dock.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "deferred" / "xz_carriage_pipette_dock.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")

@@ -38,7 +38,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - Pololu Maestro + Pico W serial protocols in XZ gantry (`xz_gantry.py`)
 - Position teaching (`teach_position`) and config persistence (`save_config`) for XZ gantry
 - STL mesh integrity check (`check_mesh_integrity` in `validate.py`, `--structural` CLI flag)
-- Structural review checklist in `hardware/stl/README.md`
+- Structural review checklist in `hardware/README.md`
 - 4 planned XZ gantry parts in manifest (frame, carriage, dPette cradles)
 - OpenSCAD scripts marked as archived fallback (`hardware/scad/README.md`)
 - Reorganized `hardware/cad/` into topic folders: `so101/`, `dpette/`, `labware/`, `deferred/`, `util/`

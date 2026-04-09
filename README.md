@@ -83,8 +83,8 @@ hardware/cad/deferred/ Future parts (XZ gantry frame, carriage)
 hardware/cad/util/     SVG theming and STL→SVG conversion
 hardware/scad/         OpenSCAD scripts — archived fallback
 hardware/slicer/       PrusaSlicer CLI printability validation (optional)
-hardware/stl/      Generated STL files (via make render_parts, gitignored)
-hardware/svg/      SVG 2D projections of parts (tracked, for documentation)
+hardware/stl/{so101,dpette,labware}/ Generated STL files (via make render_parts, gitignored)
+hardware/svg/{so101,dpette,labware}/ SVG 2D projections of parts (tracked, for documentation)
 docs/              Architecture, user stories, demo scenarios, BOM, research
 tests/                 167 tests across 16 test files
 ```

@@ -7,8 +7,8 @@ Usage:
     uv run --group cad python hardware/cad/labware/plate_holder.py
 
 Exports:
-    hardware/stl/96well_plate_holder.stl
-    hardware/svg/96well_plate_holder.svg
+    hardware/stl/labware/96well_plate_holder.stl
+    hardware/svg/labware/96well_plate_holder.svg
 """
 
 from pathlib import Path
@@ -92,8 +92,8 @@ def build_plate_holder() -> cq.Workplane:
 
 def export(holder: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl_path = Path(__file__).parent.parent.parent / "stl" / "96well_plate_holder.stl"
-    svg_path = Path(__file__).parent.parent.parent / "svg" / "96well_plate_holder.svg"
+    stl_path = Path(__file__).parent.parent.parent / "stl" / "labware" / "96well_plate_holder.stl"
+    svg_path = Path(__file__).parent.parent.parent / "svg" / "labware" / "96well_plate_holder.svg"
 
     cq.exporters.export(holder, str(stl_path))
     cq.exporters.export(holder, str(svg_path), exportType="SVG")
