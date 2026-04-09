@@ -103,7 +103,7 @@ Simpler alternative to SO-101 for repetitive pipetting at fixed positions.
 | *Alternative:* Raspberry Pi Pico W | 1 | $6 | [raspberrypi.com](https://www.raspberrypi.com/products/raspberry-pi-pico/) |
 | 3D-printed frame + carriage | 1 | ~$5 | Custom STL (see hardware parts issue) |
 
-**Estimated total: ~$60-80**
+Estimated total: ~$60-80
 
 ## PCR Equipment
 
