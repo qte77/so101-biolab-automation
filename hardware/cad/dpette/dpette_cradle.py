@@ -57,16 +57,16 @@ def build_dpette_multi_cradle() -> cq.Workplane:
 
 
 def export_single(part: cq.Workplane) -> None:
-    stl = Path(__file__).parent.parent.parent / "stl" / "dpette_single_cradle.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "dpette_single_cradle.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "dpette" / "dpette_single_cradle.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "dpette" / "dpette_single_cradle.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")
 
 
 def export_multi(part: cq.Workplane) -> None:
-    stl = Path(__file__).parent.parent.parent / "stl" / "dpette_multi_cradle.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "dpette_multi_cradle.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "dpette" / "dpette_multi_cradle.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "dpette" / "dpette_multi_cradle.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")

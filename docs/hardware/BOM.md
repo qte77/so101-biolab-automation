@@ -45,16 +45,22 @@ PLA+, 0.4mm nozzle, 0.2mm layer, 15% infill, supports >45 degrees.
 | Follower arm (all parts, single plate) | [SO-ARM100 STL (follower)](https://github.com/TheRobotStudio/SO-ARM100/tree/main/STL/SO101) |
 | Leader arm (all parts, single plate) | [SO-ARM100 STL (leader)](https://github.com/TheRobotStudio/SO-ARM100/tree/main/STL/SO101) |
 
-**Custom parts (to be designed for this project):**
+**Custom parts:**
 
-| Part | Planned File | Material | Notes |
-|------|-------------|----------|-------|
-| Pipette mount adapter | *TBD* | PLA+ | Adapts gripper to hold digital-pipette-v2 |
-| Tool dock (3-station) | *TBD* | PLA+ | Magnetic dock, ref: [Berkeley tool changer](https://goldberg.berkeley.edu/pubs/CASE2018-ron-tool-changer-submitted.pdf) |
-| Fridge hook end-effector | *TBD* | PLA+ | Hook for fridge door handle |
-| 96-well plate holder | *TBD* | PLA+ | SBS footprint alignment pins |
-| Tip rack holder | *TBD* | PLA+ | Holds standard pipette tip rack |
-| Compliant gripper tips | *TBD* | TPU 95A | Ref: [silicone mold (Thingiverse)](https://www.thingiverse.com/thing:7152864), [fin-ray gripper (MakerWorld)](https://makerworld.com/en/models/2075813) |
+| Part | Status | Source | Material | Notes |
+|------|--------|--------|----------|-------|
+| Pipette mount adapter | Designed | `cad/so101/pipette_mount.py` | PLA+ | dPette barrel clamp for SO-101 wrist |
+| Tool dock (3-station) | Designed | `cad/so101/tool_dock.py` | PLA+ | Magnetic dock, ref: [Berkeley tool changer](https://goldberg.berkeley.edu/pubs/CASE2018-ron-tool-changer-submitted.pdf) |
+| Tool cones (robot/pipette/gripper) | Designed | `cad/so101/tool_changer.py` | PLA+ | Passive tool changer cones |
+| Compliant gripper tips | Designed | `cad/so101/gripper_tips.py` | TPU 95A | Ref: [silicone mold (Thingiverse)](https://www.thingiverse.com/thing:7152864), [fin-ray gripper (MakerWorld)](https://makerworld.com/en/models/2075813) |
+| 96-well plate holder | Designed | `cad/labware/plate_holder.py` | PLA+ | SBS footprint alignment pins |
+| Tip rack holder | Designed | `cad/labware/tip_rack_holder.py` | PLA+ | Holds standard pipette tip rack |
+| dPette single cradle | Designed | `cad/dpette/dpette_cradle.py` | PLA+ | Rest cradle for AELAB dPette 7016 |
+| dPette multi cradle | Designed | `cad/dpette/dpette_cradle.py` | PLA+ | Rest cradle for DLAB dPette+ 8-channel |
+| Tip ejection post | Designed | `cad/dpette/tip_ejection_bar.py` | PLA+ | Fixed post — arm pushes ejector button onto post to pop tips |
+| Fridge hook end-effector | Designed (deferred) | `cad/so101/fridge_hook.py` | PLA+ | Hook for fridge door handle |
+| XZ gantry frame | Designed (deferred) | `cad/deferred/xz_gantry_frame.py` | PLA+ | XZ gantry structural frame |
+| XZ carriage pipette dock | Designed (deferred) | `cad/deferred/xz_carriage.py` | PLA+ | XZ gantry carriage with pipette dock |
 
 ## Cameras
 

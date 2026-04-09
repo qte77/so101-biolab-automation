@@ -3,7 +3,7 @@ title: User Stories
 purpose: Acceptance criteria for use cases UC1-5 (pipetting, fridge, tool change, remote oversight, gantry) + developer stories
 authority: Acceptance criteria (AUTHORITY)
 created: 2026-03-27
-updated: 2026-03-27
+updated: 2026-04-09
 ---
 
 # User Stories & Acceptance Criteria

@@ -43,8 +43,8 @@ def build_xz_gantry_frame() -> cq.Workplane:
 
 def export(part: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent.parent / "stl" / "xz_gantry_frame.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "xz_gantry_frame.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "deferred" / "xz_gantry_frame.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "deferred" / "xz_gantry_frame.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")

@@ -41,8 +41,8 @@ def build_gripper_tip() -> cq.Workplane:
 
 def export(part: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent.parent / "stl" / "gripper_tips_tpu.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "gripper_tips_tpu.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "so101" / "gripper_tips_tpu.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "so101" / "gripper_tips_tpu.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")

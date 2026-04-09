@@ -459,8 +459,8 @@ Add draft STL files to `hardware/stl/` for custom parts. Mark as experimental �
 
 | File | Status | Source/Approach |
 |------|--------|----------------|
-| `hardware/stl/README.md` | NEW | Index of all STL files with status (experimental/validated), print settings, notes |
-| `hardware/stl/pipette_mount_so101.stl` | EXPERIMENTAL | Adapt SO-101 wrist flange → digital-pipette-v2 body clamp. Reference: [digital-pipette-v2 STL](https://github.com/ac-rad/digital-pipette-v2/tree/main/stl) for pipette body dimensions. |
+| `hardware/README.md` | NEW | Index of all parts with status, print settings, assembly notes |
+| `hardware/stl/so101/pipette_mount_so101.stl` | EXPERIMENTAL | SO-101 wrist clamp for dPette barrel. Ejector button cutout for accessibility. |
 | `hardware/stl/tool_dock_3station.stl` | EXPERIMENTAL | 3 parking slots side-by-side. Berkeley cone geometry (10° angle). Magnets for retention. Reference: [BerkeleyAutomation/RobotToolChanger](https://github.com/BerkeleyAutomation/RobotToolChanger/tree/tool-changer). |
 | `hardware/stl/tool_cone_robot.stl` | EXPERIMENTAL | Female cone adapter for SO-101 wrist (motor 5 horn mount, M3 pattern). Berkeley design. |
 | `hardware/stl/tool_cone_pipette.stl` | EXPERIMENTAL | Male cone base for pipette tool. Mates with robot-side cone. |

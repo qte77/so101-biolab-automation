@@ -1,13 +1,13 @@
 ---
-title: STL Files Index
-purpose: Index of 3D-printable parts with status, print settings, assembly, and source scripts
+title: Hardware Parts
+purpose: 3D-printable parts index with print settings, assembly, and source scripts
 created: 2026-03-27
-updated: 2026-03-30
+updated: 2026-04-09
 ---
 
-# STL Files
+# Hardware Parts
 
-Generated from `../parts.json` manifest via `../render.py` (CadQuery preferred, OpenSCAD fallback).
+Generated from `parts.json` manifest via `render.py` (CadQuery preferred, OpenSCAD fallback).
 
 ```bash
 make setup_cad            # Install CadQuery (preferred)
@@ -26,7 +26,7 @@ make render_all           # Generate + validate
 
 ## System Overview
 
-![Workspace Layout](../svg/system_overview.svg)
+![Workspace Layout](svg/system_overview.svg)
 
 ## Print Settings
 
@@ -46,10 +46,10 @@ Passive tool changing based on [Berkeley design](https://goldberg.berkeley.edu/p
 
 | Part | Preview |
 |------|---------|
-| Robot-side cone (female) | ![tool_cone_robot](../svg/tool_cone_robot.svg) |
-| Tool-side cone — pipette | ![tool_cone_pipette](../svg/tool_cone_pipette.svg) |
-| Tool-side cone — gripper | ![tool_cone_gripper](../svg/tool_cone_gripper.svg) |
-| 3-station dock | ![tool_dock](../svg/tool_dock_3station.svg) |
+| Robot-side cone (female) | ![tool_cone_robot](svg/so101/tool_cone_robot.svg) |
+| Tool-side cone — pipette | ![tool_cone_pipette](svg/so101/tool_cone_pipette.svg) |
+| Tool-side cone — gripper | ![tool_cone_gripper](svg/so101/tool_cone_gripper.svg) |
+| 3-station dock | ![tool_dock](svg/so101/tool_dock_3station.svg) |
 
 **Assembly order:**
 
@@ -63,21 +63,21 @@ Passive tool changing based on [Berkeley design](https://goldberg.berkeley.edu/p
 
 | Part | Preview |
 |------|---------|
-| Pipette mount | ![pipette_mount](../svg/pipette_mount_so101.svg) |
+| Pipette mount | ![pipette_mount](svg/so101/pipette_mount_so101.svg) |
 
-1. **`pipette_mount_so101.stl`** — Clamp around [digital-pipette-v2](https://github.com/ac-rad/digital-pipette-v2) barrel. Tighten with 2× M3 screws.
+1. **`pipette_mount_so101.stl`** — Clamp around dPette barrel. Tighten with 2× M3 screws.
 2. Attach `tool_cone_pipette.stl` to mount base (4× M3 or glue).
 3. **`tip_rack_holder.stl`** — Place on workspace, insert tip rack. Arm picks tips by pressing pipette into rack.
 
 | Part | Preview |
 |------|---------|
-| Tip rack holder | ![tip_rack](../svg/tip_rack_holder.svg) |
+| Tip rack holder | ![tip_rack](svg/labware/tip_rack_holder.svg) |
 
 ### Plate Handling
 
 | Part | Preview |
 |------|---------|
-| 96-well plate holder | ![plate_holder](../svg/96well_plate_holder.svg) |
+| 96-well plate holder | ![plate_holder](svg/labware/96well_plate_holder.svg) |
 
 1. **`96well_plate_holder.stl`** — Place at known position. 4 alignment pins locate the plate.
 
@@ -85,7 +85,7 @@ Passive tool changing based on [Berkeley design](https://goldberg.berkeley.edu/p
 
 | Part | Preview |
 |------|---------|
-| Gripper tips (TPU) | ![gripper_tips](../svg/gripper_tips_tpu.svg) |
+| Gripper tips (TPU) | ![gripper_tips](svg/so101/gripper_tips_tpu.svg) |
 
 1. **`gripper_tips_tpu.stl`** — Press-fit or glue onto SO-101 gripper fingers. Print in TPU 95A.
 
@@ -93,17 +93,17 @@ Passive tool changing based on [Berkeley design](https://goldberg.berkeley.edu/p
 
 | STL File | SVG | Source | Description |
 |----------|-----|--------|-------------|
-| `tool_cone_robot.stl` | [svg](../svg/tool_cone_robot.svg) | `tool_changer.py` | Female cone — mounts on SO-101 wrist |
-| `tool_cone_pipette.stl` | [svg](../svg/tool_cone_pipette.svg) | `tool_changer.py` | Male cone — pipette tool base |
-| `tool_cone_gripper.stl` | [svg](../svg/tool_cone_gripper.svg) | `tool_changer.py` | Male cone — gripper tool base |
-| `tool_dock_3station.stl` | [svg](../svg/tool_dock_3station.svg) | `so101/tool_dock.py` | 3-slot parking rack with magnet pockets |
-| `pipette_mount_so101.stl` | [svg](../svg/pipette_mount_so101.svg) | `so101/pipette_mount.py` | dPette barrel clamp for SO-101 wrist |
-| `96well_plate_holder.stl` | [svg](../svg/96well_plate_holder.svg) | `labware/plate_holder.py` | SBS plate holder with alignment pins |
-| `tip_rack_holder.stl` | [svg](../svg/tip_rack_holder.svg) | `labware/tip_rack_holder.py` | Tip rack tray |
-| `gripper_tips_tpu.stl` | [svg](../svg/gripper_tips_tpu.svg) | `so101/gripper_tips.py` | Compliant fingertips (TPU 95A) |
-| `dpette_single_cradle.stl` | [svg](../svg/dpette_single_cradle.svg) | `dpette/dpette_cradle.py` | Rest cradle for dPette 7016 |
-| `dpette_multi_cradle.stl` | [svg](../svg/dpette_multi_cradle.svg) | `dpette/dpette_cradle.py` | Rest cradle for dPette+ 8-channel |
-| `tip_ejection_bar.stl` | [svg](../svg/tip_ejection_bar.svg) | `dpette/tip_ejection_bar.py` | Tip ejection post (top-button) |
+| `tool_cone_robot.stl` | [svg](svg/so101/tool_cone_robot.svg) | `cad/so101/tool_changer.py` | Female cone — mounts on SO-101 wrist |
+| `tool_cone_pipette.stl` | [svg](svg/so101/tool_cone_pipette.svg) | `cad/so101/tool_changer.py` | Male cone — pipette tool base |
+| `tool_cone_gripper.stl` | [svg](svg/so101/tool_cone_gripper.svg) | `cad/so101/tool_changer.py` | Male cone — gripper tool base |
+| `tool_dock_3station.stl` | [svg](svg/so101/tool_dock_3station.svg) | `cad/so101/tool_dock.py` | 3-slot parking rack with magnet pockets |
+| `pipette_mount_so101.stl` | [svg](svg/so101/pipette_mount_so101.svg) | `cad/so101/pipette_mount.py` | dPette barrel clamp for SO-101 wrist |
+| `gripper_tips_tpu.stl` | [svg](svg/so101/gripper_tips_tpu.svg) | `cad/so101/gripper_tips.py` | Compliant fingertips (TPU 95A) |
+| `96well_plate_holder.stl` | [svg](svg/labware/96well_plate_holder.svg) | `cad/labware/plate_holder.py` | SBS plate holder with alignment pins |
+| `tip_rack_holder.stl` | [svg](svg/labware/tip_rack_holder.svg) | `cad/labware/tip_rack_holder.py` | Tip rack tray |
+| `dpette_single_cradle.stl` | [svg](svg/dpette/dpette_single_cradle.svg) | `cad/dpette/dpette_cradle.py` | Rest cradle for dPette 7016 |
+| `dpette_multi_cradle.stl` | [svg](svg/dpette/dpette_multi_cradle.svg) | `cad/dpette/dpette_cradle.py` | Rest cradle for dPette+ 8-channel |
+| `tip_ejection_bar.stl` | [svg](svg/dpette/tip_ejection_bar.svg) | `cad/dpette/tip_ejection_bar.py` | Tip ejection post (top-button) |
 
 ## Structural Review Checklist
 

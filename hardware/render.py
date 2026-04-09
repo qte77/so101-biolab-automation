@@ -74,8 +74,12 @@ def render_cad(parts: list[dict]) -> None:
         build_fn = getattr(mod, part["build_func"])
         shape = build_fn()
 
-        cq.exporters.export(shape, str(STL_DIR / part["stl"]))
-        cq.exporters.export(shape, str(SVG_DIR / part["svg"]), exportType="SVG")
+        stl_out = STL_DIR / part["stl"]
+        svg_out = SVG_DIR / part["svg"]
+        stl_out.parent.mkdir(parents=True, exist_ok=True)
+        svg_out.parent.mkdir(parents=True, exist_ok=True)
+        cq.exporters.export(shape, str(stl_out))
+        cq.exporters.export(shape, str(svg_out), exportType="SVG")
         print(f"  {part['stl']} + {part['svg']}")
 
 
@@ -89,6 +93,7 @@ def render_scad(parts: list[dict]) -> None:
             continue
         scad_path = HARDWARE_DIR / part["scad"]
         stl_path = STL_DIR / part["stl"]
+        stl_path.parent.mkdir(parents=True, exist_ok=True)
         args = part.get("scad_args", "").split()
         cmd = ["openscad", "-o", str(stl_path), *args, str(scad_path)]
         cmd = [c for c in cmd if c]

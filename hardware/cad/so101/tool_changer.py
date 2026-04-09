@@ -10,12 +10,12 @@ Usage:
     uv run --group cad python hardware/cad/so101/tool_changer.py
 
 Exports:
-    hardware/stl/tool_cone_robot.stl   (female, mounts on SO-101 wrist)
-    hardware/stl/tool_cone_pipette.stl (male, attaches to pipette)
-    hardware/stl/tool_cone_gripper.stl (male, attaches to gripper)
-    hardware/stl/tool_cone_hook.stl    (male, attaches to fridge hook)
-    hardware/svg/tool_cone_robot.svg
-    hardware/svg/tool_cone_male.svg
+    hardware/stl/so101/tool_cone_robot.stl   (female, mounts on SO-101 wrist)
+    hardware/stl/so101/tool_cone_pipette.stl (male, attaches to pipette)
+    hardware/stl/so101/tool_cone_gripper.stl (male, attaches to gripper)
+    hardware/stl/so101/tool_cone_hook.stl    (male, attaches to fridge hook)
+    hardware/svg/so101/tool_cone_robot.svg
+    hardware/svg/so101/tool_cone_male.svg
 """
 
 import math
@@ -141,8 +141,8 @@ def build_male_cone() -> cq.Workplane:
 
 def export_all() -> None:
     """Export all tool changer components."""
-    stl_dir = Path(__file__).parent.parent.parent / "stl"
-    svg_dir = Path(__file__).parent.parent.parent / "svg"
+    stl_dir = Path(__file__).parent.parent.parent / "stl" / "so101"
+    svg_dir = Path(__file__).parent.parent.parent / "svg" / "so101"
 
     robot_cone = build_robot_cone()
     cq.exporters.export(robot_cone, str(stl_dir / "tool_cone_robot.stl"))

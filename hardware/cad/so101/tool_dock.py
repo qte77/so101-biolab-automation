@@ -44,8 +44,8 @@ def build_tool_dock() -> cq.Workplane:
 
 def export(part: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent.parent / "stl" / "tool_dock_3station.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "tool_dock_3station.svg"
+    stl = Path(__file__).parent.parent.parent / "stl" / "so101" / "tool_dock_3station.stl"
+    svg = Path(__file__).parent.parent.parent / "svg" / "so101" / "tool_dock_3station.svg"
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
     print(f"Exported: {stl}")

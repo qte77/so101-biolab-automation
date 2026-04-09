@@ -64,7 +64,7 @@ def theme_svg(path: Path) -> None:
 
 def main() -> None:
     """Theme all SVGs in hardware/svg/."""
-    for svg in sorted(SVG_DIR.glob("*.svg")):
+    for svg in sorted(SVG_DIR.glob("**/*.svg")):
         if svg.name in SKIP:
             print(f"Skipped: {svg.name} (manually themed)")
             continue

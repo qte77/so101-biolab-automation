@@ -91,8 +91,8 @@ def build_pipette_mount() -> cq.Workplane:
 
 def export(part: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl_path = Path(__file__).parent.parent.parent / "stl" / "pipette_mount_so101.stl"
-    svg_path = Path(__file__).parent.parent.parent / "svg" / "pipette_mount_so101.svg"
+    stl_path = Path(__file__).parent.parent.parent / "stl" / "so101" / "pipette_mount_so101.stl"
+    svg_path = Path(__file__).parent.parent.parent / "svg" / "so101" / "pipette_mount_so101.svg"
     cq.exporters.export(part, str(stl_path))
     cq.exporters.export(part, str(svg_path), exportType="SVG")
     print(f"Exported: {stl_path}")

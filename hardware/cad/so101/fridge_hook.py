@@ -7,8 +7,8 @@ Usage:
     uv run --group cad python hardware/cad/so101/fridge_hook.py
 
 Exports:
-    hardware/stl/fridge_hook_tool.stl
-    hardware/svg/fridge_hook_tool.svg
+    hardware/stl/so101/fridge_hook_tool.stl
+    hardware/svg/so101/fridge_hook_tool.svg
 """
 
 from pathlib import Path
@@ -61,8 +61,8 @@ def build_fridge_hook() -> cq.Workplane:
 
 def export(hook: cq.Workplane) -> None:
     """Export to STL and SVG."""
-    stl_path = Path(__file__).parent.parent.parent / "stl" / "fridge_hook_tool.stl"
-    svg_path = Path(__file__).parent.parent.parent / "svg" / "fridge_hook_tool.svg"
+    stl_path = Path(__file__).parent.parent.parent / "stl" / "so101" / "fridge_hook_tool.stl"
+    svg_path = Path(__file__).parent.parent.parent / "svg" / "so101" / "fridge_hook_tool.svg"
 
     cq.exporters.export(hook, str(stl_path))
     cq.exporters.export(hook, str(svg_path), exportType="SVG")
