@@ -63,6 +63,9 @@ def render_cad(parts: list[dict]) -> None:
     _modules: dict[str, object] = {}
 
     for part in parts:
+        if "cad" not in part or "build_func" not in part:
+            print(f"  SKIP {part['name']} — no CadQuery script")
+            continue
         cad_rel = part["cad"]
         if cad_rel not in _modules:
             _modules[cad_rel] = _load_module(HARDWARE_DIR / cad_rel)
@@ -81,6 +84,9 @@ def render_scad(parts: list[dict]) -> None:
     print("--- Rendering via OpenSCAD (fallback)")
 
     for part in parts:
+        if "scad" not in part:
+            print(f"  SKIP {part['name']} — no .scad script")
+            continue
         scad_path = HARDWARE_DIR / part["scad"]
         stl_path = STL_DIR / part["stl"]
         args = part.get("scad_args", "").split()
@@ -91,13 +97,13 @@ def render_scad(parts: list[dict]) -> None:
 
     # Generate SVGs from STLs (CadQuery's stl_to_svg.py)
     print("--- SVG wireframe from STLs")
-    stl_to_svg = HARDWARE_DIR / "cad" / "stl_to_svg.py"
+    stl_to_svg = HARDWARE_DIR / "cad" / "util" / "stl_to_svg.py"
     subprocess.run([sys.executable, str(stl_to_svg), "--all"], check=True)
 
 
 def run_theme() -> None:
     """Inject dark mode CSS into all SVGs."""
-    theme_script = HARDWARE_DIR / "cad" / "theme_svgs.py"
+    theme_script = HARDWARE_DIR / "cad" / "util" / "theme_svgs.py"
     subprocess.run([sys.executable, str(theme_script)], check=True)
 
 
@@ -108,16 +114,40 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    backend = args.backend or detect_backend()
-    parts = load_manifest()
+    force_backend = args.backend
+    all_parts = load_manifest()
 
-    if backend == "cad":
-        render_cad(parts)
-    else:
-        render_scad(parts)
+    # Skip deferred/planned parts
+    parts = [p for p in all_parts if p.get("status") not in ("deferred", "planned")]
+    skipped = len(all_parts) - len(parts)
+    if skipped:
+        print(f"--- Skipping {skipped} deferred/planned parts")
+
+    # Split parts by primary_backend (or use forced backend)
+    cad_parts = []
+    scad_parts = []
+    for part in parts:
+        backend = force_backend or part.get("primary_backend", "cadquery")
+        if backend in ("cad", "cadquery"):
+            cad_parts.append(part)
+        else:
+            scad_parts.append(part)
+
+    # Render each group with the appropriate backend
+    if cad_parts:
+        available = detect_backend()
+        if available == "cad" or force_backend == "cad":
+            render_cad(cad_parts)
+        else:
+            print(f"  CadQuery unavailable — falling back to OpenSCAD for {len(cad_parts)} parts")
+            render_scad(cad_parts)
+
+    if scad_parts:
+        render_scad(scad_parts)
 
     run_theme()
-    print(f"=== {len(parts)} parts rendered via {backend} ===")
+    total = len(cad_parts) + len(scad_parts)
+    print(f"=== {total} parts rendered (cad:{len(cad_parts)}, scad:{len(scad_parts)}) ===")
     return 0
 
 

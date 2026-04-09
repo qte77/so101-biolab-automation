@@ -63,7 +63,15 @@ PLA+, 0.4mm nozzle, 0.2mm layer, 15% infill, supports >45 degrees.
 | 32x32mm UVC camera module (wrist) | 2 | $15 ea | Per [SO-ARM100 wrist camera options](https://github.com/TheRobotStudio/SO-ARM100#5-wristmount-cameras) |
 | USB webcam 1080p (overhead) | 1 | $25 | Per [SO-ARM100 overhead mount](https://github.com/TheRobotStudio/SO-ARM100#2-overhead-camera-mount) |
 
-## Digital Pipette
+## Commercial Electronic Pipettes (Primary)
+
+| Part | Qty | ~Cost | Source | Notes |
+|------|-----|-------|--------|-------|
+| AELAB dPette 7016 (single-channel, 0.5–10,000 µL) | 1 | ~$200 | AELAB | USB port — protocol TBD (see `ElectronicPipette` backend) |
+| DLAB dPette+ (8-channel, 0.5–300 µL) | 1 | ~$600 | DLAB | USB port — protocol TBD (same approach) |
+| Pipette tips (compatible with dPette) | 1 box ea | $15 ea | Lab supply | |
+
+## Digital Pipette (DIY Alternative)
 
 Based on [digital-pipette-v2](https://github.com/ac-rad/digital-pipette-v2)
 ([paper: RSC Digital Discovery 2026](https://pubs.rsc.org/en/content/articlehtml/2026/dd/d5dd00336a)).
@@ -75,6 +83,27 @@ Based on [digital-pipette-v2](https://github.com/ac-rad/digital-pipette-v2)
 | Arduino Nano | 1 | $5 | [Arduino store](https://store.arduino.cc/products/arduino-nano) |
 | 3D-printed pipette body | 1 | — | [STL + code](https://github.com/ac-rad/digital-pipette-v2) |
 | Pipette tips (1-200 uL) | 1 box | $15 | Lab supply |
+
+## XZ Gantry (Dedicated Pipetting Arm)
+
+Simpler alternative to SO-101 for repetitive pipetting at fixed positions.
+
+| Part | Qty | ~Cost | Source |
+|------|-----|-------|--------|
+| MGN12 linear rail (200mm) | 2 | $15 ea | AliExpress / Amazon |
+| NEMA 17 stepper motor | 2 | $10 ea | Generic |
+| GT2 timing belt + pulleys | 1 set | $8 | Generic |
+| Pololu Maestro 6-ch USB servo controller | 1 | $18 | [Pololu](https://www.pololu.com/product/1350) |
+| *Alternative:* Raspberry Pi Pico W | 1 | $6 | [raspberrypi.com](https://www.raspberrypi.com/products/raspberry-pi-pico/) |
+| 3D-printed frame + carriage | 1 | ~$5 | Custom STL (see hardware parts issue) |
+
+**Estimated total: ~$60-80**
+
+## PCR Equipment
+
+| Part | Qty | ~Cost | Source | Notes |
+|------|-----|-------|--------|-------|
+| [Bento Lab](https://www.bento.bio/) (portable PCR) | 1 | ~$1,500 | Bento Bioworks | Centrifuge + thermocycler + gel electrophoresis. USB control TBD. |
 
 ## Edge Compute
 
@@ -101,5 +130,7 @@ Seeed Studio offers [reComputer Jetson + SO-101 kits](https://wiki.seeedstudio.c
 | Config | Estimated Cost |
 |--------|----------------|
 | Minimum (1 follower + 1 leader, RPi, no pipette) | ~$350 |
-| Full prototype (2 followers + 1 leader, RPi, pipette, cameras) | ~$650 |
-| With Jetson (GPU training on-device) | ~$820 |
+| Full SO-101 (2 followers + 1 leader, RPi, DIY pipette, cameras) | ~$650 |
+| Full SO-101 + Jetson (GPU training on-device) | ~$820 |
+| XZ gantry only (dedicated pipetting, commercial pipettes) | ~$860 (gantry ~$60 + dPette 7016 ~$200 + dPette+ ~$600) |
+| Full system (SO-101 + XZ gantry + Bento Lab) | ~$3,000+ |

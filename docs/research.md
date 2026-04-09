@@ -66,6 +66,37 @@ No community design for a pipette attachment specifically for SO-101. This is an
 | [OptoBot](https://github.com/nicolaegues/OptoBot) | GitHub | — | 2024 | OT-2 + Python for automated experimental optimization loops. Closed-loop observe→decide→pipette pattern. |
 | [OT-2 Plate Handler](https://doi.org/10.26434/chemrxiv-2025-n95kk) | ChemRxiv | — | 2025 (Bolt et al.) | 3D-printed robotic claw for Opentrons OT-2. Plate gripping geometry + positioning tolerances reusable. |
 
+## USB Serial & Reverse Engineering Tools
+
+| Tool | URL | Purpose |
+|------|-----|---------|
+| [ac-rad/digital-pipette](https://github.com/ac-rad/digital-pipette) | GitHub | Original (v1) digital pipette — Arduino + Python controller architecture reference |
+| [pyserial](https://pypi.org/project/pyserial/) | PyPI | Python serial port library — foundation for USB serial communication with pipettes |
+| [USBREVue](https://github.com/wcooley/usbrevue) | GitHub | USB traffic capture and replay for reverse-engineering device protocols |
+
+## Commercial Electronic Pipettes
+
+| Equipment | Vendor | Channels | Volume Range | USB Control | Status |
+|-----------|--------|----------|-------------|-------------|--------|
+| AELAB dPette 7016 | AELAB / DLAB OEM | 1 | 0.5–10,000 µL (6 ranges) | USB port (calibration only, no public SDK) | In lab — protocol TBD |
+| DLAB dPette+ | DLAB | 8 | 0.5–300 µL (4 ranges) | USB port (calibration only, no public SDK) | In lab — protocol TBD |
+
+**Control paths (priority order):**
+
+1. **USB reverse engineering** — connect via pyserial, capture traffic with USBREVue/Wireshark during calibration software use, identify aspirate/dispense command bytes, replay from Python
+2. **GPIO button bypass** — solder to 2 button contacts, trigger via optocoupler from RPi/Arduino
+3. **Mechanical button press** — second arm or servo physically presses pipette buttons
+
+Both pipettes use 2 physical buttons for all operations. No public API or serial protocol documentation exists.
+
+## PCR Equipment
+
+| Equipment | Vendor | Features | Control | Status |
+|-----------|--------|----------|---------|--------|
+| [Bento Lab](https://www.bento.bio/) | Bento Bioworks | Portable PCR (centrifuge + thermocycler + gel electrophoresis) | USB — protocol TBD | In lab |
+
+The Bento Lab display shows PCR programs (95°C denature, 55–65°C anneal, 72°C extend, 30 cycles). Automation requires: open/close lid, start/stop program, read status. Control interface needs the same reverse-engineering approach as the electronic pipettes.
+
 ## Bimanual SO-101 Support
 
 **[AIDASLab/lerobot-so101-bimanual](https://github.com/AIDASLab/lerobot-so101-bimanual)** (2026-01, 5 stars) — Drop-in LeRobot fork with `bi_so101_follower`/`bi_so101_leader` types. Calibration, teleoperation, recording all work dual-arm. **Use this instead of patching upstream.**
@@ -175,6 +206,7 @@ No community design for a pipette attachment specifically for SO-101. This is an
 5. **Bimanual needs inter-arm attention** — vanilla ACT struggles with coupled coordination; use InterACT or MoE-ACT
 6. **PyLabRobot backend driver** — writing one for SO-101 makes all existing protocols work on our arms
 7. **8-channel pipette head** — 8x efficiency for 96-well work; design as a specialized end-effector
+8. **Tool genesis is the frontier** — subsystems exist (LLM→CAD, auto-print, tool changing, VLM validation) but no one has closed the full loop yet (see § "Autonomous Tool Genesis")
 
 ## Slicer CLI & Parametric CAD Research
 
@@ -277,7 +309,7 @@ Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm wi
 | [ScadLM](https://github.com/KrishKrosh/ScadLM) | Agentic AI + OpenSCAD generation | Early stage; no slicer validation or print control |
 | [Text2CAD](https://github.com/SadilKhan/Text2CAD) | NeurIPS 2024: text → parametric CAD operations | Academic; 170K models dataset; no print integration |
 | [text-2-cad](https://github.com/roberto-ceraolo/text-2-cad) | OpenAI + RAG over OpenSCAD docs → .scad | Early; similar LLM+OpenSCAD approach, minimal |
-| [Speech-to-Reality](https://arxiv.org/html/2409.18390) | Voice → 3D generative AI → robotic assembly | Research; broader scope includes assembly, not printing |
+| [Speech-to-Reality](https://arxiv.org/html/2409.18390) | Voice → 3D generative AI → robotic assembly | See § "Autonomous Tool Genesis" for full analysis |
 
 **MCP servers (integration layer):**
 
@@ -288,6 +320,62 @@ Agent receives a goal (e.g., "print a plate holder fitting SBS 127.76x85.48mm wi
 | [CADQuery MCP](https://github.com/rishigundakaram/cadquery-mcp-server) | CAD generation + STL/STEP export + SVG feedback | CadQuery path if needed |
 
 **Key insight:** No project integrates all layers (voice → design → validate → print → camera+VLM inspect → agent fix). The MCP ecosystem provides the building blocks.
+
+### Autonomous Tool Genesis (Self-Evolving Multi-Tool)
+
+**Vision:** Robot identifies missing tool → agent generates CAD → prints → mounts via tool changer → validates with VLM → iterates. No existing system fully closes this loop as of mid-2026.
+
+#### Tool Genesis Loop
+
+```text
+Task requires unknown tool
+       ↓
+Agent detects capability gap
+       ↓
+VLM/LLM designs tool (CadQuery/OpenSCAD)
+       ↓
+Slicer validates → Printer fabricates
+       ↓
+Robot mounts via tool changer
+       ↓
+Execute task → VLM validates result
+       ↓ (fail)
+Agent adjusts design → reprints
+```
+
+#### Closest Existing Systems
+
+| Project | Year | Institution | What | Gap vs Full Loop |
+|---------|------|-------------|------|-----------------|
+| [RobotSmith](https://arxiv.org/abs/2506.14763) | 2025 | UMass + MIT | VLM proposes tool geometry, simulates trajectories, 3D-prints, deploys on real robot. 50% success. NeurIPS 2025. | **Closest overall.** Fabrication handoff is manual, no iterative reprinting. |
+| [VLMgineer](https://arxiv.org/abs/2507.12644) | 2025 | UPenn | VLMs co-design tool geometry + action plan via evolutionary search. 12-task benchmark. | Co-optimization of design+use. No physical fabrication in loop. |
+| [Ringwald et al.](https://arxiv.org/abs/2210.10015) | 2022 | TU Munich | Two robots + two 3D printers. Auto print → mount → test gripper fingertips. Fully automated fab-to-deploy. | **Best physical pipeline.** Uses predefined STLs, no LLM design or gap detection. |
+| [MAMA BEAR](https://www.bu.edu/articles/2024/a-robot-on-a-mission) | 2018+ | Boston U | Autonomous robot running 3+ years. Designs via Bayesian opt → prints → crush-tests → iterates. 25K+ structures. | **Gold standard for design-fabricate-test loop.** Structures, not tools. |
+| [RoboTool](https://arxiv.org/abs/2310.13065) | 2023 | CMU + DeepMind | LLM reasons about when to **manufacture** a new tool vs select existing. Tested on real robots. | Demonstrated manufacturing reasoning. No actual CAD gen or printing. |
+
+#### Enabling Research
+
+| Project | Year | Institution | What | Relevance |
+|---------|------|-------------|------|-----------|
+| [Learning to Design and Use Tools](https://arxiv.org/abs/2311.00754) | 2023 | Stanford / MIT | RL jointly learns designer policy (tool geometry) + controller policy (tool use). Zero-shot to unseen goals. CoRL 2023. | Joint design+control optimization — learns novel tool shapes. |
+| [Speech to Reality](https://arxiv.org/abs/2409.18390) | 2025 | MIT CSAIL + DeepMind + Autodesk | Voice → LLM → 3D gen → robotic assembly. Builds furniture in ~5 min. ACM SCF '25 + NeurIPS. | Full prompt-to-physical-object loop (assembly, not printing). |
+| [GAD (Generative AI + CAD)](https://link.springer.com/article/10.1007/s00170-025-15830-2) | 2025 | Springer | GPT-4o generates 3D models from text/images/voice → STL + G-code → direct to printer. | End-to-end text-to-print with printer integration. |
+| [Generative AI for FreeCAD](https://arxiv.org/abs/2508.00843) | 2025 | Various | LLMs generate FreeCAD scripts from NL, iteratively refine on error feedback. | Directly applicable — parametric script gen for tool parts. |
+| [CAD-LLM](https://www.research.autodesk.com/publications/ai-lab-cad-llm/) | 2024 | Autodesk Research | LLM generates parametric CAD from natural language. | Text-to-CAD backbone for fabrication pipeline. |
+| [FiloBot](https://techxplore.com/news/2024-01-snake-robot-3d-body-longer.html) | 2024 | IIT Italy | Snake robot 3D-prints its own body to grow longer (FDM). Responds to stimuli. | Robot that literally fabricates itself — narrow but novel. |
+
+#### What's Missing (Open Problems)
+
+No single system combines all six steps:
+
+1. **Capability gap detection** — robot identifies it lacks a tool for a task
+2. **LLM/VLM-driven CAD** — designs a novel tool parametrically
+3. **Automated fabrication** — prints with quality monitoring ([LLM-3D Print](https://arxiv.org/abs/2408.14307))
+4. **Robotic tool mounting** — picks up via quick-exchange (Ringwald has this)
+5. **Task execution + validation** — uses tool, verifies success (RobotSmith has this)
+6. **Iterative refinement** — redesigns and reprints on failure (MAMA BEAR has this for structures)
+
+**Our position:** Steps 1-2-3 via CadQuery + PrusaSlicer + Bambu printer. Step 4 via SO-101 tool changer. Steps 5-6 via VLM camera loop. Assembling these subsystems into a unified pipeline is the frontier.
 
 ### SO-101 Simulation & Digital Twin
 
@@ -416,12 +504,14 @@ Add draft STL files to `hardware/stl/` for custom parts. Mark as experimental �
 
 | Option | Type | Control | Cost | Status |
 |--------|------|---------|------|--------|
-| [digital-pipette-v2](https://github.com/ac-rad/digital-pipette-v2) | DIY syringe | Arduino serial | ~$95 | Available now (v2.0.0, 2025-11) |
+| [digital-pipette-v2](https://github.com/ac-rad/digital-pipette-v2) | DIY syringe | Arduino serial | ~$95 | `DigitalPipette` backend (available now) |
+| AELAB dPette 7016 | Commercial electronic (1-ch) | USB serial (TBD) | ~$200 | `ElectronicPipette` backend (stub, needs USB RE) |
+| DLAB dPette+ | Commercial electronic (8-ch) | USB serial (TBD) | ~$600 | `ElectronicPipette` backend (stub, needs USB RE) |
 | [Sartorius Picus 2](https://www.sartorius.com/en/products/pipetting/electronic-pipettes) | Commercial electronic | Bluetooth/serial | ~$800-2000 | Future — see [GormleyLab Python interface](https://github.com/GormleyLab/Pipette-Liquid-Handler) |
 | [Integra VIAFLO](https://www.integra-biosciences.com/global/en/electronic-pipettes) | Commercial electronic | Bluetooth | ~$1000-3000 | Future — 8/12-channel for 96-well efficiency |
 | Custom 8-channel head | DIY multi-channel | Arduino/stepper | ~$200 | Future — 8x efficiency for 96-well |
 
-**`src/biolab/pipette.py` is already abstracted** — `aspirate(volume)`, `dispense(volume)`, `eject_tip()`. Adding a Sartorius/Integra backend is a new class implementing the same interface.
+**`src/biolab/pipette.py` defines `PipetteProtocol`** — `aspirate(volume)`, `dispense(volume)`, `eject_tip()`. Both `DigitalPipette` and `ElectronicPipette` satisfy this protocol. Backend selected via `configs/pipette.yaml`.
 
 ## Future Vision: VLM + Embodied AI for Hands-Off Autonomous Operation
 

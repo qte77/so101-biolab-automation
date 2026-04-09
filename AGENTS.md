@@ -19,7 +19,7 @@ For technical workflows and coding standards, see [CONTRIBUTING.md](CONTRIBUTING
 See [docs/architecture.md](docs/architecture.md) for full system design, module table, and data flows.
 
 - **Dual SO-101 arms** — leader/follower teleoperation and ACT policy execution
-- **Workflow orchestration** — composes arms + pipette + tool changer into use cases (UC1-4)
+- **Workflow orchestration** — composes arms + pipette + tool changer into use cases (UC1-5)
 - **FastAPI dashboard** — remote oversight with WebSocket command channel
 
 Key references:

@@ -45,9 +45,11 @@ updated: 2026-03-27
 
 | Module | File | Responsibility | Dependencies |
 |--------|------|----------------|--------------|
-| **Workflow** | `src/biolab/workflow.py` | Orchestrates UC1-4 by composing other modules | arms, pipette, plate, tool_changer |
+| **Workflow** | `src/biolab/workflow.py` | Orchestrates use cases (UC1-5) by composing other modules | arms, pipette, plate, tool_changer, xz_gantry |
 | **Arms** | `src/biolab/arms.py` | Dual SO-101 arm control via LeRobot. Stub mode when lerobot absent. | plate (for send_to_well), safety (for PARK_POSITION) |
-| **Pipette** | `src/biolab/pipette.py` | Digital pipette serial control. Tracks fill state. Stub mode when pyserial absent. | None |
+| **Pipette** | `src/biolab/pipette.py` | Multi-backend pipette control (`PipetteProtocol`). Backends: `DigitalPipette` (DIY/Arduino), `ElectronicPipette` (AELAB/DLAB). Stub mode when pyserial absent. | None |
+| **XZ Gantry** | `src/biolab/xz_gantry.py` | Dedicated 2-axis pipetting arm (simpler than SO-101). Stub mode when serial absent. | None |
+| **Bento Lab** | `src/biolab/bento_lab.py` | Portable PCR thermocycler control (lid, programs, status). Stub mode when serial absent. | None |
 | **Plate** | `src/biolab/plate.py` | Pure SBS 96-well coordinate math. No hardware deps. | None |
 | **Tool Changer** | `src/biolab/tool_changer.py` | 3-tool magnetic dock: pipette, gripper, fridge hook. | arms (for send_action) |
 | **Camera** | `src/biolab/camera.py` | Multi-camera capture via OpenCV. Stub mode when cv2 absent. | None |
@@ -82,6 +84,9 @@ workflow.uc2_fridge_open_grab_move()
 | `configs/arms.yaml` | `DualArmConfig.from_yaml()` | Arm ports, motor IDs, camera devices |
 | `configs/plate_layout.yaml` | `PlateLayout.from_yaml()` | Workspace origin, Z heights, trough position |
 | `configs/tool_dock.yaml` | `ToolDockConfig.from_yaml()` | Joint arrays for 3 dock stations |
+| `configs/pipette.yaml` | `_create_pipette()` | Backend selection (digital/electronic) + per-backend settings |
+| `configs/xz_gantry.yaml` | `XZGantryConfig.from_yaml()` | Named positions, serial port, controller type |
+| `configs/bento_lab.yaml` | `BentoLabConfig` | Serial port, PCR program definitions |
 
 ## Stub Mode
 
@@ -90,7 +95,9 @@ Every hardware-dependent module gracefully degrades when its dependency is unava
 | Module | Trigger | Behavior |
 |--------|---------|----------|
 | arms.py | `ImportError` on `lerobot` | `send_action` logs and returns; `get_observation` returns `{"stub": True}` |
-| pipette.py | `ImportError` on `serial` | Fill state tracked in memory; `_move_to` is a no-op |
+| pipette.py | `ImportError` on `serial` | Fill state tracked in memory; serial commands are no-ops |
+| xz_gantry.py | `ImportError` on `serial` | Position tracked in memory; serial commands are no-ops |
+| bento_lab.py | `ImportError` on `serial` | State (lid, program) tracked in memory; serial commands are no-ops |
 | camera.py | `ImportError` on `cv2` | `start()` returns; `get_frames()` returns `{}` |
 
 This allows the full workflow to run end-to-end without any hardware attached. Run `make run_tests` to verify.

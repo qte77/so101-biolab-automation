@@ -7,7 +7,7 @@ Based on Berkeley AutoLab passive modular tool changer design:
 Key design: truncated cone (10° angle) + dowel pin alignment.
 
 Usage:
-    uv run --group cad python hardware/cad/tool_changer.py
+    uv run --group cad python hardware/cad/so101/tool_changer.py
 
 Exports:
     hardware/stl/tool_cone_robot.stl   (female, mounts on SO-101 wrist)
@@ -141,8 +141,8 @@ def build_male_cone() -> cq.Workplane:
 
 def export_all() -> None:
     """Export all tool changer components."""
-    stl_dir = Path(__file__).parent.parent / "stl"
-    svg_dir = Path(__file__).parent.parent / "svg"
+    stl_dir = Path(__file__).parent.parent.parent / "stl"
+    svg_dir = Path(__file__).parent.parent.parent / "svg"
 
     robot_cone = build_robot_cone()
     cq.exporters.export(robot_cone, str(stl_dir / "tool_cone_robot.stl"))

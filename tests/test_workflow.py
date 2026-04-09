@@ -9,7 +9,12 @@ from __future__ import annotations
 import pytest
 
 from biolab.arms import ArmConfig, DualArmConfig, DualArmController
-from biolab.pipette import DigitalPipette, PipetteConfig
+from biolab.pipette import (
+    DigitalPipette,
+    ElectronicPipette,
+    ElectronicPipetteConfig,
+    PipetteConfig,
+)
 from biolab.tool_changer import Tool, ToolChanger, ToolDockConfig
 from biolab.workflow import (
     PlateLayout,
@@ -22,7 +27,10 @@ from biolab.workflow import (
     uc2_fridge_open_grab_move,
     uc3_tool_cycle,
     uc4_demo_all,
+    uc5_gantry_pipette,
+    uc5_gantry_strip,
 )
+from biolab.xz_gantry import XZGantry, XZGantryConfig
 
 
 @pytest.fixture
@@ -240,6 +248,68 @@ class TestUC4DemoAll:
     ) -> None:
         """After demo, pipette fill is 0."""
         uc4_demo_all(stub_controller, stub_pipette, changer, layout, "arm_a")
+        assert stub_pipette._current_fill == 0.0
+
+
+@pytest.fixture
+def stub_gantry() -> XZGantry:
+    """Connected XZ gantry in stub mode."""
+    config = XZGantryConfig(
+        serial_port="/dev/ttyUSB_MISSING",
+        positions={"trough": (0.0, 0.0), "plate_a1": (45.0, 11.24), "plate_a2": (54.0, 11.24)},
+    )
+    g = XZGantry(config)
+    g.connect()
+    return g
+
+
+class TestUC5GantryPipette:
+    """UC5: Gantry-based pipetting — no SO-101 arm needed."""
+
+    def test_gantry_single_well_completes(
+        self, stub_gantry: XZGantry, stub_pipette: DigitalPipette
+    ) -> None:
+        """Full cycle: trough → aspirate → plate → dispense."""
+        uc5_gantry_pipette(stub_gantry, stub_pipette, "trough", "plate_a1", 50.0)
+        assert stub_pipette._current_fill == 0.0
+
+    def test_gantry_fill_resets(self, stub_gantry: XZGantry, stub_pipette: DigitalPipette) -> None:
+        """Pipette fill returns to 0 after dispense."""
+        uc5_gantry_pipette(stub_gantry, stub_pipette, "trough", "plate_a1", 100.0)
+        assert stub_pipette._current_fill == 0.0
+
+    def test_gantry_invalid_position_raises(
+        self, stub_gantry: XZGantry, stub_pipette: DigitalPipette
+    ) -> None:
+        """Unknown position raises ValueError."""
+        with pytest.raises(ValueError, match="Unknown position"):
+            uc5_gantry_pipette(stub_gantry, stub_pipette, "nonexistent", "plate_a1", 50.0)
+
+    def test_gantry_with_electronic_pipette(self, stub_gantry: XZGantry) -> None:
+        """ElectronicPipette works with gantry (PipetteProtocol)."""
+        epipette = ElectronicPipette(
+            ElectronicPipetteConfig(serial_port="/dev/ttyACM_MISSING", max_volume_ul=1000.0)
+        )
+        epipette.connect()
+        uc5_gantry_pipette(stub_gantry, epipette, "trough", "plate_a1", 50.0)
+        assert epipette._current_fill == 0.0
+
+
+class TestUC5GantryStrip:
+    """UC5: Gantry-based strip pipetting — multiple wells."""
+
+    def test_gantry_strip_completes(
+        self, stub_gantry: XZGantry, stub_pipette: DigitalPipette
+    ) -> None:
+        """Pipette multiple positions in sequence."""
+        uc5_gantry_strip(stub_gantry, stub_pipette, "trough", ["plate_a1", "plate_a2"], 25.0)
+        assert stub_pipette._current_fill == 0.0
+
+    def test_gantry_strip_empty_list(
+        self, stub_gantry: XZGantry, stub_pipette: DigitalPipette
+    ) -> None:
+        """Empty destination list is a no-op."""
+        uc5_gantry_strip(stub_gantry, stub_pipette, "trough", [], 25.0)
         assert stub_pipette._current_fill == 0.0
 
 

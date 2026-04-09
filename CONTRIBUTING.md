@@ -25,6 +25,7 @@ For AI agent behavioral rules, see [AGENTS.md](AGENTS.md).
 | `make serve_dashboard` | Start remote dashboard |
 
 **Emergency fallback** (if make commands fail):
+
 ```bash
 uv run ruff format . && uv run ruff check . --fix
 uv run pyright
@@ -34,16 +35,19 @@ uv run pytest -m "not hardware"
 ## Testing Strategy
 
 ### Unit Tests (always required)
+
 - Mock all hardware and external dependencies using `@patch`
 - Test business logic and data validation
 - Mirror `src/` structure in `tests/`
 
 ### Hardware Tests (opt-in)
+
 - Tag with `@pytest.mark.hardware` — excluded from `make run_tests` by default
 - Run explicitly: `uv run pytest -m hardware`
 - Require physical arms connected and calibrated
 
 ### BDD Approach
+
 - Write tests first, implement code iteratively
 - All tests must pass before advancing to the next step
 

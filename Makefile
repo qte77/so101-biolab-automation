@@ -109,7 +109,7 @@ render_parts: ## Generate STL + SVG from hardware/parts.json (CadQuery preferred
 	uv run --group cad python hardware/render.py || python3 hardware/render.py
 
 check_prints: ## Run PrusaSlicer printability checks on STLs (optional)
-	python hardware/slicer/validate.py --all
+	uv run python hardware/slicer/validate.py --all
 
 render_all: render_parts check_prints ## Generate parts + validate printability
 
