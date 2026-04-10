@@ -1,6 +1,8 @@
 """Tests for 96-well plate coordinate calculations."""
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 from so101.plate import (
     A1_OFFSET_X,
@@ -116,3 +118,27 @@ class TestParseWellName:
     def test_empty(self) -> None:
         with pytest.raises(ValueError):
             parse_well_name("")
+
+
+class TestWellProperties:
+    """Hypothesis property tests for well coordinates."""
+
+    @given(
+        row=st.sampled_from(list("ABCDEFGH")),
+        col=st.integers(min_value=1, max_value=12),
+    )
+    def test_all_coordinates_positive(self, row: str, col: int) -> None:
+        """Every valid well has positive x and y coordinates."""
+        x, y = well_coordinates(row, col)
+        assert x > 0
+        assert y > 0
+
+    @given(
+        row=st.sampled_from(list("ABCDEFGH")),
+        col=st.integers(min_value=1, max_value=12),
+    )
+    def test_parse_well_roundtrip(self, row: str, col: int) -> None:
+        """parse_well_name(f'{row}{col}') recovers the same row and col."""
+        well = parse_well_name(f"{row}{col}")
+        assert well.row == row
+        assert well.col == col

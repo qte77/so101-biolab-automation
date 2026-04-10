@@ -69,3 +69,23 @@ class TestToolChanger:
         changer.current_tool = Tool.NONE
         with pytest.raises(ValueError, match="fridge_hook"):
             changer.change_tool(Tool.FRIDGE_HOOK)
+
+    def test_change_from_none_only_picks_up(self, dock_config: ToolDockConfig) -> None:
+        """Starting with NONE, change_tool only does pickup (no return)."""
+        stub = StubArmController()
+        changer = ToolChanger(dock_config, stub, "arm_a")
+        changer.current_tool = Tool.NONE
+        changer.change_tool(Tool.PIPETTE)
+        assert changer.current_tool == Tool.PIPETTE
+        assert len(stub.actions) == 4  # Pickup only
+
+    def test_rapid_tool_changes(self, dock_config: ToolDockConfig) -> None:
+        """Two consecutive tool changes work correctly."""
+        stub = StubArmController()
+        changer = ToolChanger(dock_config, stub, "arm_a")
+        changer.current_tool = Tool.NONE
+        changer.change_tool(Tool.PIPETTE)
+        changer.change_tool(Tool.GRIPPER)
+        assert changer.current_tool == Tool.GRIPPER
+        # 4 (pickup pipette) + 4 (return pipette) + 4 (pickup gripper) = 12
+        assert len(stub.actions) == 12
