@@ -1,6 +1,7 @@
 """Tests for dual arm controller — must work without LeRobot hardware."""
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -138,3 +139,63 @@ class TestNamedPositions:
         ctrl.connect()
         with pytest.raises(ValueError, match="Unknown arm"):
             ctrl.move_to_named("nonexistent", "park")
+
+
+class TestConfigDrivenOperations:
+    """park_all and send_to_well use config positions, not hardcoded values."""
+
+    @pytest.fixture
+    def config_with_positions(self) -> DualArmConfig:
+        """Config with custom park and well_approach positions."""
+        return DualArmConfig(
+            arm_a=ArmConfig(arm_id="arm_a", port="/dev/null", role="follower"),
+            arm_b=ArmConfig(arm_id="arm_b", port="/dev/null", role="follower"),
+            positions={
+                "park": [5.0, -40.0, -85.0, 2.0, 1.0, 0.0],
+                "well_approach": [10.0, -30.0, -60.0, 5.0, 0.0, 0.0],
+            },
+        )
+
+    def test_park_all_uses_config_position(
+        self, config_with_positions: DualArmConfig
+    ) -> None:
+        """park_all sends the config 'park' position, not the hardcoded constant."""
+        ctrl = DualArmController(config_with_positions)
+        ctrl.connect()
+        sent_actions: list[tuple[str, list[float]]] = []
+        original_send = ctrl.send_action
+
+        def spy_send(arm_id: str, action: list[float]) -> None:
+            sent_actions.append((arm_id, action))
+            original_send(arm_id, action)
+
+        with patch.object(ctrl, "send_action", side_effect=spy_send):
+            ctrl.park_all()
+
+        # Both arms should receive the config park position
+        assert len(sent_actions) == 2
+        for arm_id, action in sent_actions:
+            assert action == [5.0, -40.0, -85.0, 2.0, 1.0, 0.0]
+
+    def test_send_to_well_uses_config_position(
+        self, config_with_positions: DualArmConfig
+    ) -> None:
+        """send_to_well uses well_approach from config, not zero-filled stub."""
+        ctrl = DualArmController(config_with_positions)
+        ctrl.connect()
+        sent_actions: list[tuple[str, list[float]]] = []
+        original_send = ctrl.send_action
+
+        def spy_send(arm_id: str, action: list[float]) -> None:
+            sent_actions.append((arm_id, action))
+            original_send(arm_id, action)
+
+        with patch.object(ctrl, "send_action", side_effect=spy_send):
+            ctrl.send_to_well("arm_a", "A1")
+
+        assert len(sent_actions) == 1
+        _, action = sent_actions[0]
+        # Must NOT be all-zeros stub
+        assert action != [0.0] * 6
+        # Should be the well_approach position from config
+        assert action == [10.0, -30.0, -60.0, 5.0, 0.0, 0.0]
