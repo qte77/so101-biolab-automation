@@ -6,6 +6,7 @@ All tests work without hardware (stub mode).
 
 from __future__ import annotations
 
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -435,6 +436,25 @@ class TestUC5GantryStrip:
         # Pipette should be empty — dispensing anything raises
         with pytest.raises(ValueError):
             stub_pipette.dispense(0.1)
+
+
+class TestWorkflowRecovery:
+    """P5: Workflow recovery — error handling at system boundaries."""
+
+    def test_pipette_well_unknown_arm(
+        self,
+        stub_controller: DualArmController,
+        stub_pipette: DigitalPipette,
+        layout: PlateLayout,
+    ) -> None:
+        """Unknown arm_id raises ValueError."""
+        with pytest.raises(ValueError, match="Unknown arm"):
+            pipette_well(stub_controller, stub_pipette, layout, "nonexistent", "TROUGH", "A1", 50.0)
+
+    def test_create_workflow_missing_config(self, tmp_path: Path) -> None:
+        """create_workflow_context raises when config file doesn't exist."""
+        with pytest.raises(FileNotFoundError):
+            create_workflow_context(arm_config_path=str(tmp_path / "missing.yaml"))
 
 
 class TestCreateWorkflowContext:
