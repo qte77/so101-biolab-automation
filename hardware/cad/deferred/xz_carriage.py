@@ -9,9 +9,16 @@ Usage:
     uv run --group cad python hardware/cad/deferred/xz_carriage.py
 """
 
+# Shared export helper (standalone mode)
+import sys
 from pathlib import Path
 
-from build123d import Box, Cylinder, ExportSVG, Pos, Rot, Solid, export_stl
+from build123d import Box, Cylinder, Pos, Rot, Solid
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from util.export import export_part
+
+sys.path.pop()
 
 # --- Parameters (all in mm) ---
 CARRIAGE_W = 50.0
@@ -51,14 +58,7 @@ def build_xz_carriage() -> Solid:
 
 def export(part: Solid) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent.parent / "stl" / "deferred" / "xz_carriage_pipette_dock.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "deferred" / "xz_carriage_pipette_dock.svg"
-    export_stl(part, str(stl))
-    exporter = ExportSVG()
-    exporter.add_shape(part)
-    exporter.write(str(svg))
-    print(f"Exported: {stl}")
-    print(f"Exported: {svg}")
+    export_part(part, "deferred", "xz_carriage_pipette_dock")
 
 
 if __name__ == "__main__":

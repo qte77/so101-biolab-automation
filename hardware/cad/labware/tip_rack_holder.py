@@ -6,9 +6,16 @@ Usage:
     uv run --group cad python hardware/cad/labware/tip_rack_holder.py
 """
 
+# Shared export helper (standalone mode)
+import sys
 from pathlib import Path
 
-from build123d import Box, ExportSVG, Pos, export_stl
+from build123d import Box, Pos
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from util.export import export_part
+
+sys.path.pop()
 
 # --- Parameters (all in mm) ---
 # Standard tip rack (approximate — varies by manufacturer)
@@ -38,14 +45,7 @@ def build_tip_rack_holder():
 
 def export(part) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent.parent / "stl" / "labware" / "tip_rack_holder.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "labware" / "tip_rack_holder.svg"
-    export_stl(part, str(stl))
-    exporter = ExportSVG()
-    exporter.add_shape(part)
-    exporter.write(str(svg))
-    print(f"Exported: {stl}")
-    print(f"Exported: {svg}")
+    export_part(part, "labware", "tip_rack_holder")
 
 
 if __name__ == "__main__":

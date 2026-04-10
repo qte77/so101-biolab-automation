@@ -7,9 +7,16 @@ Usage:
     uv run --group cad python hardware/cad/so101/gripper_tips.py
 """
 
+# Shared export helper (standalone mode)
+import sys
 from pathlib import Path
 
-from build123d import Box, ExportSVG, Pos, export_stl
+from build123d import Box, Pos
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from util.export import export_part
+
+sys.path.pop()
 
 # --- Parameters (all in mm) ---
 # SO-101 gripper finger (approximate)
@@ -41,14 +48,7 @@ def build_gripper_tip():
 
 def export(part) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent.parent / "stl" / "so101" / "gripper_tips_tpu.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "so101" / "gripper_tips_tpu.svg"
-    export_stl(part, str(stl))
-    exporter = ExportSVG()
-    exporter.add_shape(part)
-    exporter.write(str(svg))
-    print(f"Exported: {stl}")
-    print(f"Exported: {svg}")
+    export_part(part, "so101", "gripper_tips_tpu")
 
 
 if __name__ == "__main__":

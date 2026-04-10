@@ -19,9 +19,16 @@ Usage:
     uv run --group cad python hardware/cad/dpette/tip_ejection_bar.py
 """
 
+# Shared export helper (standalone mode)
+import sys
 from pathlib import Path
 
-from build123d import Box, Cone, Cylinder, ExportSVG, Pos, export_stl
+from build123d import Box, Cone, Cylinder, Pos
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from util.export import export_part
+
+sys.path.pop()
 
 # --- Parameters (all in mm) ---
 # Post dimensions (contacts the top-mounted ejector button)
@@ -85,14 +92,7 @@ def build_tip_ejection_bar():
 
 def export(part) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent.parent / "stl" / "dpette" / "tip_ejection_bar.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "dpette" / "tip_ejection_bar.svg"
-    export_stl(part, str(stl))
-    exporter = ExportSVG()
-    exporter.add_shape(part)
-    exporter.write(str(svg))
-    print(f"Exported: {stl}")
-    print(f"Exported: {svg}")
+    export_part(part, "dpette", "tip_ejection_bar")
 
 
 if __name__ == "__main__":

@@ -19,9 +19,17 @@ Exports:
 """
 
 import math
+
+# Shared export helper (standalone mode)
+import sys
 from pathlib import Path
 
-from build123d import Cone, Cylinder, ExportSVG, Pos, export_stl
+from build123d import Cone, Cylinder, Pos
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from util.export import export_part
+
+sys.path.pop()
 
 # --- Parameters (all in mm) ---
 # SO-101 wrist flange (motor 5 horn mount)
@@ -119,28 +127,14 @@ def build_male_cone():
 
 def export_all() -> None:
     """Export all tool changer components."""
-    stl_dir = Path(__file__).parent.parent.parent / "stl" / "so101"
-    svg_dir = Path(__file__).parent.parent.parent / "svg" / "so101"
-
     robot_cone = build_robot_cone()
-    export_stl(robot_cone, str(stl_dir / "tool_cone_robot.stl"))
-    exporter = ExportSVG()
-    exporter.add_shape(robot_cone)
-    exporter.write(str(svg_dir / "tool_cone_robot.svg"))
-    print("Exported: tool_cone_robot.stl + .svg")
+    export_part(robot_cone, "so101", "tool_cone_robot")
 
     male_cone = build_male_cone()
-    for name in ["pipette", "gripper", "hook"]:
-        export_stl(male_cone, str(stl_dir / f"tool_cone_{name}.stl"))
-        exporter = ExportSVG()
-        exporter.add_shape(male_cone)
-        exporter.write(str(svg_dir / f"tool_cone_{name}.svg"))
-        print(f"Exported: tool_cone_{name}.stl + .svg")
-
-    exporter = ExportSVG()
-    exporter.add_shape(male_cone)
-    exporter.write(str(svg_dir / "tool_cone_male.svg"))
-    print("Exported: tool_cone_male.svg")
+    export_part(male_cone, "so101", "tool_cone_pipette")
+    export_part(male_cone, "so101", "tool_cone_gripper")
+    export_part(male_cone, "so101", "tool_cone_hook")
+    export_part(male_cone, "so101", "tool_cone_male")
 
 
 if __name__ == "__main__":

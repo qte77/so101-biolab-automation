@@ -6,9 +6,16 @@ Usage:
     uv run --group cad python hardware/cad/dpette/dpette_cradle.py
 """
 
+# Shared export helper (standalone mode)
+import sys
 from pathlib import Path
 
-from build123d import Box, Cylinder, ExportSVG, Pos, export_stl
+from build123d import Box, Cylinder, Pos
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from util.export import export_part
+
+sys.path.pop()
 
 # --- Common parameters (all in mm) ---
 WALL = 2.5
@@ -57,23 +64,13 @@ def build_dpette_multi_cradle():
 
 
 def export_single(part) -> None:
-    stl = Path(__file__).parent.parent.parent / "stl" / "dpette" / "dpette_single_cradle.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "dpette" / "dpette_single_cradle.svg"
-    export_stl(part, str(stl))
-    exporter = ExportSVG()
-    exporter.add_shape(part)
-    exporter.write(str(svg))
-    print(f"Exported: {stl}")
+    """Export single-channel cradle to STL and SVG."""
+    export_part(part, "dpette", "dpette_single_cradle")
 
 
 def export_multi(part) -> None:
-    stl = Path(__file__).parent.parent.parent / "stl" / "dpette" / "dpette_multi_cradle.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "dpette" / "dpette_multi_cradle.svg"
-    export_stl(part, str(stl))
-    exporter = ExportSVG()
-    exporter.add_shape(part)
-    exporter.write(str(svg))
-    print(f"Exported: {stl}")
+    """Export multi-channel cradle to STL and SVG."""
+    export_part(part, "dpette", "dpette_multi_cradle")
 
 
 if __name__ == "__main__":

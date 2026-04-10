@@ -11,9 +11,16 @@ Exports:
     hardware/svg/labware/96well_plate_holder.svg
 """
 
+# Shared export helper (standalone mode)
+import sys
 from pathlib import Path
 
-from build123d import Box, Cylinder, ExportSVG, Pos, export_stl
+from build123d import Box, Cylinder, Pos
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from util.export import export_part
+
+sys.path.pop()
 
 # --- Parameters (all in mm) ---
 # SBS standard plate footprint
@@ -79,16 +86,7 @@ def build_plate_holder():
 
 def export(holder) -> None:
     """Export to STL and SVG."""
-    stl_path = Path(__file__).parent.parent.parent / "stl" / "labware" / "96well_plate_holder.stl"
-    svg_path = Path(__file__).parent.parent.parent / "svg" / "labware" / "96well_plate_holder.svg"
-
-    export_stl(holder, str(stl_path))
-    exporter = ExportSVG()
-    exporter.add_shape(holder)
-    exporter.write(str(svg_path))
-
-    print(f"Exported: {stl_path}")
-    print(f"Exported: {svg_path}")
+    export_part(holder, "labware", "96well_plate_holder")
 
 
 if __name__ == "__main__":

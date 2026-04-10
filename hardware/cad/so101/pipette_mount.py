@@ -13,9 +13,16 @@ Usage:
     uv run --group cad python hardware/cad/so101/pipette_mount.py
 """
 
+# Shared export helper (standalone mode)
+import sys
 from pathlib import Path
 
-from build123d import Box, Cylinder, ExportSVG, Pos, Rot, export_stl
+from build123d import Box, Cylinder, Pos, Rot
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from util.export import export_part
+
+sys.path.pop()
 
 # --- Parameters (all in mm) ---
 # dPette 7016 barrel (approximate — measure real hardware)
@@ -82,14 +89,7 @@ def build_pipette_mount():
 
 def export(part) -> None:
     """Export to STL and SVG."""
-    stl_path = Path(__file__).parent.parent.parent / "stl" / "so101" / "pipette_mount_so101.stl"
-    svg_path = Path(__file__).parent.parent.parent / "svg" / "so101" / "pipette_mount_so101.svg"
-    export_stl(part, str(stl_path))
-    exporter = ExportSVG()
-    exporter.add_shape(part)
-    exporter.write(str(svg_path))
-    print(f"Exported: {stl_path}")
-    print(f"Exported: {svg_path}")
+    export_part(part, "so101", "pipette_mount_so101")
 
 
 if __name__ == "__main__":

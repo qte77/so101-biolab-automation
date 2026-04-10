@@ -11,9 +11,16 @@ Exports:
     hardware/svg/so101/fridge_hook_tool.svg
 """
 
+# Shared export helper (standalone mode)
+import sys
 from pathlib import Path
 
-from build123d import Box, Cylinder, ExportSVG, Pos, export_stl
+from build123d import Box, Cylinder, Pos
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from util.export import export_part
+
+sys.path.pop()
 
 # --- Parameters (all in mm) ---
 # Hook geometry
@@ -53,16 +60,7 @@ def build_fridge_hook():
 
 def export(hook) -> None:
     """Export to STL and SVG."""
-    stl_path = Path(__file__).parent.parent.parent / "stl" / "so101" / "fridge_hook_tool.stl"
-    svg_path = Path(__file__).parent.parent.parent / "svg" / "so101" / "fridge_hook_tool.svg"
-
-    export_stl(hook, str(stl_path))
-    exporter = ExportSVG()
-    exporter.add_shape(hook)
-    exporter.write(str(svg_path))
-
-    print(f"Exported: {stl_path}")
-    print(f"Exported: {svg_path}")
+    export_part(hook, "so101", "fridge_hook_tool")
 
 
 if __name__ == "__main__":

@@ -7,9 +7,16 @@ Usage:
     uv run --group cad python hardware/cad/so101/tool_dock.py
 """
 
+# Shared export helper (standalone mode)
+import sys
 from pathlib import Path
 
-from build123d import Box, Cylinder, ExportSVG, Pos, export_stl
+from build123d import Box, Cylinder, Pos
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from util.export import export_part
+
+sys.path.pop()
 
 # --- Parameters (all in mm) ---
 SLOT_DIAMETER = 38.0  # Fits tool cone base (36mm + clearance)
@@ -43,14 +50,7 @@ def build_tool_dock():
 
 def export(part) -> None:
     """Export to STL and SVG."""
-    stl = Path(__file__).parent.parent.parent / "stl" / "so101" / "tool_dock_3station.stl"
-    svg = Path(__file__).parent.parent.parent / "svg" / "so101" / "tool_dock_3station.svg"
-    export_stl(part, str(stl))
-    exporter = ExportSVG()
-    exporter.add_shape(part)
-    exporter.write(str(svg))
-    print(f"Exported: {stl}")
-    print(f"Exported: {svg}")
+    export_part(part, "so101", "tool_dock_3station")
 
 
 if __name__ == "__main__":
