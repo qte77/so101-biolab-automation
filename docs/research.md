@@ -212,6 +212,23 @@ The Bento Lab display shows PCR programs (95°C denature, 55–65°C anneal, 72�
 
 **Problem:** CadQuery generates geometrically correct STLs but has no FDM awareness. Vertical empty rows, unsupported overhangs, and gravity failures are invisible until a print fails.
 
+### CAD Library Comparison
+
+| Feature | CadQuery | Build123d | OpenSCAD | JSCAD | FreeCAD | Blender (bpy) |
+|---------|----------|-----------|----------|-------|---------|----------------|
+| Language | Python | Python | Own syntax | JavaScript | GUI + Python | Python |
+| Paradigm | Parametric, BREP | Parametric, BREP | CSG only | CSG only | Full CAD | Mesh-based |
+| Output | STEP, STL, DXF | STEP, STL | STL only | STL, OBJ | STEP, STL, many | STL, OBJ, many |
+| Curve quality | Excellent | Excellent | Faceted | Faceted | Excellent | Mesh |
+| For 3D printing | Great | Great | Common | OK | Great | Needs cleanup |
+| For mechanical parts | Best in class | Very good | Limited | Limited | Best in class | Not ideal |
+| Learning curve | Medium | Low-Medium | Low | Low | High | High |
+| Browser-based | No | No | No | Yes | No | No |
+| Open source | Yes | Yes | Yes | Yes | Yes | Yes |
+| Python 3.13+ support | No (VTK blocked) | Yes | N/A | N/A | Yes | Yes |
+
+**Decision (2026-04):** Migrating from CadQuery to **build123d** — same BREP kernel (OCP), lower learning curve, algebraic operators (`+`/`-` instead of `.union()`/`.cut()`), and builds on Python 3.13 where CadQuery's VTK dependency does not.
+
 ### OpenSCAD CLI
 
 Mature, stable parametric CAD. `.scad` -> STL/SVG/DXF/PNG via CLI.
@@ -451,7 +468,7 @@ OpenSCAD (.scad) ──→ STL ──→ PrusaSlicer CLI ──→ printability 
 
 - OpenSCAD: parametric generator (reliable CLI, SVG via projection)
 - PrusaSlicer: printability validator (optional, graceful fallback if unavailable)
-- CadQuery: legacy reference in `hardware/cad/` (no longer used for generation)
+- build123d: primary CAD backend in `hardware/cad/` (migrated from CadQuery 2026-04)
 
 ## STL Files Plan
 

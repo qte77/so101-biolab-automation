@@ -141,7 +141,7 @@ class TestManifest:
             assert part["status"] in valid, f"{part['name']} has invalid status: {part['status']}"
 
     def test_manifest_primary_backend_valid(self) -> None:
-        valid = {"cadquery", "openscad"}
+        valid = {"build123d", "cadquery", "openscad"}
         for part in MANIFEST:
             assert "primary_backend" in part, f"{part['name']} missing primary_backend field"
             assert part["primary_backend"] in valid, (

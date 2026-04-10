@@ -40,8 +40,8 @@ See [docs/hardware/BOM.md](docs/hardware/BOM.md) for full shopping list with lin
 # Setup (all deps + tools)
 make setup_all
 
-# Generate 3D-printed parts (CadQuery preferred, OpenSCAD fallback)
-make render_parts
+# Generate 3D-printed parts (build123d preferred, OpenSCAD fallback)
+make render_wireframe
 
 # Optional: validate printability (PrusaSlicer)
 make setup_slicer
@@ -83,7 +83,7 @@ hardware/cad/deferred/ Future parts (XZ gantry frame, carriage)
 hardware/cad/util/     SVG theming and STL→SVG conversion
 hardware/scad/         OpenSCAD scripts — archived fallback
 hardware/slicer/       PrusaSlicer CLI printability validation (optional)
-hardware/stl/{so101,dpette,labware}/ Generated STL files (via make render_parts, gitignored)
+hardware/stl/{so101,dpette,labware}/ Generated STL files (via make render_wireframe, gitignored)
 hardware/svg/{so101,dpette,labware}/ SVG 2D projections of parts (tracked, for documentation)
 docs/              Architecture, user stories, demo scenarios, BOM, research
 tests/                 167 tests across 16 test files
@@ -102,9 +102,10 @@ tests/                 167 tests across 16 test files
 - [LeRobot](https://github.com/huggingface/lerobot) — Teleoperation + imitation learning
 - [PyLabRobot](https://github.com/PyLabRobot/pylabrobot) — Liquid handling abstractions
 - [digital-pipette-v2](https://github.com/ac-rad/digital-pipette-v2) — DIY pipette (alternative backend)
-- [CadQuery](https://github.com/CadQuery/cadquery) — Primary CAD for 3D-printed parts
+- [build123d](https://github.com/gumyr/build123d) — Primary CAD for 3D-printed parts
 - [OpenSCAD](https://openscad.org/) — Fallback CAD for 3D-printed parts
-- [PrusaSlicer](https://github.com/prusa3d/PrusaSlicer) — Printability validation (optional)
+- [CuraEngine](https://github.com/Ultimaker/CuraEngine) — Printability validation (headless, preferred)
+- [PrusaSlicer](https://github.com/prusa3d/PrusaSlicer) — Printability validation (fallback)
 - FastAPI + WebRTC — Remote dashboard
 - OpenCV — Camera pipeline
 
@@ -116,10 +117,10 @@ Toward general-purpose voice/agent-to-print. This repo is the first showcase.
 
 **Agent loop** — goal spec → agent generates CAD → slicer validates → printer API → camera + VLM inspects → agent fixes → reprints autonomously
 
-1. **Done** — CadQuery + PrusaSlicer CLI pipeline (`make render_parts`, `make check_prints`)
-2. **Next** — LLM-assisted CadQuery generation from text prompts
+1. **Done** — build123d + CuraEngine CLI pipeline (`make render_wireframe`, `make check_prints`)
+2. **Next** — LLM-assisted build123d generation from text prompts
 3. **Future** — Autonomous agent loop with Bambu camera + VLM print inspection
-4. **Vision** — Closed-loop tool genesis: agent identifies missing tool → generates CadQuery → slices → prints → mounts via tool changer → validates with VLM — true self-evolving multi-tool
+4. **Vision** — Closed-loop tool genesis: agent identifies missing tool → generates CAD → slices → prints → mounts via tool changer → validates with VLM — true self-evolving multi-tool
 
 See [docs/research.md](docs/research.md) § "Closed-Loop 3D Printing" for prior art.
 
