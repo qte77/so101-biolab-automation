@@ -60,7 +60,7 @@ Tighten one level at a time. Fix violations before tightening further.
 
 | Language | Tool | Gate threshold | Notes |
 |----------|------|---------------|-------|
-| Python | complexipy | 15/function | `complexipy app/ --max-complexity 15` |
+| Python | complexipy | 15/function | `complexipy app/ --max-complexity-allowed 15` |
 | Rust | clippy `cognitive_complexity` | 25 (default) | built into clippy |
 | C/C++ | clang-tidy `readability-function-cognitive-complexity` | 25 | configurable |
 | TypeScript | eslint `complexity` | 20 | cyclomatic, not cognitive |
