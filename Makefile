@@ -11,7 +11,7 @@ endif
 .PHONY: \
 	setup_uv setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
 	render_wireframe render_solid check_prints render_all \
-	autofix lint check_links check_types test retest quick_validate validate \
+	autofix lint check_links check_types test test_cov retest complexity quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
 	eval_policy serve_dashboard run_demo \
 	help
@@ -196,8 +196,14 @@ check_types: ## Run pyright type checking
 test: ## Run all tests with pytest
 	uv run pytest $(PYTEST_QUIET)
 
+test_cov: ## Run tests with coverage report
+	uv run pytest --cov=so101 --cov=dashboard --cov-fail-under=80 $(PYTEST_QUIET)
+
 retest: ## Rerun last failed tests only
 	uv run pytest --lf -x
+
+complexity: ## Check cognitive complexity (max 15/function)
+	uv run complexipy app/so101/ app/dashboard/ --max-complexity 15
 
 quick_validate: lint check_types ## Fast gate (lint + type check)
 
