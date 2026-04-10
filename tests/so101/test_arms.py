@@ -200,3 +200,74 @@ class TestConfigDrivenOperations:
         assert action != [0.0] * 6
         # Should be the well_approach position from config
         assert action == [10.0, -30.0, -60.0, 5.0, 0.0, 0.0]
+
+
+class TestExecuteSequence:
+    """execute_sequence sends named positions in order."""
+
+    @pytest.fixture
+    def seq_config(self) -> DualArmConfig:
+        """Config with multiple positions for sequence testing."""
+        return DualArmConfig(
+            arm_a=ArmConfig(arm_id="arm_a", port="/dev/null", role="follower"),
+            arm_b=ArmConfig(arm_id="arm_b", port="/dev/null", role="follower"),
+            positions={
+                "park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0],
+                "home": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "approach": [10.0, -30.0, -60.0, 5.0, 0.0, 0.0],
+                "lower": [10.0, -30.0, -80.0, 5.0, 0.0, 0.0],
+            },
+        )
+
+    def test_sequence_sends_positions_in_order(self, seq_config: DualArmConfig) -> None:
+        """execute_sequence sends each position to the arm in order."""
+        ctrl = DualArmController(seq_config)
+        ctrl.connect()
+        sent: list[list[float]] = []
+        original_send = ctrl.send_action
+
+        def spy(arm_id: str, action: list[float]) -> None:
+            sent.append(action)
+            original_send(arm_id, action)
+
+        with patch.object(ctrl, "send_action", side_effect=spy):
+            ctrl.execute_sequence("arm_a", ["home", "approach", "lower"])
+
+        assert len(sent) == 3
+        assert sent[0] == [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        assert sent[1] == [10.0, -30.0, -60.0, 5.0, 0.0, 0.0]
+        assert sent[2] == [10.0, -30.0, -80.0, 5.0, 0.0, 0.0]
+
+    def test_sequence_validates_all_names_before_sending(
+        self, seq_config: DualArmConfig
+    ) -> None:
+        """execute_sequence raises KeyError if any name is invalid, sends nothing."""
+        ctrl = DualArmController(seq_config)
+        ctrl.connect()
+        sent: list[list[float]] = []
+        original_send = ctrl.send_action
+
+        def spy(arm_id: str, action: list[float]) -> None:
+            sent.append(action)
+            original_send(arm_id, action)
+
+        with patch.object(ctrl, "send_action", side_effect=spy), pytest.raises(
+            KeyError, match="bogus"
+        ):
+            ctrl.execute_sequence("arm_a", ["home", "bogus", "approach"])
+
+        # No actions should have been sent
+        assert len(sent) == 0
+
+    def test_sequence_empty_list_is_noop(self, seq_config: DualArmConfig) -> None:
+        """execute_sequence with empty list does nothing."""
+        ctrl = DualArmController(seq_config)
+        ctrl.connect()
+        ctrl.execute_sequence("arm_a", [])
+
+    def test_sequence_unknown_arm_raises(self, seq_config: DualArmConfig) -> None:
+        """execute_sequence raises ValueError for unknown arm."""
+        ctrl = DualArmController(seq_config)
+        ctrl.connect()
+        with pytest.raises(ValueError, match="Unknown arm"):
+            ctrl.execute_sequence("nonexistent", ["home"])
