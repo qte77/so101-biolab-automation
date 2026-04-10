@@ -4,13 +4,6 @@
     "CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL": "1",
     "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1"
   },
-  "outputStyle": "default",
-  "spinnerTipsEnabled": true,
-  "prefersReducedMotion": true,
-  "statusLine": {
-    "type": "command",
-    "command": "bash .claude/scripts/statusline.sh"
-  },
   "attribution": {
     "commit": "Co-Authored-By: Claude <noreply@anthropic.com>",
     "pr": "Generated with Claude <noreply@anthropic.com>"
@@ -50,7 +43,6 @@
       "Bash(source:*)",
       "Bash(tail:*)",
       "Bash(touch:*)",
-      "Bash(curl:*)",
       "Bash(wget:*)",
       "Edit(.env)",
       "Read(.env)"
@@ -70,6 +62,10 @@
       "Edit(README.md)"
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "bash .claude/scripts/statusline.sh"
+  },
   "enabledPlugins": {
     "context7@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
@@ -87,5 +83,8 @@
         "repo": "qte77/claude-code-utils-plugin"
       }
     }
-  }
+  },
+  "outputStyle": "default",
+  "spinnerTipsEnabled": true,
+  "prefersReducedMotion": true
 }
