@@ -108,7 +108,9 @@ class TestUC1SingleWell:
     ) -> None:
         """After aspirate+dispense, pipette fill is 0."""
         pipette_well(stub_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
-        assert stub_pipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            stub_pipette.dispense(0.1)
 
     def test_single_well_invalid_dest(
         self, stub_controller: DualArmController, stub_pipette: DigitalPipette, layout: PlateLayout
@@ -122,7 +124,9 @@ class TestUC1SingleWell:
     ) -> None:
         """uc1_single_well is a convenience wrapper over pipette_well."""
         uc1_single_well(stub_controller, stub_pipette, layout, "arm_a", "A1", 50.0)
-        assert stub_pipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            stub_pipette.dispense(0.1)
 
 
 class TestUC1Row:
@@ -139,7 +143,9 @@ class TestUC1Row:
     ) -> None:
         """After full row, pipette fill is 0."""
         uc1_row(stub_controller, stub_pipette, layout, "arm_a", "A", 25.0)
-        assert stub_pipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            stub_pipette.dispense(0.1)
 
     def test_invalid_row_raises(
         self, stub_controller: DualArmController, stub_pipette: DigitalPipette, layout: PlateLayout
@@ -157,7 +163,9 @@ class TestUC1Col:
     ) -> None:
         """Column 1 pipettes 8 wells without error."""
         uc1_col(stub_controller, stub_pipette, layout, "arm_a", 1, 20.0)
-        assert stub_pipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            stub_pipette.dispense(0.1)
 
 
 class TestUC1FullPlate:
@@ -174,7 +182,9 @@ class TestUC1FullPlate:
     ) -> None:
         """After full plate, pipette fill is 0."""
         uc1_full_plate(stub_controller, stub_pipette, layout, "arm_a", 20.0)
-        assert stub_pipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            stub_pipette.dispense(0.1)
 
 
 class TestUC2Fridge:
@@ -248,7 +258,9 @@ class TestUC4DemoAll:
     ) -> None:
         """After demo, pipette fill is 0."""
         uc4_demo_all(stub_controller, stub_pipette, changer, layout, "arm_a")
-        assert stub_pipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            stub_pipette.dispense(0.1)
 
 
 @pytest.fixture
@@ -271,12 +283,16 @@ class TestUC5GantryPipette:
     ) -> None:
         """Full cycle: trough → aspirate → plate → dispense."""
         uc5_gantry_pipette(stub_gantry, stub_pipette, "trough", "plate_a1", 50.0)
-        assert stub_pipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            stub_pipette.dispense(0.1)
 
     def test_gantry_fill_resets(self, stub_gantry: XZGantry, stub_pipette: DigitalPipette) -> None:
         """Pipette fill returns to 0 after dispense."""
         uc5_gantry_pipette(stub_gantry, stub_pipette, "trough", "plate_a1", 100.0)
-        assert stub_pipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            stub_pipette.dispense(0.1)
 
     def test_gantry_invalid_position_raises(
         self, stub_gantry: XZGantry, stub_pipette: DigitalPipette
@@ -292,7 +308,9 @@ class TestUC5GantryPipette:
         )
         epipette.connect()
         uc5_gantry_pipette(stub_gantry, epipette, "trough", "plate_a1", 50.0)
-        assert epipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            epipette.dispense(0.1)
 
 
 class TestUC5GantryStrip:
@@ -303,14 +321,18 @@ class TestUC5GantryStrip:
     ) -> None:
         """Pipette multiple positions in sequence."""
         uc5_gantry_strip(stub_gantry, stub_pipette, "trough", ["plate_a1", "plate_a2"], 25.0)
-        assert stub_pipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            stub_pipette.dispense(0.1)
 
     def test_gantry_strip_empty_list(
         self, stub_gantry: XZGantry, stub_pipette: DigitalPipette
     ) -> None:
         """Empty destination list is a no-op."""
         uc5_gantry_strip(stub_gantry, stub_pipette, "trough", [], 25.0)
-        assert stub_pipette._current_fill == 0.0
+        # Pipette should be empty — dispensing anything raises
+        with pytest.raises(ValueError):
+            stub_pipette.dispense(0.1)
 
 
 class TestCreateWorkflowContext:
@@ -318,17 +340,21 @@ class TestCreateWorkflowContext:
 
     @pytest.mark.integration
     def test_creates_all_components(self) -> None:
-        """Factory returns 4-tuple with all components."""
+        """Factory returns working components that can be used immediately."""
         arm, pipette, changer, layout = create_workflow_context()
-        assert arm._connected is True
+        # Verify arm is operational (not checking _connected flag)
+        obs = arm.get_observation("arm_a")
+        assert "joints" in obs
         assert isinstance(pipette, DigitalPipette)
         assert isinstance(changer, ToolChanger)
         assert isinstance(layout, PlateLayout)
         arm.disconnect()
 
     @pytest.mark.integration
-    def test_arm_in_stub_mode(self) -> None:
-        """Factory creates arm in stub mode (no hardware)."""
+    def test_arm_operates_in_stub_mode(self) -> None:
+        """Factory creates arm that works without hardware."""
         arm, _, _, _ = create_workflow_context()
-        assert arm._stub_mode is True
+        # Stub mode returns stub-shaped observations
+        obs = arm.get_observation("arm_a")
+        assert obs.get("stub") is True
         arm.disconnect()
