@@ -29,6 +29,12 @@ PROFILE_DIR = Path(__file__).resolve().parent / "profiles"
 # Part-to-profile mapping (default: PLA+)
 TPU_PARTS = {"gripper_tips_tpu.stl"}
 
+# Profile filenames — prefer MK4 profiles if available, fall back to generic
+_MK4_PLA = "prusa_mk4_pla_02mm.ini"
+_MK4_TPU = "prusa_mk4_tpu_02mm.ini"
+_GENERIC_PLA = "pla_plus_02mm.ini"
+_GENERIC_TPU = "tpu_95a_02mm.ini"
+
 OVERHANG_KEYWORDS = [
     "overhang",
     "unsupported",
@@ -39,10 +45,15 @@ OVERHANG_KEYWORDS = [
 
 
 def get_profile(stl_name: str, override: str | None = None) -> Path:
-    """Return the slicer profile path for a given STL."""
+    """Return the slicer profile path for a given STL.
+
+    Prefers MK4-specific profiles when available, falls back to generic.
+    """
     if override == "tpu" or stl_name in TPU_PARTS:
-        return PROFILE_DIR / "tpu_95a_02mm.ini"
-    return PROFILE_DIR / "pla_plus_02mm.ini"
+        mk4 = PROFILE_DIR / _MK4_TPU
+        return mk4 if mk4.exists() else PROFILE_DIR / _GENERIC_TPU
+    mk4 = PROFILE_DIR / _MK4_PLA
+    return mk4 if mk4.exists() else PROFILE_DIR / _GENERIC_PLA
 
 
 def find_slicer() -> str | None:
@@ -197,7 +208,7 @@ def main() -> int:
         return 0
 
     if args.all:
-        stls = sorted(STL_DIR.glob("*.stl"))
+        stls = sorted(STL_DIR.rglob("*.stl"))
     elif args.files:
         stls = collect_stls(args.files)
     else:
