@@ -203,11 +203,11 @@ retest: ## Rerun last failed tests only
 	uv run pytest --lf -x
 
 complexity: ## Check cognitive complexity (max 15/function)
-	uv run complexipy app/so101/ app/dashboard/ --max-complexity 15
+	uv run complexipy app/so101/ app/dashboard/ --max-complexity-allowed 15
 
 quick_validate: lint check_types ## Fast gate (lint + type check)
 
-validate: lint check_types test ## Full gate (lint + types + tests) — must pass before commit
+validate: lint check_types test_cov complexity ## Full gate (lint + types + tests + coverage + complexity)
 
 
 # MARK: APP
