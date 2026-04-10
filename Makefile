@@ -126,10 +126,10 @@ setup_lychee: ## Install lychee link checker
 
 
 render_parts: ## Generate STL + SVG from hardware/parts.json (build123d preferred, OpenSCAD fallback)
-	uv run --group cad python hardware/render.py
+	uv run --group cad python app/hardware/render.py
 
 check_prints: ## Run slicer printability checks on STLs (CuraEngine or PrusaSlicer)
-	uv run python hardware/slicer/validate.py --all
+	uv run python app/hardware/slicer/validate.py --all
 
 render_all: render_parts check_prints ## Generate parts + validate printability
 
@@ -191,7 +191,7 @@ check_links: ## Check links with lychee
 	fi
 
 check_types: ## Run pyright type checking
-	uv run pyright src $(PYRIGHT_QUIET)
+	uv run pyright app $(PYRIGHT_QUIET)
 
 test: ## Run all tests with pytest
 	uv run pytest $(PYTEST_QUIET)
@@ -211,7 +211,7 @@ eval_policy: ## Evaluate trained policy
 	uv run python scripts/run_demo.py --mode=eval --arm-port=$(FOLLOWER_A_PORT)
 
 serve_dashboard: ## Start remote dashboard
-	uv run uvicorn src.dashboard.server:app --host 0.0.0.0 --port 8080 --reload
+	uv run uvicorn app.dashboard.server:app --host 0.0.0.0 --port 8080 --reload
 
 run_demo: ## Run full demo pipeline
 	uv run python scripts/run_demo.py --mode=full

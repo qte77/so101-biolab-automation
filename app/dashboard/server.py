@@ -17,11 +17,11 @@ from typing import Any
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 
-from biolab.arms import DualArmConfig, DualArmController
-from biolab.pipette import DigitalPipette, PipetteConfig
-from biolab.safety import SafetyConfig, SafetyMonitor
-from biolab.tool_changer import ToolChanger, ToolDockConfig
-from biolab.workflow import PlateLayout, uc4_demo_all
+from so101.arms import DualArmConfig, DualArmController
+from so101.pipette import DigitalPipette, PipetteConfig
+from so101.safety import SafetyConfig, SafetyMonitor
+from so101.tool_changer import ToolChanger, ToolDockConfig
+from so101.workflow import PlateLayout, uc4_demo_all
 
 logger = logging.getLogger(__name__)
 

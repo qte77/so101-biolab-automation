@@ -1,6 +1,6 @@
 """Tests for camera pipeline — must work without cv2/camera hardware."""
 
-from biolab.camera import CameraConfig, CameraPipeline
+from so101.camera import CameraConfig, CameraPipeline
 
 
 class TestCameraPipeline:

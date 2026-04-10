@@ -2,7 +2,7 @@
 
 import pytest
 
-from biolab.tool_changer import DockStation, Tool, ToolChanger, ToolDockConfig
+from so101.tool_changer import DockStation, Tool, ToolChanger, ToolDockConfig
 
 
 @pytest.fixture

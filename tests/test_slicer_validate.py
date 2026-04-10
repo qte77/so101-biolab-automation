@@ -11,7 +11,7 @@ from unittest.mock import patch
 import pytest
 
 # Import module under test (not a package, lives outside src/)
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hardware" / "slicer"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "app" / "hardware" / "slicer"))
 validate = importlib.import_module("validate")
 sys.path.pop(0)
 

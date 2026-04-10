@@ -3,8 +3,8 @@
 import pytest
 import yaml
 
-from biolab.arms import DualArmConfig
-from biolab.tool_changer import ToolDockConfig
+from so101.arms import DualArmConfig
+from so101.tool_changer import ToolDockConfig
 
 
 @pytest.mark.integration

@@ -17,16 +17,16 @@ from typing import Any
 
 import yaml
 
-from biolab.arms import DualArmConfig, DualArmController
-from biolab.pipette import (
+from so101.arms import DualArmConfig, DualArmController
+from so101.pipette import (
     DigitalPipette,
     ElectronicPipette,
     ElectronicPipetteConfig,
     PipetteConfig,
     PipetteProtocol,
 )
-from biolab.plate import ROWS, all_wells, parse_well_name
-from biolab.tool_changer import Tool, ToolChanger, ToolDockConfig
+from so101.plate import ROWS, all_wells, parse_well_name
+from so101.tool_changer import Tool, ToolChanger, ToolDockConfig
 
 logger = logging.getLogger(__name__)
 

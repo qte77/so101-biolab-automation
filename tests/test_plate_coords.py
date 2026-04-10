@@ -2,7 +2,7 @@
 
 import pytest
 
-from biolab.plate import (
+from so101.plate import (
     A1_OFFSET_X,
     A1_OFFSET_Y,
     WELL_SPACING,

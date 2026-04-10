@@ -11,8 +11,8 @@ from __future__ import annotations
 import argparse
 import logging
 
-from biolab.arms import ArmConfig, DualArmConfig, DualArmController
-from biolab.plate import parse_well_name
+from so101.arms import ArmConfig, DualArmConfig, DualArmController
+from so101.plate import parse_well_name
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)

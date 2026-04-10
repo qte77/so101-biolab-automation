@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-HARDWARE_DIR = Path(__file__).resolve().parent.parent / "hardware"
+HARDWARE_DIR = Path(__file__).resolve().parent.parent / "app" / "hardware"
 SVG_DIR = HARDWARE_DIR / "svg"
 MANIFEST = json.loads((HARDWARE_DIR / "parts.json").read_text())
 

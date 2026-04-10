@@ -12,8 +12,8 @@ from typing import Any
 
 import yaml
 
-from biolab.plate import parse_well_name
-from biolab.safety import PARK_POSITION
+from so101.plate import parse_well_name
+from so101.safety import PARK_POSITION
 
 logger = logging.getLogger(__name__)
 

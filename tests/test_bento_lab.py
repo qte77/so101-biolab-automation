@@ -2,7 +2,7 @@
 
 import pytest
 
-from biolab.bento_lab import BentoLab, BentoLabConfig
+from so101.bento_lab import BentoLab, BentoLabConfig
 
 
 @pytest.fixture

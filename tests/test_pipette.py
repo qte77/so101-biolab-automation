@@ -2,7 +2,7 @@
 
 import pytest
 
-from biolab.pipette import (
+from so101.pipette import (
     DigitalPipette,
     ElectronicPipette,
     ElectronicPipetteConfig,

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from biolab.xz_gantry import XZGantry, XZGantryConfig
+from so101.xz_gantry import XZGantry, XZGantryConfig
 
 
 @pytest.fixture

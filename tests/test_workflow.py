@@ -8,15 +8,15 @@ from __future__ import annotations
 
 import pytest
 
-from biolab.arms import ArmConfig, DualArmConfig, DualArmController
-from biolab.pipette import (
+from so101.arms import ArmConfig, DualArmConfig, DualArmController
+from so101.pipette import (
     DigitalPipette,
     ElectronicPipette,
     ElectronicPipetteConfig,
     PipetteConfig,
 )
-from biolab.tool_changer import Tool, ToolChanger, ToolDockConfig
-from biolab.workflow import (
+from so101.tool_changer import Tool, ToolChanger, ToolDockConfig
+from so101.workflow import (
     PlateLayout,
     create_workflow_context,
     pipette_well,
@@ -30,7 +30,7 @@ from biolab.workflow import (
     uc5_gantry_pipette,
     uc5_gantry_strip,
 )
-from biolab.xz_gantry import XZGantry, XZGantryConfig
+from so101.xz_gantry import XZGantry, XZGantryConfig
 
 
 @pytest.fixture

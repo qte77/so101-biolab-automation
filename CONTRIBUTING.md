@@ -38,7 +38,7 @@ uv run pytest -m "not hardware"
 
 - Mock all hardware and external dependencies using `@patch`
 - Test business logic and data validation
-- Mirror `src/` structure in `tests/`
+- Mirror `app/` structure in `tests/`
 
 ### Hardware Tests (opt-in)
 

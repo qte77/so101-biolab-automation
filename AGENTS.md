@@ -40,7 +40,7 @@ Key references:
 - System design: [docs/architecture.md](docs/architecture.md) (AUTHORITY)
 - Acceptance criteria: [docs/UserStory.md](docs/UserStory.md) (AUTHORITY)
 - Hardware constraints: [docs/hardware/BOM.md](docs/hardware/BOM.md) + `configs/*.yaml`
-- Implementation detail: `src/` code (reference, not authority)
+- Implementation detail: `app/` code (reference, not authority)
 
 **Anti-scope-creep:** Only implement what is explicitly requested. Hardware automation
 is safety-critical — never add untested behaviour speculatively.

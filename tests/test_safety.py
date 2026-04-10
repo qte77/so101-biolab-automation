@@ -2,7 +2,7 @@
 
 import time
 
-from biolab.safety import SafetyConfig, SafetyMonitor
+from so101.safety import SafetyConfig, SafetyMonitor
 
 
 class TestSafetyMonitor:

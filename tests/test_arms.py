@@ -2,7 +2,7 @@
 
 import pytest
 
-from biolab.arms import ArmConfig, DualArmConfig, DualArmController
+from so101.arms import ArmConfig, DualArmConfig, DualArmController
 
 
 @pytest.fixture
