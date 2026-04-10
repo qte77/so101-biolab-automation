@@ -1,0 +1,14 @@
+{
+    "_comment": "CuraEngine profile: PLA+ 0.2mm — printability validation only",
+    "layer_height": 0.2,
+    "layer_height_0": 0.2,
+    "wall_line_count": 2,
+    "infill_sparse_density": 15,
+    "support_enable": false,
+    "material_print_temperature": 210,
+    "material_bed_temperature": 60,
+    "machine_nozzle_size": 0.4,
+    "machine_width": 220,
+    "machine_depth": 220,
+    "machine_height": 250
+}

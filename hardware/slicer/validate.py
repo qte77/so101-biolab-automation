@@ -1,7 +1,7 @@
-"""Validate STL printability via PrusaSlicer CLI and mesh integrity.
+"""Validate STL printability via CuraEngine (preferred) or PrusaSlicer (fallback).
 
 Slices each STL and reports overhang/support warnings.
-PrusaSlicer is optional — graceful skip if unavailable.
+Both slicers are optional — graceful skip if unavailable.
 Mesh integrity check uses stdlib only (struct) — no external deps.
 
 Usage:
@@ -14,6 +14,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 import struct
 import subprocess
@@ -21,7 +22,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-SLICER_CMD = "prusa-slicer"
 TIMEOUT_SEC = 120
 STL_DIR = Path(__file__).resolve().parent.parent / "stl"
 PROFILE_DIR = Path(__file__).resolve().parent / "profiles"
@@ -38,23 +38,51 @@ OVERHANG_KEYWORDS = [
 ]
 
 
-def get_profile(stl_name: str, override: str | None = None) -> Path:
-    """Return the slicer profile path for a given STL."""
+def get_profile(stl_name: str, backend: str, override: str | None = None) -> Path:
+    """Return the slicer profile path for a given STL and backend."""
+    ext = ".json" if backend == "cura" else ".ini"
     if override == "tpu" or stl_name in TPU_PARTS:
-        return PROFILE_DIR / "tpu_95a_02mm.ini"
-    return PROFILE_DIR / "pla_plus_02mm.ini"
+        return PROFILE_DIR / f"tpu_95a_02mm{ext}"
+    return PROFILE_DIR / f"pla_plus_02mm{ext}"
 
 
-def find_slicer() -> str | None:
-    """Return slicer binary path or None."""
-    return shutil.which(SLICER_CMD)
+def detect_slicer() -> tuple[str, str] | None:
+    """Return (backend_name, binary_path) for the first available slicer."""
+    cura = shutil.which("CuraEngine")
+    if cura:
+        return ("cura", cura)
+    prusa = shutil.which("prusa-slicer")
+    if prusa:
+        return ("prusa", prusa)
+    return None
 
 
-def validate_stl(stl_path: Path, profile: Path) -> dict:
+def _build_cura_cmd(binary: str, stl_path: Path, profile: Path, gcode_out: Path) -> list[str]:
+    """Build CuraEngine CLI command with settings from JSON profile."""
+    settings = json.loads(profile.read_text())
+    cmd = [binary, "slice", "-l", str(stl_path), "-o", str(gcode_out)]
+    for key, value in settings.items():
+        if key.startswith("_"):
+            continue
+        # CuraEngine uses -s key=value for each setting
+        if isinstance(value, bool):
+            cmd.extend(["-s", f"{key}={'true' if value else 'false'}"])
+        else:
+            cmd.extend(["-s", f"{key}={value}"])
+    return cmd
+
+
+def _build_prusa_cmd(binary: str, stl_path: Path, profile: Path, gcode_out: Path) -> list[str]:
+    """Build PrusaSlicer CLI command."""
+    return [binary, "--export-gcode", "--load", str(profile), "--output", str(gcode_out), str(stl_path)]
+
+
+def validate_stl(stl_path: Path, backend: str, binary: str, profile: Path) -> dict:
     """Slice an STL and parse output for printability issues."""
     result = {
         "file": stl_path.name,
         "profile": profile.stem,
+        "slicer": backend,
         "warnings": [],
         "status": "PASS",
         "error": None,
@@ -62,26 +90,16 @@ def validate_stl(stl_path: Path, profile: Path) -> dict:
 
     with tempfile.TemporaryDirectory() as tmp:
         gcode_out = Path(tmp) / (stl_path.stem + ".gcode")
-        cmd = [
-            SLICER_CMD,
-            "--export-gcode",
-            "--load",
-            str(profile),
-            "--output",
-            str(gcode_out),
-            str(stl_path),
-        ]
+
+        if backend == "cura":
+            cmd = _build_cura_cmd(binary, stl_path, profile, gcode_out)
+        else:
+            cmd = _build_prusa_cmd(binary, stl_path, profile, gcode_out)
 
         try:
-            proc = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=TIMEOUT_SEC,
-            )
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT_SEC)
             output = (proc.stdout + "\n" + proc.stderr).lower()
 
-            # Parse warnings
             for keyword in OVERHANG_KEYWORDS:
                 if keyword in output:
                     result["warnings"].append(keyword)
@@ -165,16 +183,15 @@ def print_report(results: list[dict]) -> int:
         print("No STL files found to validate.")
         return 1
 
-    # Header
-    print(f"\n{'Part':<35} {'Profile':<18} {'Warnings':<25} {'Status'}")
-    print("-" * 85)
+    print(f"\n{'Part':<35} {'Profile':<18} {'Slicer':<8} {'Warnings':<25} {'Status'}")
+    print("-" * 95)
 
     exit_code = 0
     for r in results:
         warnings = ", ".join(r["warnings"]) if r["warnings"] else "none"
         status = r["status"]
         error_suffix = f" ({r['error']})" if r["error"] else ""
-        print(f"{r['file']:<35} {r['profile']:<18} {warnings:<25} {status}{error_suffix}")
+        print(f"{r['file']:<35} {r['profile']:<18} {r['slicer']:<8} {warnings:<25} {status}{error_suffix}")
         if status == "FAIL":
             exit_code = 1
 
@@ -192,12 +209,14 @@ def main() -> int:
     parser.add_argument("--structural", action="store_true", help="Run mesh integrity check")
     args = parser.parse_args()
 
-    if not find_slicer() and not args.structural:
-        print(f"SKIP: {SLICER_CMD} not found. Install via: make setup_slicer")
+    slicer = detect_slicer()
+
+    if not slicer and not args.structural:
+        print("SKIP: No slicer found. Install via: make setup_slicer")
         return 0
 
     if args.all:
-        stls = sorted(STL_DIR.glob("*.stl"))
+        stls = sorted(STL_DIR.glob("**/*.stl"))
     elif args.files:
         stls = collect_stls(args.files)
     else:
@@ -220,10 +239,15 @@ def main() -> int:
             print(f"\n{len(failed)} STL(s) failed mesh integrity check.\n")
             return 1
         print(f"\n{len(mesh_results)}/{len(mesh_results)} STLs passed mesh integrity.\n")
-        if not find_slicer():
+        if not slicer:
             return 0
 
-    results = [validate_stl(stl, get_profile(stl.name, args.profile)) for stl in stls]
+    backend, binary = slicer
+    print(f"--- Validating with {backend} ({binary})")
+    results = [
+        validate_stl(stl, backend, binary, get_profile(stl.name, backend, args.profile))
+        for stl in stls
+    ]
     return print_report(results)
 
 
