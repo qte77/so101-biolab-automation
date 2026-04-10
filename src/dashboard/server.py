@@ -91,7 +91,7 @@ function sendCmd(cmd) { ws.send(JSON.stringify({command: cmd})); }
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket) -> None:
     """WebSocket command channel for remote operator."""
-    global _mode  # noqa: PLW0603
+    global _mode
     await websocket.accept()
     logger.info("Remote operator connected")
 
@@ -144,7 +144,7 @@ def _get_status(controller: DualArmController, monitor: SafetyMonitor) -> dict[s
 
 def _run_workflow(app: FastAPI) -> None:
     """Run full demo workflow in background thread."""
-    global _mode  # noqa: PLW0603
+    global _mode
     try:
         uc4_demo_all(
             app.state.controller,

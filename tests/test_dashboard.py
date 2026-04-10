@@ -44,25 +44,22 @@ class TestDashboardWebSocket:
 
     def test_e_stop_websocket(self) -> None:
         """e_stop command sets e_stopped state."""
-        with TestClient(app) as client:
-            with client.websocket_connect("/ws") as ws:
-                ws.send_text(json.dumps({"command": "e_stop"}))
-                resp = json.loads(ws.receive_text())
-                assert resp["status"]["e_stopped"] is True
-                assert resp["status"]["mode"] == "e_stopped"
+        with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+            ws.send_text(json.dumps({"command": "e_stop"}))
+            resp = json.loads(ws.receive_text())
+            assert resp["status"]["e_stopped"] is True
+            assert resp["status"]["mode"] == "e_stopped"
 
     def test_heartbeat_websocket(self) -> None:
         """heartbeat command succeeds without error."""
-        with TestClient(app) as client:
-            with client.websocket_connect("/ws") as ws:
-                ws.send_text(json.dumps({"command": "heartbeat"}))
-                resp = json.loads(ws.receive_text())
-                assert "status" in resp
+        with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+            ws.send_text(json.dumps({"command": "heartbeat"}))
+            resp = json.loads(ws.receive_text())
+            assert "status" in resp
 
     def test_target_well_websocket(self) -> None:
         """target_well command returns status."""
-        with TestClient(app) as client:
-            with client.websocket_connect("/ws") as ws:
-                ws.send_text(json.dumps({"command": "target_well", "well": "A1"}))
-                resp = json.loads(ws.receive_text())
-                assert "status" in resp
+        with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+            ws.send_text(json.dumps({"command": "target_well", "well": "A1"}))
+            resp = json.loads(ws.receive_text())
+            assert "status" in resp

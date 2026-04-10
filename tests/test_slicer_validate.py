@@ -148,8 +148,12 @@ class TestPrintReport:
     def test_all_pass(self, capsys) -> None:
         results = [
             {
-                "file": "a.stl", "profile": "pla", "slicer": "prusa",
-                "warnings": [], "status": "PASS", "error": None,
+                "file": "a.stl",
+                "profile": "pla",
+                "slicer": "prusa",
+                "warnings": [],
+                "status": "PASS",
+                "error": None,
             }
         ]
         code = validate.print_report(results)
@@ -159,8 +163,12 @@ class TestPrintReport:
     def test_fail_returns_nonzero(self) -> None:
         results = [
             {
-                "file": "a.stl", "profile": "pla", "slicer": "prusa",
-                "warnings": [], "status": "FAIL", "error": "bad",
+                "file": "a.stl",
+                "profile": "pla",
+                "slicer": "prusa",
+                "warnings": [],
+                "status": "FAIL",
+                "error": "bad",
             }
         ]
         code = validate.print_report(results)
