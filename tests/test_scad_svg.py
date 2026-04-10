@@ -11,11 +11,11 @@ from __future__ import annotations
 
 import json
 import re
-from pathlib import Path
 
 import pytest
 
-HARDWARE_DIR = Path(__file__).resolve().parent.parent / "app" / "hardware"
+from _paths import HARDWARE_DIR
+
 SVG_DIR = HARDWARE_DIR / "svg"
 MANIFEST = json.loads((HARDWARE_DIR / "parts.json").read_text())
 
