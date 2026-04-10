@@ -115,7 +115,7 @@ def pipette_well(
     # Validate destination (raises ValueError if invalid)
     dest_well = parse_well_name(dest)
 
-    # Move to source
+    # Move to source using position sequences
     if source.upper() == "TROUGH":
         logger.info(
             "[UC1] Move %s → TROUGH (%.1f, %.1f mm)",
@@ -123,16 +123,16 @@ def pipette_well(
             layout.trough_x_mm,
             layout.trough_y_mm,
         )
-        arm.send_action(arm_id, [0.0] * 6)  # Stub: trough position
+        arm.execute_sequence(arm_id, ["trough_approach", "trough_lower"])
     else:
-        arm.send_to_well(arm_id, source)
+        arm.execute_sequence(arm_id, ["well_approach", "well_lower"])
 
     # Aspirate
     logger.info("[UC1] Aspirate %.1f µL", volume_ul)
     pipette.aspirate(volume_ul)
 
-    # Move to destination
-    arm.send_to_well(arm_id, dest)
+    # Move to destination using position sequences
+    arm.execute_sequence(arm_id, ["well_approach", "well_lower"])
 
     # Dispense
     logger.info("[UC1] Dispense %.1f µL → %s", volume_ul, dest_well.name)

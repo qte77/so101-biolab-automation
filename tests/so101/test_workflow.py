@@ -41,7 +41,13 @@ def stub_controller() -> DualArmController:
     config = DualArmConfig(
         arm_a=ArmConfig(arm_id="arm_a", port="/dev/null", role="follower"),
         arm_b=ArmConfig(arm_id="arm_b", port="/dev/null", role="follower"),
-        positions={"park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0]},
+        positions={
+            "park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0],
+            "well_approach": [10.0, -30.0, -60.0, 5.0, 0.0, 0.0],
+            "well_lower": [10.0, -30.0, -80.0, 5.0, 0.0, 0.0],
+            "trough_approach": [20.0, -20.0, -50.0, 0.0, 0.0, 0.0],
+            "trough_lower": [20.0, -20.0, -70.0, 0.0, 0.0, 0.0],
+        },
     )
     ctrl = DualArmController(config)
     ctrl.connect()
