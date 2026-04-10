@@ -16,6 +16,7 @@ def stub_config() -> DualArmConfig:
         arm_a=ArmConfig(arm_id="arm_a", port="/dev/null", role="follower"),
         arm_b=ArmConfig(arm_id="arm_b", port="/dev/null", role="follower"),
         leader=ArmConfig(arm_id="leader", port="/dev/null", role="leader"),
+        positions={"park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0]},
     )
 
 

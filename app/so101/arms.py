@@ -13,7 +13,6 @@ from typing import Any
 import yaml
 
 from so101.plate import parse_well_name
-from so101.safety import PARK_POSITION
 
 logger = logging.getLogger(__name__)
 
@@ -167,9 +166,12 @@ class DualArmController:
         """
         well = parse_well_name(well_name)
         logger.info("Moving %s to well %s (%.2f, %.2f mm)", arm_id, well.name, well.x_mm, well.y_mm)
-        # Stub: use zero joints. Real IK mapping deferred to MVP.
-        stub_joints = [0.0] * 6
-        self.send_action(arm_id, stub_joints)
+        # Use config well_approach position; fall back to zeros if not configured
+        if "well_approach" in self.config.positions:
+            joints = list(self.config.positions["well_approach"])
+        else:
+            joints = [0.0] * 6
+        self.send_action(arm_id, joints)
 
     def move_to_named(self, arm_id: str, position_name: str) -> None:
         """Move an arm to a named position from config.
@@ -190,4 +192,4 @@ class DualArmController:
         """Move all follower arms to the park (safe) position."""
         for arm_id in self.arm_ids:
             logger.info("Parking arm %s", arm_id)
-            self.send_action(arm_id, list(PARK_POSITION))
+            self.move_to_named(arm_id, "park")
