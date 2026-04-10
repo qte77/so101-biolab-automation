@@ -30,3 +30,8 @@ leader:
   port: /dev/ttyACM0
   role: leader
   cameras: {}
+
+# Named joint positions [shoulder, elbow, wrist_pitch, wrist_roll, gripper_roll, gripper]
+positions:
+  park: [0.0, -45.0, -90.0, 0.0, 0.0, 0.0]
+  home: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]

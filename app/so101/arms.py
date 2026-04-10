@@ -35,6 +35,7 @@ class DualArmConfig:
     arm_a: ArmConfig
     arm_b: ArmConfig
     leader: ArmConfig | None = None
+    positions: dict[str, list[float]] = field(default_factory=dict)
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> DualArmConfig:
@@ -52,7 +53,8 @@ class DualArmConfig:
         arm_a = ArmConfig(**data["arm_a"])
         arm_b = ArmConfig(**data["arm_b"])
         leader = ArmConfig(**data["leader"]) if "leader" in data else None
-        return cls(arm_a=arm_a, arm_b=arm_b, leader=leader)
+        positions = data.get("positions", {})
+        return cls(arm_a=arm_a, arm_b=arm_b, leader=leader, positions=positions)
 
 
 class DualArmController:
@@ -168,6 +170,21 @@ class DualArmController:
         # Stub: use zero joints. Real IK mapping deferred to MVP.
         stub_joints = [0.0] * 6
         self.send_action(arm_id, stub_joints)
+
+    def move_to_named(self, arm_id: str, position_name: str) -> None:
+        """Move an arm to a named position from config.
+
+        Args:
+            arm_id: Which arm to move.
+            position_name: Name of the position defined in config.
+
+        Raises:
+            ValueError: If arm_id is not a configured follower arm.
+            KeyError: If position_name is not defined in config.
+        """
+        if position_name not in self.config.positions:
+            raise KeyError(position_name)
+        self.send_action(arm_id, list(self.config.positions[position_name]))
 
     def park_all(self) -> None:
         """Move all follower arms to the park (safe) position."""
