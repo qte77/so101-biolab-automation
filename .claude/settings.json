@@ -20,6 +20,7 @@
       "AskUserQuestion",
       "Bash(date:*)",
       "Bash(git:add:*)",
+      "Bash(git:commit:*)",
       "Bash(git:diff:*)",
       "Bash(git:log:*)",
       "Bash(git:status:*)",
@@ -63,7 +64,6 @@
     ],
     "ask": [
       "Bash(git clean:*)",
-      "Bash(git:commit:*)",
       "Bash(git reset:*)",
       "Bash(mv:*)",
       "Bash(mkdir:*)",
