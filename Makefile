@@ -9,9 +9,9 @@ endif
 .SILENT:  # TODO: replace with per-recipe @ prefix so render/test show progress
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
+	setup_uv setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee setup_mdlint \
 	render_wireframe render_solid check_prints render_all \
-	autofix lint check_links check_types test test_cov retest complexity quick_validate validate \
+	autofix lint check_links check_docs check_types test test_cov retest complexity quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
 	eval_policy serve_dashboard run_demo \
 	help
@@ -117,8 +117,20 @@ setup_lychee: ## Install lychee link checker
 		echo "lychee already installed: $$(lychee --version)"
 	else
 		curl -sSfL https://github.com/lycheeverse/lychee/releases/latest/download/lychee-x86_64-unknown-linux-gnu.tar.gz \
-			| tar xz -C /usr/local/bin 2>/dev/null \
+			| sudo tar xz -C /usr/local/bin 2>/dev/null \
+			|| (mkdir -p ~/.local/bin && curl -sSfL https://github.com/lycheeverse/lychee/releases/latest/download/lychee-x86_64-unknown-linux-gnu.tar.gz \
+				| tar xz -C ~/.local/bin \
+				&& echo "lychee installed to ~/.local/bin — ensure it is on PATH") \
 			|| echo "Install failed — download manually from https://github.com/lycheeverse/lychee/releases"
+	fi
+
+setup_mdlint: ## Install markdownlint-cli2 (requires npm)
+	if command -v markdownlint-cli2 > /dev/null 2>&1; then
+		echo "markdownlint-cli2 already installed"
+	elif command -v npm > /dev/null 2>&1; then
+		npm install -g markdownlint-cli2
+	else
+		echo "npm not found — install Node.js first"
 	fi
 
 
@@ -188,6 +200,13 @@ check_links: ## Check links with lychee
 		lychee --config .lychee.toml .
 	else
 		echo "lychee not installed — run: make setup_lychee"
+	fi
+
+check_docs: ## Lint markdown files (reads .markdownlint.json)
+	if command -v markdownlint-cli2 > /dev/null 2>&1; then
+		markdownlint-cli2 "README.md" "CHANGELOG.md" "CONTRIBUTING.md" "AGENTS.md" "docs/**/*.md"
+	else
+		echo "markdownlint-cli2 not installed — run: make setup_mdlint"
 	fi
 
 check_types: ## Run pyright type checking
