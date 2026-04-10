@@ -6,7 +6,7 @@ ifeq ($(filter oneshell,$(.FEATURES)),)
 $(error GNU Make >= 3.82 required. macOS: brew install make, then use gmake)
 endif
 
-.SILENT:
+.SILENT:  # TODO: replace with per-recipe @ prefix so render/test show progress
 .ONESHELL:
 .PHONY: \
 	setup_uv setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \

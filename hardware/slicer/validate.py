@@ -57,9 +57,19 @@ def detect_slicer() -> tuple[str, str] | None:
     return None
 
 
+_profile_cache: dict[Path, dict] = {}
+
+
+def _load_profile(profile: Path) -> dict:
+    """Load and cache a JSON slicer profile."""
+    if profile not in _profile_cache:
+        _profile_cache[profile] = json.loads(profile.read_text())
+    return _profile_cache[profile]
+
+
 def _build_cura_cmd(binary: str, stl_path: Path, profile: Path, gcode_out: Path) -> list[str]:
     """Build CuraEngine CLI command with settings from JSON profile."""
-    settings = json.loads(profile.read_text())
+    settings = _load_profile(profile)
     cmd = [binary, "slice", "-l", str(stl_path), "-o", str(gcode_out)]
     for key, value in settings.items():
         if key.startswith("_"):

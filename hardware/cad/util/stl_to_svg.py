@@ -21,11 +21,12 @@ SVG_DIR = Path(__file__).resolve().parent.parent.parent / "svg"
 
 def stl_to_svg(stl_path: Path, svg_path: Path) -> None:
     """Import STL and export as isometric wireframe SVG."""
-    from build123d import ExportSVG, import_stl
+    from build123d import ExportSVG, Rot, import_stl
 
     shape = import_stl(str(stl_path))
+    iso = Rot(35.264, 0, -45) * shape
     exporter = ExportSVG()
-    exporter.add_shape(shape)
+    exporter.add_shape(iso)
     exporter.write(str(svg_path))
     print(f"  {svg_path.name}")
 
