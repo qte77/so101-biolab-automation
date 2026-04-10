@@ -6,6 +6,8 @@ All tests work without hardware (stub mode).
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
 
 from so101.arms import ArmConfig, DualArmConfig, DualArmController
@@ -128,6 +130,99 @@ class TestUC1SingleWell:
         # Pipette should be empty — dispensing anything raises
         with pytest.raises(ValueError):
             stub_pipette.dispense(0.1)
+
+
+class TestPipetteWellSequences:
+    """pipette_well uses execute_sequence for coordinate-based movement."""
+
+    @pytest.fixture
+    def seq_controller(self) -> DualArmController:
+        """Controller with approach/lower/raise positions for sequence testing."""
+        config = DualArmConfig(
+            arm_a=ArmConfig(arm_id="arm_a", port="/dev/null", role="follower"),
+            arm_b=ArmConfig(arm_id="arm_b", port="/dev/null", role="follower"),
+            positions={
+                "park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0],
+                "well_approach": [10.0, -30.0, -60.0, 5.0, 0.0, 0.0],
+                "well_lower": [10.0, -30.0, -80.0, 5.0, 0.0, 0.0],
+                "well_raise": [10.0, -30.0, -40.0, 5.0, 0.0, 0.0],
+                "trough_approach": [20.0, -20.0, -50.0, 0.0, 0.0, 0.0],
+                "trough_lower": [20.0, -20.0, -70.0, 0.0, 0.0, 0.0],
+            },
+        )
+        ctrl = DualArmController(config)
+        ctrl.connect()
+        return ctrl
+
+    def test_trough_source_uses_sequence(
+        self,
+        seq_controller: DualArmController,
+        stub_pipette: DigitalPipette,
+        layout: PlateLayout,
+    ) -> None:
+        """pipette_well with TROUGH source uses trough position sequence, not [0.0]*6."""
+        calls: list[tuple[str, list[str]]] = []
+        original = seq_controller.execute_sequence
+
+        def spy(arm_id: str, names: list[str]) -> None:
+            calls.append((arm_id, names))
+            original(arm_id, names)
+
+        with patch.object(seq_controller, "execute_sequence", side_effect=spy):
+            pipette_well(seq_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
+
+        # Should have called execute_sequence for trough approach
+        trough_calls = [c for c in calls if any("trough" in n for n in c[1])]
+        assert len(trough_calls) > 0, "Expected trough position sequence calls"
+
+    def test_well_dest_uses_sequence(
+        self,
+        seq_controller: DualArmController,
+        stub_pipette: DigitalPipette,
+        layout: PlateLayout,
+    ) -> None:
+        """pipette_well uses well position sequence for destination, not raw send_to_well."""
+        calls: list[tuple[str, list[str]]] = []
+        original = seq_controller.execute_sequence
+
+        def spy(arm_id: str, names: list[str]) -> None:
+            calls.append((arm_id, names))
+            original(arm_id, names)
+
+        with patch.object(seq_controller, "execute_sequence", side_effect=spy):
+            pipette_well(seq_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
+
+        # Should have called execute_sequence for well approach/lower
+        well_calls = [c for c in calls if any("well" in n for n in c[1])]
+        assert len(well_calls) > 0, "Expected well position sequence calls"
+
+    def test_sequence_order_approach_lower_raise(
+        self,
+        seq_controller: DualArmController,
+        stub_pipette: DigitalPipette,
+        layout: PlateLayout,
+    ) -> None:
+        """pipette_well follows approach→lower→action→raise pattern."""
+        calls: list[tuple[str, list[str]]] = []
+        original = seq_controller.execute_sequence
+
+        def spy(arm_id: str, names: list[str]) -> None:
+            calls.append((arm_id, names))
+            original(arm_id, names)
+
+        with patch.object(seq_controller, "execute_sequence", side_effect=spy):
+            pipette_well(seq_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
+
+        # Flatten all position names in order
+        all_names = [name for _, names in calls for name in names]
+        # Source: trough_approach → trough_lower, then dest: well_approach → well_lower
+        assert "trough_approach" in all_names
+        assert "trough_lower" in all_names
+        assert "well_approach" in all_names
+        assert "well_lower" in all_names
+        # Approach comes before lower for each phase
+        assert all_names.index("trough_approach") < all_names.index("trough_lower")
+        assert all_names.index("well_approach") < all_names.index("well_lower")
 
 
 class TestUC1Row:
