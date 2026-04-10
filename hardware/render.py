@@ -1,11 +1,13 @@
 """Render all parts from hardware/parts.json manifest.
 
-Auto-detects backend: CadQuery (preferred) or OpenSCAD (fallback).
+Auto-detects backend: build123d (preferred) or OpenSCAD (fallback).
+SVGs default to wireframe; use --solid for filled faces.
 Runs theme_svgs.py after generation.
 
 Usage:
-    python hardware/render.py                # auto-detect
-    python hardware/render.py --backend cad  # force CadQuery
+    python hardware/render.py                # wireframe SVG (default)
+    python hardware/render.py --solid        # solid-filled SVG
+    python hardware/render.py --backend cad  # force build123d
     python hardware/render.py --backend scad # force OpenSCAD
 """
 
@@ -30,41 +32,55 @@ def load_manifest() -> list[dict]:
 
 
 def detect_backend() -> str:
-    """Return 'cad' if CadQuery importable, 'scad' if openscad binary found, else error."""
+    """Return 'cad' if build123d importable, 'scad' if openscad binary found, else error."""
     try:
-        import cadquery  # noqa: F401
+        import build123d  # noqa: F401
 
         return "cad"
     except ImportError:
         pass
     if shutil.which("openscad"):
         return "scad"
-    print("ERROR: Neither CadQuery nor OpenSCAD found")
+    print("ERROR: Neither build123d nor OpenSCAD found")
     print("  Run: make setup_cad   (preferred)")
     print("  Or:  make setup_scad  (fallback)")
     sys.exit(1)
 
 
 def _load_module(cad_path: Path):
-    """Import a CadQuery script as a module."""
+    """Import a CAD script as a module."""
     spec = importlib.util.spec_from_file_location(cad_path.stem, cad_path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
 
 
-def render_cad(parts: list[dict]) -> None:
-    """Render all parts via CadQuery — import build functions, export using manifest filenames."""
-    import cadquery as cq
+def _to_solid(shape):
+    """Coerce build123d result (Solid, Compound, or ShapeList) to exportable Shape."""
+    from build123d import Compound, Solid
 
-    print("--- Rendering via CadQuery")
+    if isinstance(shape, Solid):
+        return shape
+    if isinstance(shape, Compound):
+        return shape
+    # ShapeList or other iterable — wrap in Compound
+    if hasattr(shape, "__iter__"):
+        return Compound(children=list(shape))
+    return shape
+
+
+def render_cad(parts: list[dict], *, solid: bool = False) -> None:
+    """Render all parts via build123d — import build functions, export using manifest filenames."""
+    from build123d import Color, ExportSVG, LineType, Rot, export_stl
+
+    print("--- Rendering via build123d")
 
     # Cache modules (tool_changer.py is used by multiple parts)
     _modules: dict[str, object] = {}
 
     for part in parts:
         if "cad" not in part or "build_func" not in part:
-            print(f"  SKIP {part['name']} — no CadQuery script")
+            print(f"  SKIP {part['name']} — no CAD script")
             continue
         cad_rel = part["cad"]
         if cad_rel not in _modules:
@@ -72,15 +88,37 @@ def render_cad(parts: list[dict]) -> None:
 
         mod = _modules[cad_rel]
         build_fn = getattr(mod, part["build_func"])
-        shape = build_fn()
+        shape = _to_solid(build_fn())
 
         stl_out = STL_DIR / part["stl"]
         svg_out = SVG_DIR / part["svg"]
         stl_out.parent.mkdir(parents=True, exist_ok=True)
         svg_out.parent.mkdir(parents=True, exist_ok=True)
-        cq.exporters.export(shape, str(stl_out))
-        cq.exporters.export(shape, str(svg_out), exportType="SVG")
-        print(f"  {part['stl']} + {part['svg']}")
+        export_stl(shape, str(stl_out))
+        try:
+            # Rotate to isometric view (ExportSVG projects top-down on XY)
+            iso_shape = Rot(35.264, 0, -45) * shape
+            exporter = ExportSVG()
+            if solid:
+                exporter.add_layer(
+                    "solid",
+                    fill_color=Color(0.85, 0.85, 0.85),
+                    line_color=Color(0, 0, 0),
+                    line_weight=0.5,
+                )
+                exporter.add_layer(
+                    "hidden",
+                    line_color=Color(0.6, 0.6, 0.6),
+                    line_weight=0.25,
+                    line_type=LineType.ISO_DOT,
+                )
+                exporter.add_shape(iso_shape, layer="solid")
+            else:
+                exporter.add_shape(iso_shape)
+            exporter.write(str(svg_out))
+            print(f"  {part['stl']} + {part['svg']}")
+        except Exception as exc:
+            print(f"  {part['stl']} (SVG failed: {exc})")
 
 
 def render_scad(parts: list[dict]) -> None:
@@ -100,7 +138,7 @@ def render_scad(parts: list[dict]) -> None:
         subprocess.run(cmd, capture_output=True, check=True)
         print(f"  {part['stl']}")
 
-    # Generate SVGs from STLs (CadQuery's stl_to_svg.py)
+    # Generate SVGs from STLs (build123d's stl_to_svg.py)
     print("--- SVG wireframe from STLs")
     stl_to_svg = HARDWARE_DIR / "cad" / "util" / "stl_to_svg.py"
     subprocess.run([sys.executable, str(stl_to_svg), "--all"], check=True)
@@ -117,6 +155,9 @@ def main() -> int:
     parser.add_argument(
         "--backend", choices=["cad", "scad"], help="Force backend (default: auto-detect)"
     )
+    parser.add_argument(
+        "--solid", action="store_true", help="Filled SVG faces (default: wireframe)"
+    )
     args = parser.parse_args()
 
     force_backend = args.backend
@@ -132,8 +173,8 @@ def main() -> int:
     cad_parts = []
     scad_parts = []
     for part in parts:
-        backend = force_backend or part.get("primary_backend", "cadquery")
-        if backend in ("cad", "cadquery"):
+        backend = force_backend or part.get("primary_backend", "build123d")
+        if backend in ("cad", "cadquery", "build123d"):
             cad_parts.append(part)
         else:
             scad_parts.append(part)
@@ -142,9 +183,9 @@ def main() -> int:
     if cad_parts:
         available = detect_backend()
         if available == "cad" or force_backend == "cad":
-            render_cad(cad_parts)
+            render_cad(cad_parts, solid=args.solid)
         else:
-            print(f"  CadQuery unavailable — falling back to OpenSCAD for {len(cad_parts)} parts")
+            print(f"  build123d unavailable — falling back to OpenSCAD for {len(cad_parts)} parts")
             render_scad(cad_parts)
 
     if scad_parts:
