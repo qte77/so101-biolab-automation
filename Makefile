@@ -10,7 +10,7 @@ endif
 .ONESHELL:
 .PHONY: \
 	setup_uv setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
-	render_parts check_prints render_all \
+	render_wireframe render_solid check_prints render_all \
 	lint_code check_links check_types run_tests rerun_tests quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
 	eval_policy serve_dashboard run_demo \
@@ -124,13 +124,16 @@ setup_lychee: ## Install lychee link checker
 # MARK: HARDWARE
 
 
-render_parts: ## Generate STL + SVG from hardware/parts.json (build123d preferred, OpenSCAD fallback)
+render_wireframe: ## Generate STL + wireframe SVG from parts.json
 	uv run --group cad python hardware/render.py
+
+render_solid: ## Generate STL + solid-filled SVG from parts.json
+	uv run --group cad python hardware/render.py --solid
 
 check_prints: ## Run slicer printability checks on STLs (CuraEngine or PrusaSlicer)
 	uv run python hardware/slicer/validate.py --all
 
-render_all: render_parts check_prints ## Generate parts + validate printability
+render_all: render_wireframe check_prints ## Generate parts + validate printability
 
 calibrate_arms: ## Calibrate all arms (leader + followers)
 	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_A_PORT) --robot.id=arm_a
