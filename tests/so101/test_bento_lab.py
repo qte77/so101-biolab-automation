@@ -28,21 +28,23 @@ class TestBentoLabLid:
     """Tests for lid open/close."""
 
     def test_open_close_lid(self, bento: BentoLab) -> None:
-        assert not bento._lid_open
+        """Lid state observable through get_status()."""
         bento.open_lid()
-        assert bento._lid_open
+        assert bento.get_status()["lid_open"] is True
         bento.close_lid()
-        assert not bento._lid_open
+        assert bento.get_status()["lid_open"] is False
 
 
 class TestBentoLabProgram:
     """Tests for PCR program control."""
 
     def test_start_program(self, bento: BentoLab) -> None:
+        """Running program observable through get_status()."""
         bento.close_lid()
         bento.start_program("pcr_standard")
-        assert bento._running
-        assert bento._current_program == "pcr_standard"
+        status = bento.get_status()
+        assert status["running"] is True
+        assert status["program"] == "pcr_standard"
 
     def test_start_program_with_lid_open_raises(self, bento: BentoLab) -> None:
         bento.open_lid()
