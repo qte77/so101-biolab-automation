@@ -13,7 +13,7 @@ Exports:
 
 from pathlib import Path
 
-import cadquery as cq
+from build123d import Box, Cylinder, Pos, export_stl, ExportSVG
 
 # --- Parameters (all in mm) ---
 # SBS standard plate footprint
@@ -37,40 +37,31 @@ OUTER_WIDTH = INNER_WIDTH + WALL_THICKNESS * 2
 WALL_HEIGHT = PLATE_HEIGHT * 0.6  # Walls don't need to be full height
 
 
-def build_plate_holder() -> cq.Workplane:
+def build_plate_holder():
     """Build 96-well plate holder with alignment pins.
 
     Returns:
-        CadQuery workplane with the plate holder solid.
+        build123d solid with the plate holder.
     """
     # Base plate
-    holder = (
-        cq.Workplane("XY")
-        .box(OUTER_LENGTH, OUTER_WIDTH, BASE_THICKNESS)
-        .translate((0, 0, BASE_THICKNESS / 2))
-    )
+    holder = Pos(0, 0, BASE_THICKNESS / 2) * Box(OUTER_LENGTH, OUTER_WIDTH, BASE_THICKNESS)
 
-    # Cut inner pocket for plate
-    holder = (
-        holder.faces(">Z")
-        .workplane()
-        .rect(INNER_LENGTH, INNER_WIDTH)
-        .cutBlind(-BASE_THICKNESS + 1.0)  # Leave 1mm floor
+    # Cut inner pocket for plate (leave 1mm floor)
+    pocket_depth = BASE_THICKNESS - 1.0
+    pocket = Pos(0, 0, BASE_THICKNESS - pocket_depth / 2) * Box(
+        INNER_LENGTH, INNER_WIDTH, pocket_depth
     )
+    holder = holder - pocket
 
     # Add walls
-    walls = (
-        cq.Workplane("XY")
-        .box(OUTER_LENGTH, OUTER_WIDTH, WALL_HEIGHT)
-        .translate((0, 0, BASE_THICKNESS + WALL_HEIGHT / 2))
+    walls = Pos(0, 0, BASE_THICKNESS + WALL_HEIGHT / 2) * Box(
+        OUTER_LENGTH, OUTER_WIDTH, WALL_HEIGHT
     )
-    inner_cut = (
-        cq.Workplane("XY")
-        .box(INNER_LENGTH, INNER_WIDTH, WALL_HEIGHT + 1)
-        .translate((0, 0, BASE_THICKNESS + WALL_HEIGHT / 2))
+    inner_cut = Pos(0, 0, BASE_THICKNESS + WALL_HEIGHT / 2) * Box(
+        INNER_LENGTH, INNER_WIDTH, WALL_HEIGHT + 1
     )
-    walls = walls.cut(inner_cut)
-    holder = holder.union(walls)
+    walls = walls - inner_cut
+    holder = holder + walls
 
     # Add alignment pins at corners
     pin_positions = [
@@ -80,23 +71,23 @@ def build_plate_holder() -> cq.Workplane:
         (-INNER_LENGTH / 2 + PIN_INSET, -INNER_WIDTH / 2 + PIN_INSET),
     ]
     for x, y in pin_positions:
-        pin = (
-            cq.Workplane("XY")
-            .cylinder(PIN_HEIGHT, PIN_DIAMETER / 2)
-            .translate((x, y, BASE_THICKNESS + PIN_HEIGHT / 2))
+        pin = Pos(x, y, BASE_THICKNESS + PIN_HEIGHT / 2) * Cylinder(
+            PIN_DIAMETER / 2, PIN_HEIGHT
         )
-        holder = holder.union(pin)
+        holder = holder + pin
 
     return holder
 
 
-def export(holder: cq.Workplane) -> None:
+def export(holder) -> None:
     """Export to STL and SVG."""
     stl_path = Path(__file__).parent.parent.parent / "stl" / "labware" / "96well_plate_holder.stl"
     svg_path = Path(__file__).parent.parent.parent / "svg" / "labware" / "96well_plate_holder.svg"
 
-    cq.exporters.export(holder, str(stl_path))
-    cq.exporters.export(holder, str(svg_path), exportType="SVG")
+    export_stl(holder, str(stl_path))
+    exporter = ExportSVG()
+    exporter.add_shape(holder)
+    exporter.write(str(svg_path))
 
     print(f"Exported: {stl_path}")
     print(f"Exported: {svg_path}")

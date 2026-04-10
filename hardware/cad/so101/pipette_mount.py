@@ -15,7 +15,7 @@ Usage:
 
 from pathlib import Path
 
-import cadquery as cq
+from build123d import Box, Cylinder, ExportSVG, Pos, Rot, export_stl
 
 # --- Parameters (all in mm) ---
 # dPette 7016 barrel (approximate — measure real hardware)
@@ -40,61 +40,52 @@ BUTTON_CUTOUT_WIDTH = 12.0
 BUTTON_CUTOUT_DEPTH = 8.0
 
 
-def build_pipette_mount() -> cq.Workplane:
+def build_pipette_mount():
     """Build dPette barrel clamp with tool cone mounting plate."""
     # Mounting plate (bolts to tool cone male base)
-    mount = cq.Workplane("XY").box(MOUNT_WIDTH, MOUNT_WIDTH, MOUNT_THICKNESS)
+    mount = Box(MOUNT_WIDTH, MOUNT_WIDTH, MOUNT_THICKNESS)
 
     # Clamp body (cylinder around pipette barrel)
-    clamp = (
-        cq.Workplane("XY")
-        .cylinder(CLAMP_LENGTH, CLAMP_OUTER / 2)
-        .translate((0, 0, MOUNT_THICKNESS / 2 + CLAMP_LENGTH / 2))
+    clamp = Pos(0, 0, MOUNT_THICKNESS / 2 + CLAMP_LENGTH / 2) * Cylinder(
+        CLAMP_OUTER / 2, CLAMP_LENGTH
     )
 
     # Cut barrel hole
-    barrel = (
-        cq.Workplane("XY")
-        .cylinder(CLAMP_LENGTH + 1, (BARREL_DIAMETER + BARREL_CLEARANCE * 2) / 2)
-        .translate((0, 0, MOUNT_THICKNESS / 2 + CLAMP_LENGTH / 2))
+    barrel = Pos(0, 0, MOUNT_THICKNESS / 2 + CLAMP_LENGTH / 2) * Cylinder(
+        (BARREL_DIAMETER + BARREL_CLEARANCE * 2) / 2, CLAMP_LENGTH + 1
     )
-    clamp = clamp.cut(barrel)
+    clamp = clamp - barrel
 
     # Cut split gap for clamping
-    gap = (
-        cq.Workplane("XY")
-        .box(SPLIT_GAP, CLAMP_OUTER + 1, CLAMP_LENGTH + 1)
-        .translate((0, 0, MOUNT_THICKNESS / 2 + CLAMP_LENGTH / 2))
+    gap = Pos(0, 0, MOUNT_THICKNESS / 2 + CLAMP_LENGTH / 2) * Box(
+        SPLIT_GAP, CLAMP_OUTER + 1, CLAMP_LENGTH + 1
     )
-    clamp = clamp.cut(gap)
+    clamp = clamp - gap
 
     # Ejector button cutout at top of clamp
-    button_cut = (
-        cq.Workplane("XY")
-        .box(BUTTON_CUTOUT_WIDTH, BUTTON_CUTOUT_DEPTH, CLAMP_LENGTH * 0.4)
-        .translate((0, 0, MOUNT_THICKNESS / 2 + CLAMP_LENGTH * 0.8))
+    button_cut = Pos(0, 0, MOUNT_THICKNESS / 2 + CLAMP_LENGTH * 0.8) * Box(
+        BUTTON_CUTOUT_WIDTH, BUTTON_CUTOUT_DEPTH, CLAMP_LENGTH * 0.4
     )
-    clamp = clamp.cut(button_cut)
+    clamp = clamp - button_cut
 
     # Screw holes for clamp tightening (2x M3)
     for z_off in [CLAMP_LENGTH * 0.25, CLAMP_LENGTH * 0.65]:
-        hole = (
-            cq.Workplane("XY")
-            .cylinder(CLAMP_OUTER + 10, SCREW_DIAMETER / 2)
-            .rotateAboutCenter((1, 0, 0), 90)
-            .translate((0, 0, MOUNT_THICKNESS / 2 + z_off))
+        hole = Pos(0, 0, MOUNT_THICKNESS / 2 + z_off) * Rot(90, 0, 0) * Cylinder(
+            SCREW_DIAMETER / 2, CLAMP_OUTER + 10
         )
-        clamp = clamp.cut(hole)
+        clamp = clamp - hole
 
-    return mount.union(clamp)
+    return mount + clamp
 
 
-def export(part: cq.Workplane) -> None:
+def export(part) -> None:
     """Export to STL and SVG."""
     stl_path = Path(__file__).parent.parent.parent / "stl" / "so101" / "pipette_mount_so101.stl"
     svg_path = Path(__file__).parent.parent.parent / "svg" / "so101" / "pipette_mount_so101.svg"
-    cq.exporters.export(part, str(stl_path))
-    cq.exporters.export(part, str(svg_path), exportType="SVG")
+    export_stl(part, str(stl_path))
+    exporter = ExportSVG()
+    exporter.add_shape(part)
+    exporter.write(str(svg_path))
     print(f"Exported: {stl_path}")
     print(f"Exported: {svg_path}")
 

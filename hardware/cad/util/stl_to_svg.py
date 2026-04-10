@@ -1,6 +1,6 @@
-"""Convert STL files to isometric wireframe SVGs using CadQuery.
+"""Convert STL files to isometric wireframe SVGs using build123d.
 
-CadQuery's SVG exporter renders visible edges with hidden-line removal,
+build123d's SVG exporter renders visible edges with hidden-line removal,
 producing proper 3D wireframe views — unlike OpenSCAD's projection()
 which only gives silhouette outlines.
 
@@ -21,21 +21,17 @@ SVG_DIR = Path(__file__).resolve().parent.parent.parent / "svg"
 
 def stl_to_svg(stl_path: Path, svg_path: Path) -> None:
     """Import STL and export as isometric wireframe SVG."""
-    import cadquery as cq
-    from OCP.StlAPI import StlAPI_Reader
-    from OCP.TopoDS import TopoDS_Shape
+    from build123d import ExportSVG, import_stl
 
-    reader = StlAPI_Reader()
-    ocp_shape = TopoDS_Shape()
-    reader.Read(ocp_shape, str(stl_path))
-
-    shape = cq.Workplane("XY").add(cq.Shape(ocp_shape))
-    cq.exporters.export(shape, str(svg_path), exportType="SVG")
+    shape = import_stl(str(stl_path))
+    exporter = ExportSVG()
+    exporter.add_shape(shape)
+    exporter.write(str(svg_path))
     print(f"  {svg_path.name}")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="STL → wireframe SVG via CadQuery")
+    parser = argparse.ArgumentParser(description="STL → wireframe SVG via build123d")
     parser.add_argument("stl", nargs="?", help="Input STL file")
     parser.add_argument("svg", nargs="?", help="Output SVG file")
     parser.add_argument("--all", action="store_true", help="Convert all STLs")

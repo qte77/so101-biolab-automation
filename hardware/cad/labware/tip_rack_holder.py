@@ -8,7 +8,7 @@ Usage:
 
 from pathlib import Path
 
-import cadquery as cq
+from build123d import Box, Pos, export_stl, ExportSVG
 
 # --- Parameters (all in mm) ---
 # Standard tip rack (approximate — varies by manufacturer)
@@ -25,25 +25,29 @@ OUTER_L = INNER_L + WALL_THICKNESS * 2
 OUTER_W = INNER_W + WALL_THICKNESS * 2
 
 
-def build_tip_rack_holder() -> cq.Workplane:
+def build_tip_rack_holder():
     """Build tip rack holder tray."""
-    base = cq.Workplane("XY").box(OUTER_L, OUTER_W, BASE_THICKNESS)
+    base = Box(OUTER_L, OUTER_W, BASE_THICKNESS)
 
-    walls = cq.Workplane("XY").box(OUTER_L, OUTER_W, WALL_HEIGHT)
-    walls = walls.translate((0, 0, BASE_THICKNESS / 2 + WALL_HEIGHT / 2))
-    inner = cq.Workplane("XY").box(INNER_L, INNER_W, WALL_HEIGHT + 1)
-    inner = inner.translate((0, 0, BASE_THICKNESS / 2 + WALL_HEIGHT / 2))
-    walls = walls.cut(inner)
+    walls = Pos(0, 0, BASE_THICKNESS / 2 + WALL_HEIGHT / 2) * Box(
+        OUTER_L, OUTER_W, WALL_HEIGHT
+    )
+    inner = Pos(0, 0, BASE_THICKNESS / 2 + WALL_HEIGHT / 2) * Box(
+        INNER_L, INNER_W, WALL_HEIGHT + 1
+    )
+    walls = walls - inner
 
-    return base.union(walls)
+    return base + walls
 
 
-def export(part: cq.Workplane) -> None:
+def export(part) -> None:
     """Export to STL and SVG."""
     stl = Path(__file__).parent.parent.parent / "stl" / "labware" / "tip_rack_holder.stl"
     svg = Path(__file__).parent.parent.parent / "svg" / "labware" / "tip_rack_holder.svg"
-    cq.exporters.export(part, str(stl))
-    cq.exporters.export(part, str(svg), exportType="SVG")
+    export_stl(part, str(stl))
+    exporter = ExportSVG()
+    exporter.add_shape(part)
+    exporter.write(str(svg))
     print(f"Exported: {stl}")
     print(f"Exported: {svg}")
 

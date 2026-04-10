@@ -21,7 +21,7 @@ Exports:
 import math
 from pathlib import Path
 
-import cadquery as cq
+from build123d import Cone, Cylinder, ExportSVG, Pos, export_stl
 
 # --- Parameters (all in mm) ---
 # SO-101 wrist flange (motor 5 horn mount)
@@ -50,91 +50,75 @@ BASE_THICKNESS = 5.0
 BASE_RADIUS = CONE_TOP_RADIUS + 3
 
 
-def _make_truncated_cone(height: float, r_bottom: float, r_top: float) -> cq.Workplane:
-    """Create a truncated cone (frustum) via revolve.
-
-    Args:
-        height: Cone height.
-        r_bottom: Bottom radius (smaller).
-        r_top: Top radius (larger).
-
-    Returns:
-        CadQuery solid.
-    """
-    return (
-        cq.Workplane("XZ")
-        .moveTo(0, 0)
-        .lineTo(r_bottom, 0)
-        .lineTo(r_top, height)
-        .lineTo(0, height)
-        .close()
-        .revolve(360, (0, 0, 0), (0, 1, 0))
-    )
-
-
-def build_robot_cone() -> cq.Workplane:
+def build_robot_cone():
     """Build female (robot-side) cone adapter for SO-101 wrist.
 
     Returns:
-        CadQuery workplane with female cone solid.
+        build123d solid with female cone.
     """
     # Base cylinder
-    base = cq.Workplane("XY").cylinder(BASE_THICKNESS, BASE_RADIUS)
+    base = Cylinder(BASE_RADIUS, BASE_THICKNESS)
 
     # Cut conical pocket (female)
-    cone = _make_truncated_cone(CONE_HEIGHT, CONE_BOTTOM_RADIUS, CONE_TOP_RADIUS)
-    cone = cone.translate((0, 0, -BASE_THICKNESS / 2 + 0.5))
-    base = base.cut(cone)
+    cone = Pos(0, 0, -BASE_THICKNESS / 2 + 0.5) * Cone(
+        CONE_BOTTOM_RADIUS, CONE_TOP_RADIUS, CONE_HEIGHT
+    )
+    base = base - cone
 
     # M3 mounting holes (4x at 90° intervals, offset 45°)
     for i in range(4):
         angle = math.radians(i * 90 + 45)
         x = WRIST_SCREW_PATTERN_RADIUS * math.cos(angle)
         y = WRIST_SCREW_PATTERN_RADIUS * math.sin(angle)
-        hole = cq.Workplane("XY").cylinder(BASE_THICKNESS + 1, WRIST_SCREW_DIAMETER / 2)
-        base = base.cut(hole.translate((x, y, 0)))
+        hole = Pos(x, y, 0) * Cylinder(WRIST_SCREW_DIAMETER / 2, BASE_THICKNESS + 1)
+        base = base - hole
 
     # Dowel pin holes (2x, opposing)
     for sign in [1, -1]:
-        hole = cq.Workplane("XY").cylinder(DOWEL_HEIGHT, DOWEL_DIAMETER / 2)
         z = BASE_THICKNESS / 2 - DOWEL_HEIGHT / 2
-        base = base.cut(hole.translate((sign * DOWEL_OFFSET, 0, z)))
+        hole = Pos(sign * DOWEL_OFFSET, 0, z) * Cylinder(DOWEL_DIAMETER / 2, DOWEL_HEIGHT)
+        base = base - hole
 
     # Magnet pockets (2x, opposing on Y axis)
     for sign in [1, -1]:
-        pocket = cq.Workplane("XY").cylinder(MAGNET_DEPTH, MAGNET_DIAMETER / 2)
         z = -BASE_THICKNESS / 2 + MAGNET_DEPTH / 2
-        base = base.cut(pocket.translate((0, sign * MAGNET_OFFSET, z)))
+        pocket = Pos(0, sign * MAGNET_OFFSET, z) * Cylinder(MAGNET_DIAMETER / 2, MAGNET_DEPTH)
+        base = base - pocket
 
     return base
 
 
-def build_male_cone() -> cq.Workplane:
+def build_male_cone():
     """Build male (tool-side) cone base.
 
     Returns:
-        CadQuery workplane with male cone solid.
+        build123d solid with male cone.
     """
     # Conical protrusion (0.3mm smaller for clearance)
-    cone = _make_truncated_cone(CONE_HEIGHT, CONE_BOTTOM_RADIUS - 0.3, CONE_TOP_RADIUS - 0.3)
+    cone = Cone(CONE_BOTTOM_RADIUS - 0.3, CONE_TOP_RADIUS - 0.3, CONE_HEIGHT)
 
     # Base plate for tool attachment
-    base = cq.Workplane("XY").cylinder(BASE_THICKNESS, BASE_RADIUS)
-    base = base.translate((0, 0, -CONE_HEIGHT / 2 - BASE_THICKNESS / 2))
+    base = Pos(0, 0, -CONE_HEIGHT / 2 - BASE_THICKNESS / 2) * Cylinder(
+        BASE_RADIUS, BASE_THICKNESS
+    )
 
-    result = cone.union(base)
+    result = cone + base
 
     # Dowel pin protrusions (0.1mm smaller for fit)
     for sign in [1, -1]:
-        pin = cq.Workplane("XY").cylinder(DOWEL_HEIGHT, DOWEL_DIAMETER / 2 - 0.1)
         z = CONE_HEIGHT / 2 + DOWEL_HEIGHT / 2
-        result = result.union(pin.translate((sign * DOWEL_OFFSET, 0, z)))
+        pin = Pos(sign * DOWEL_OFFSET, 0, z) * Cylinder(
+            DOWEL_DIAMETER / 2 - 0.1, DOWEL_HEIGHT
+        )
+        result = result + pin
 
     # Magnet pockets (matching robot side)
     for sign in [1, -1]:
-        pocket = cq.Workplane("XY").cylinder(MAGNET_DEPTH, MAGNET_DIAMETER / 2)
         z = CONE_HEIGHT / 2 - MAGNET_DEPTH / 2
-        result = result.cut(pocket.translate((0, sign * MAGNET_OFFSET, z)))
+        pocket = Pos(0, sign * MAGNET_OFFSET, z) * Cylinder(
+            MAGNET_DIAMETER / 2, MAGNET_DEPTH
+        )
+        result = result - pocket
 
     return result
 
@@ -145,17 +129,23 @@ def export_all() -> None:
     svg_dir = Path(__file__).parent.parent.parent / "svg" / "so101"
 
     robot_cone = build_robot_cone()
-    cq.exporters.export(robot_cone, str(stl_dir / "tool_cone_robot.stl"))
-    cq.exporters.export(robot_cone, str(svg_dir / "tool_cone_robot.svg"), exportType="SVG")
+    export_stl(robot_cone, str(stl_dir / "tool_cone_robot.stl"))
+    exporter = ExportSVG()
+    exporter.add_shape(robot_cone)
+    exporter.write(str(svg_dir / "tool_cone_robot.svg"))
     print("Exported: tool_cone_robot.stl + .svg")
 
     male_cone = build_male_cone()
     for name in ["pipette", "gripper", "hook"]:
-        cq.exporters.export(male_cone, str(stl_dir / f"tool_cone_{name}.stl"))
-        cq.exporters.export(male_cone, str(svg_dir / f"tool_cone_{name}.svg"), exportType="SVG")
+        export_stl(male_cone, str(stl_dir / f"tool_cone_{name}.stl"))
+        exporter = ExportSVG()
+        exporter.add_shape(male_cone)
+        exporter.write(str(svg_dir / f"tool_cone_{name}.svg"))
         print(f"Exported: tool_cone_{name}.stl + .svg")
 
-    cq.exporters.export(male_cone, str(svg_dir / "tool_cone_male.svg"), exportType="SVG")
+    exporter = ExportSVG()
+    exporter.add_shape(male_cone)
+    exporter.write(str(svg_dir / "tool_cone_male.svg"))
     print("Exported: tool_cone_male.svg")
 
 

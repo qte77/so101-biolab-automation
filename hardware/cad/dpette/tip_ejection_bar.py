@@ -21,7 +21,7 @@ Usage:
 
 from pathlib import Path
 
-import cadquery as cq
+from build123d import Box, Cone, Cylinder, Pos, export_stl, ExportSVG
 
 # --- Parameters (all in mm) ---
 # Post dimensions (contacts the top-mounted ejector button)
@@ -47,7 +47,7 @@ BOLT_SPACING_Y = 20.0
 WASTE_HOLE_D = 25.0
 
 
-def build_tip_ejection_bar() -> cq.Workplane:
+def build_tip_ejection_bar():
     """Build tip ejection post with base plate.
 
     The post sticks up from the base. The pipette is lowered so its
@@ -55,41 +55,42 @@ def build_tip_ejection_bar() -> cq.Workplane:
     to eject the tip. The tip falls through the waste hole in the base.
     """
     # Base plate
-    base = cq.Workplane("XY").box(BASE_LENGTH, BASE_WIDTH, BASE_THICKNESS)
+    base = Box(BASE_LENGTH, BASE_WIDTH, BASE_THICKNESS)
 
     # Waste hole in center of base (tips fall through)
-    base = base.faces(">Z").workplane().hole(WASTE_HOLE_D)
-
-    # Vertical post (offset from waste hole so tip falls clear)
-    post = cq.Workplane("XY").circle(POST_DIAMETER / 2).extrude(POST_HEIGHT)
-    post = post.translate((0, 0, BASE_THICKNESS / 2))
-
-    # Rounded post tip (hemisphere for self-centering on button)
-    tip_sphere = cq.Workplane("XY").sphere(POST_TIP_RADIUS)
-    tip_sphere = tip_sphere.translate((0, 0, BASE_THICKNESS / 2 + POST_HEIGHT))
+    waste_hole = Cylinder(WASTE_HOLE_D / 2, BASE_THICKNESS + 1)
+    base = base - waste_hole
 
     # Mounting holes (4x M4 at corners)
-    base = (
-        base.faces("<Z")
-        .workplane()
-        .pushPoints([
-            (-BOLT_SPACING_X / 2, -BOLT_SPACING_Y / 2),
-            (BOLT_SPACING_X / 2, -BOLT_SPACING_Y / 2),
-            (-BOLT_SPACING_X / 2, BOLT_SPACING_Y / 2),
-            (BOLT_SPACING_X / 2, BOLT_SPACING_Y / 2),
-        ])
-        .hole(BOLT_HOLE_D)
+    bolt_positions = [
+        (-BOLT_SPACING_X / 2, -BOLT_SPACING_Y / 2),
+        (BOLT_SPACING_X / 2, -BOLT_SPACING_Y / 2),
+        (-BOLT_SPACING_X / 2, BOLT_SPACING_Y / 2),
+        (BOLT_SPACING_X / 2, BOLT_SPACING_Y / 2),
+    ]
+    for bx, by in bolt_positions:
+        bolt = Pos(bx, by, 0) * Cylinder(BOLT_HOLE_D / 2, BASE_THICKNESS + 1)
+        base = base - bolt
+
+    # Vertical post (offset from waste hole so tip falls clear)
+    post = Pos(0, 0, BASE_THICKNESS / 2) * Cylinder(POST_DIAMETER / 2, POST_HEIGHT)
+
+    # Chamfered post tip (cone for self-centering on button)
+    tip_cone = Pos(0, 0, BASE_THICKNESS / 2 + POST_HEIGHT) * Cone(
+        POST_DIAMETER / 2, POST_TIP_RADIUS, POST_TIP_RADIUS * 2
     )
 
-    return base.union(post).union(tip_sphere)
+    return base + post + tip_cone
 
 
-def export(part: cq.Workplane) -> None:
+def export(part) -> None:
     """Export to STL and SVG."""
     stl = Path(__file__).parent.parent.parent / "stl" / "dpette" / "tip_ejection_bar.stl"
     svg = Path(__file__).parent.parent.parent / "svg" / "dpette" / "tip_ejection_bar.svg"
-    cq.exporters.export(part, str(stl))
-    cq.exporters.export(part, str(svg), exportType="SVG")
+    export_stl(part, str(stl))
+    exporter = ExportSVG()
+    exporter.add_shape(part)
+    exporter.write(str(svg))
     print(f"Exported: {stl}")
     print(f"Exported: {svg}")
 

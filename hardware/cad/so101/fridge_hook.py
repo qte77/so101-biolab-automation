@@ -13,7 +13,7 @@ Exports:
 
 from pathlib import Path
 
-import cadquery as cq
+from build123d import Box, Cylinder, ExportSVG, Pos, export_stl
 
 # --- Parameters (all in mm) ---
 # Hook geometry
@@ -27,45 +27,39 @@ MOUNT_DIAMETER = 30.0  # Match tool cone top diameter
 MOUNT_THICKNESS = 5.0
 
 
-def build_fridge_hook() -> cq.Workplane:
+def build_fridge_hook():
     """Build fridge hook end-effector.
 
     Returns:
-        CadQuery workplane with hook solid.
+        build123d solid with hook.
     """
     # Mounting plate
-    mount = cq.Workplane("XY").cylinder(MOUNT_THICKNESS, MOUNT_DIAMETER / 2)
+    mount = Cylinder(MOUNT_DIAMETER / 2, MOUNT_THICKNESS)
 
     # Hook arm (vertical part)
-    arm = (
-        cq.Workplane("XY")
-        .box(HOOK_WIDTH, HOOK_THICKNESS, HOOK_DEPTH)
-        .translate((0, 0, MOUNT_THICKNESS / 2 + HOOK_DEPTH / 2))
+    arm = Pos(0, 0, MOUNT_THICKNESS / 2 + HOOK_DEPTH / 2) * Box(
+        HOOK_WIDTH, HOOK_THICKNESS, HOOK_DEPTH
     )
 
     # Hook tip (horizontal part curving inward)
-    tip = (
-        cq.Workplane("XY")
-        .box(HOOK_WIDTH, HOOK_OPENING, HOOK_THICKNESS)
-        .translate(
-            (
-                0,
-                -HOOK_OPENING / 2 + HOOK_THICKNESS / 2,
-                MOUNT_THICKNESS / 2 + HOOK_DEPTH - HOOK_THICKNESS / 2,
-            )
-        )
-    )
+    tip = Pos(
+        0,
+        -HOOK_OPENING / 2 + HOOK_THICKNESS / 2,
+        MOUNT_THICKNESS / 2 + HOOK_DEPTH - HOOK_THICKNESS / 2,
+    ) * Box(HOOK_WIDTH, HOOK_OPENING, HOOK_THICKNESS)
 
-    return mount.union(arm).union(tip)
+    return mount + arm + tip
 
 
-def export(hook: cq.Workplane) -> None:
+def export(hook) -> None:
     """Export to STL and SVG."""
     stl_path = Path(__file__).parent.parent.parent / "stl" / "so101" / "fridge_hook_tool.stl"
     svg_path = Path(__file__).parent.parent.parent / "svg" / "so101" / "fridge_hook_tool.svg"
 
-    cq.exporters.export(hook, str(stl_path))
-    cq.exporters.export(hook, str(svg_path), exportType="SVG")
+    export_stl(hook, str(stl_path))
+    exporter = ExportSVG()
+    exporter.add_shape(hook)
+    exporter.write(str(svg_path))
 
     print(f"Exported: {stl_path}")
     print(f"Exported: {svg_path}")

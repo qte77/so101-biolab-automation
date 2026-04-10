@@ -8,7 +8,7 @@ Usage:
 
 from pathlib import Path
 
-import cadquery as cq
+from build123d import Box, Cylinder, Pos, export_stl, ExportSVG
 
 # --- Common parameters (all in mm) ---
 WALL = 2.5
@@ -25,20 +25,21 @@ MULTI_BODY_W = 50.0
 MULTI_BODY_D = 25.0
 
 
-def build_dpette_single_cradle() -> cq.Workplane:
+def build_dpette_single_cradle():
     """Build rest cradle for dPette 7016 single-channel."""
     # Cylindrical cradle with open top
-    outer = cq.Workplane("XY").circle(SINGLE_OUTER_D / 2).extrude(CRADLE_HEIGHT)
-    inner = cq.Workplane("XY").circle((SINGLE_BARREL_D + CLEARANCE * 2) / 2).extrude(CRADLE_HEIGHT)
-    inner = inner.translate((0, 0, BASE_THICKNESS))
-    cradle = outer.cut(inner)
+    outer = Cylinder(SINGLE_OUTER_D / 2, CRADLE_HEIGHT)
+    inner = Pos(0, 0, BASE_THICKNESS) * Cylinder(
+        (SINGLE_BARREL_D + CLEARANCE * 2) / 2, CRADLE_HEIGHT
+    )
+    cradle = outer - inner
 
     # Flat base for stability
-    base = cq.Workplane("XY").box(SINGLE_OUTER_D + 10, SINGLE_OUTER_D + 10, BASE_THICKNESS)
-    return base.union(cradle.translate((0, 0, BASE_THICKNESS / 2)))
+    base = Box(SINGLE_OUTER_D + 10, SINGLE_OUTER_D + 10, BASE_THICKNESS)
+    return base + Pos(0, 0, BASE_THICKNESS / 2) * cradle
 
 
-def build_dpette_multi_cradle() -> cq.Workplane:
+def build_dpette_multi_cradle():
     """Build rest cradle for dPette+ 8-channel (must keep tips level)."""
     inner_w = MULTI_BODY_W + CLEARANCE * 2
     inner_d = MULTI_BODY_D + CLEARANCE * 2
@@ -46,29 +47,32 @@ def build_dpette_multi_cradle() -> cq.Workplane:
     outer_d = inner_d + WALL * 2
 
     # Rectangular cradle
-    outer = cq.Workplane("XY").box(outer_w, outer_d, CRADLE_HEIGHT + BASE_THICKNESS)
-    inner = cq.Workplane("XY").box(inner_w, inner_d, CRADLE_HEIGHT + 1)
-    inner = inner.translate((0, 0, BASE_THICKNESS))
-    cradle = outer.cut(inner)
+    outer = Box(outer_w, outer_d, CRADLE_HEIGHT + BASE_THICKNESS)
+    inner = Pos(0, 0, BASE_THICKNESS) * Box(inner_w, inner_d, CRADLE_HEIGHT + 1)
+    cradle = outer - inner
 
     # Wide base for leveling (critical for 8-channel)
-    base = cq.Workplane("XY").box(outer_w + 20, outer_d + 20, BASE_THICKNESS)
-    return base.union(cradle.translate((0, 0, BASE_THICKNESS / 2)))
+    base = Box(outer_w + 20, outer_d + 20, BASE_THICKNESS)
+    return base + Pos(0, 0, BASE_THICKNESS / 2) * cradle
 
 
-def export_single(part: cq.Workplane) -> None:
+def export_single(part) -> None:
     stl = Path(__file__).parent.parent.parent / "stl" / "dpette" / "dpette_single_cradle.stl"
     svg = Path(__file__).parent.parent.parent / "svg" / "dpette" / "dpette_single_cradle.svg"
-    cq.exporters.export(part, str(stl))
-    cq.exporters.export(part, str(svg), exportType="SVG")
+    export_stl(part, str(stl))
+    exporter = ExportSVG()
+    exporter.add_shape(part)
+    exporter.write(str(svg))
     print(f"Exported: {stl}")
 
 
-def export_multi(part: cq.Workplane) -> None:
+def export_multi(part) -> None:
     stl = Path(__file__).parent.parent.parent / "stl" / "dpette" / "dpette_multi_cradle.stl"
     svg = Path(__file__).parent.parent.parent / "svg" / "dpette" / "dpette_multi_cradle.svg"
-    cq.exporters.export(part, str(stl))
-    cq.exporters.export(part, str(svg), exportType="SVG")
+    export_stl(part, str(stl))
+    exporter = ExportSVG()
+    exporter.add_shape(part)
+    exporter.write(str(svg))
     print(f"Exported: {stl}")
 
 

@@ -9,7 +9,7 @@ Usage:
 
 from pathlib import Path
 
-import cadquery as cq
+from build123d import Box, ExportSVG, Pos, export_stl
 
 # --- Parameters (all in mm) ---
 # SO-101 gripper finger (approximate)
@@ -25,26 +25,28 @@ RIDGE_DEPTH = 0.8
 RIDGE_WIDTH = 1.5
 
 
-def build_gripper_tip() -> cq.Workplane:
+def build_gripper_tip():
     """Build one compliant gripper fingertip."""
-    tip = cq.Workplane("XY").box(FINGER_WIDTH, TIP_THICKNESS, TIP_LENGTH)
+    tip = Box(FINGER_WIDTH, TIP_THICKNESS, TIP_LENGTH)
 
     # Cut grip ridges on contact face
     for i in range(RIDGE_COUNT):
         z = -TIP_LENGTH / 2 + (i + 1) * TIP_LENGTH / (RIDGE_COUNT + 1)
-        ridge = cq.Workplane("XY").box(FINGER_WIDTH + 1, RIDGE_DEPTH, RIDGE_WIDTH)
-        ridge = ridge.translate((0, TIP_THICKNESS / 2 - RIDGE_DEPTH / 2, z))
-        tip = tip.cut(ridge)
+        ridge = Box(FINGER_WIDTH + 1, RIDGE_DEPTH, RIDGE_WIDTH)
+        ridge = Pos(0, TIP_THICKNESS / 2 - RIDGE_DEPTH / 2, z) * ridge
+        tip = tip - ridge
 
     return tip
 
 
-def export(part: cq.Workplane) -> None:
+def export(part) -> None:
     """Export to STL and SVG."""
     stl = Path(__file__).parent.parent.parent / "stl" / "so101" / "gripper_tips_tpu.stl"
     svg = Path(__file__).parent.parent.parent / "svg" / "so101" / "gripper_tips_tpu.svg"
-    cq.exporters.export(part, str(stl))
-    cq.exporters.export(part, str(svg), exportType="SVG")
+    export_stl(part, str(stl))
+    exporter = ExportSVG()
+    exporter.add_shape(part)
+    exporter.write(str(svg))
     print(f"Exported: {stl}")
     print(f"Exported: {svg}")
 
