@@ -100,7 +100,12 @@ def render_scad(parts: list[dict]) -> None:
         subprocess.run(cmd, capture_output=True, check=True)
         print(f"  {part['stl']}")
 
-    # Generate SVGs from STLs (CadQuery's stl_to_svg.py)
+    # Generate SVGs from STLs (requires CadQuery for hidden-line removal)
+    try:
+        import cadquery  # noqa: F401
+    except ImportError:
+        print("--- SVG wireframe skipped (CadQuery not available)")
+        return
     print("--- SVG wireframe from STLs")
     stl_to_svg = HARDWARE_DIR / "cad" / "util" / "stl_to_svg.py"
     subprocess.run([sys.executable, str(stl_to_svg), "--all"], check=True)

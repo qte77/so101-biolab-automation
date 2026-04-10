@@ -58,5 +58,21 @@
   {"name": "tip_ejection_post", "stl": "dpette/tip_ejection_bar.stl", "svg": "dpette/tip_ejection_bar.svg",
    "cad": "cad/dpette/tip_ejection_bar.py", "build_func": "build_tip_ejection_bar",
    "shape": "box",
-   "status": "active", "primary_backend": "cadquery", "notes": "Fixed post at waste — arm pushes dPette ejector button down onto post to pop tips"}
+   "status": "deferred", "primary_backend": "cadquery", "notes": "SUPERSEDED by dpette_tip_release — assumed top push-button, dPette+ uses side lever"},
+  {"name": "dpette_handle", "stl": "dpette/dpette_handle.stl", "svg": "dpette/dpette_handle.svg",
+   "cad": "cad/dpette/dpette_handle.py", "build_func": "build_mount_bracket",
+   "shape": "complex",
+   "status": "active", "primary_backend": "cadquery", "notes": "Tapered split-clamp for dPette+ handle — tool cone mounting + ejector/display windows"},
+  {"name": "dpette_tip_release", "stl": "dpette/dpette_tip_release.stl", "svg": "dpette/dpette_tip_release.svg",
+   "cad": "cad/dpette/dpette_tip_release.py", "build_func": "build_tip_release",
+   "shape": "box",
+   "status": "deferred", "primary_backend": "cadquery", "notes": "SUPERSEDED — cam arm on gripper motor actuates lever directly, no station needed"},
+  {"name": "dpette_cam_arm", "stl": "dpette/dpette_cam_arm.stl", "svg": "dpette/dpette_cam_arm.svg",
+   "cad": "cad/dpette/dpette_handle.py", "build_func": "build_cam_arm",
+   "shape": "complex",
+   "status": "active", "primary_backend": "cadquery", "notes": "Cam arm on gripper horn — rotates through handle slot to press tip ejector lever"},
+  {"name": "dpette_multi_handle", "stl": "dpette/dpette_multi_handle.stl", "svg": "dpette/dpette_multi_handle.svg",
+   "cad": "cad/dpette/dpette_multi_handle.py", "build_func": "build_dpette_multi_handle",
+   "shape": "box",
+   "status": "active", "primary_backend": "cadquery", "notes": "Rectangular split-clamp for dPette+ 8-channel — single SO-101 arm"}
 ]
