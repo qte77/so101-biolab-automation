@@ -1,18 +1,21 @@
-# Require GNU Make >= 3.82 (.ONESHELL support)
+# Requires GNU Make >= 3.82 for .ONESHELL
+# macOS ships 3.81 as of Sequoia 15.4 (2025-03, Apple avoids GPLv3).
+# Ref: https://opensource.apple.com/releases/ (validated 2026-04-10)
+# Fix: brew install make → use gmake (not make)
 ifeq ($(filter oneshell,$(.FEATURES)),)
-$(error GNU Make >= 3.82 required (.ONESHELL). macOS ships 3.81 — install via: brew install make, then use gmake)
+$(error GNU Make >= 3.82 required. macOS: brew install make, then use gmake)
 endif
 
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
+	setup_uv setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
 	render_parts check_prints render_all \
 	lint_code check_links check_types run_tests rerun_tests quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
 	eval_policy serve_dashboard run_demo \
-	show_help
-.DEFAULT_GOAL := show_help
+	help
+.DEFAULT_GOAL := help
 
 
 # -- config --
@@ -40,15 +43,27 @@ POLICY ?= act
 # MARK: SETUP
 
 
-setup_dev: ## Install dev + test dependencies
+setup_uv: ## Install uv package manager (if missing)
+	if command -v uv > /dev/null 2>&1; then
+		echo "uv already installed: $$(uv --version)"
+	else
+		echo "Installing uv ..."
+		curl -LsSf https://astral.sh/uv/install.sh | sh
+		echo ""
+		echo "NOTE: restart your shell or run 'source $$HOME/.local/bin/env' to add uv to PATH"
+	fi
+
+setup_dev: setup_uv ## Install dev + test dependencies
 	uv sync
 
-setup_all: setup_dev setup_cad setup_slicer setup_lychee ## Install all dependencies + tools
+setup_all: setup_dev setup_cad ## Install all dependencies + tools
+	-$(MAKE) setup_slicer
+	-$(MAKE) setup_lychee
 
-setup_train: ## Install training dependencies (torch, wandb)
-	uv sync --group train
+## setup_train: setup_uv  # Uncomment when GPU available
+##	uv sync --group train
 
-setup_cad: ## Install CadQuery for SVG wireframe generation (requires Python 3.12)
+setup_cad: setup_uv ## Install build123d for BREP CAD generation
 	uv sync --group cad
 
 setup_scad: ## Install OpenSCAD for parametric STL generation
@@ -68,19 +83,23 @@ setup_scad: ## Install OpenSCAD for parametric STL generation
 		fi
 	fi
 
-setup_slicer: ## Install PrusaSlicer for printability validation (optional)
-	if command -v prusa-slicer > /dev/null 2>&1; then
+setup_slicer: ## Install CuraEngine (preferred) or PrusaSlicer (fallback) for printability validation
+	if command -v CuraEngine > /dev/null 2>&1; then
+		echo "CuraEngine already installed: $$(CuraEngine --version 2>&1 | head -1)"
+	elif command -v prusa-slicer > /dev/null 2>&1; then
 		echo "PrusaSlicer already installed: $$(prusa-slicer --version 2>&1 | head -1)"
 	else
-		echo "Installing PrusaSlicer ..."
-		if command -v apt-get > /dev/null 2>&1; then
-			sudo apt-get update -qq && sudo apt-get install -y -qq prusa-slicer
+		echo "Installing CuraEngine (headless slicer) ..."
+		if command -v dnf > /dev/null 2>&1; then
+			sudo dnf install -y curaengine \
+				|| { echo "CuraEngine unavailable, trying PrusaSlicer ..."; sudo dnf install -y prusa-slicer; }
+		elif command -v apt-get > /dev/null 2>&1; then
+			sudo apt-get update -qq && sudo apt-get install -y -qq curaengine \
+				|| { echo "CuraEngine unavailable, trying PrusaSlicer ..."; sudo apt-get install -y -qq prusa-slicer; }
 		elif command -v brew > /dev/null 2>&1; then
 			brew install --cask prusaslicer
-		elif command -v flatpak > /dev/null 2>&1; then
-			flatpak install -y flathub com.prusa3d.PrusaSlicer
 		else
-			echo "WARN: Install manually from https://github.com/prusa3d/PrusaSlicer/releases"
+			echo "WARN: Install manually — https://github.com/Ultimaker/CuraEngine or https://github.com/prusa3d/PrusaSlicer/releases"
 		fi
 	fi
 
@@ -105,10 +124,10 @@ setup_lychee: ## Install lychee link checker
 # MARK: HARDWARE
 
 
-render_parts: ## Generate STL + SVG from hardware/parts.json (CadQuery preferred, OpenSCAD fallback)
-	uv run --group cad python hardware/render.py || python3 hardware/render.py
+render_parts: ## Generate STL + SVG from hardware/parts.json (build123d preferred, OpenSCAD fallback)
+	uv run --group cad python hardware/render.py
 
-check_prints: ## Run PrusaSlicer printability checks on STLs (optional)
+check_prints: ## Run slicer printability checks on STLs (CuraEngine or PrusaSlicer)
 	uv run python hardware/slicer/validate.py --all
 
 render_all: render_parts check_prints ## Generate parts + validate printability
@@ -185,19 +204,19 @@ validate: lint_code check_types run_tests ## Full validation (lint + type check 
 
 
 eval_policy: ## Evaluate trained policy
-	python scripts/run_demo.py --mode=eval --arm-port=$(FOLLOWER_A_PORT)
+	uv run python scripts/run_demo.py --mode=eval --arm-port=$(FOLLOWER_A_PORT)
 
 serve_dashboard: ## Start remote dashboard
-	uvicorn src.dashboard.server:app --host 0.0.0.0 --port 8080 --reload
+	uv run uvicorn src.dashboard.server:app --host 0.0.0.0 --port 8080 --reload
 
 run_demo: ## Run full demo pipeline
-	python scripts/run_demo.py --mode=full
+	uv run python scripts/run_demo.py --mode=full
 
 
 # MARK: HELP
 
 
-show_help: ## Show available recipes grouped by section
+help: ## Show available recipes grouped by section
 	echo "Usage: make [recipe]"
 	echo ""
 	awk '/^# MARK:/ { \
