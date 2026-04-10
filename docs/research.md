@@ -528,7 +528,7 @@ Add draft STL files to `hardware/stl/` for custom parts. Mark as experimental �
 | [Integra VIAFLO](https://www.integra-biosciences.com/global/en/electronic-pipettes) | Commercial electronic | Bluetooth | ~$1000-3000 | Future — 8/12-channel for 96-well efficiency |
 | Custom 8-channel head | DIY multi-channel | Arduino/stepper | ~$200 | Future — 8x efficiency for 96-well |
 
-**`src/biolab/pipette.py` defines `PipetteProtocol`** — `aspirate(volume)`, `dispense(volume)`, `eject_tip()`. Both `DigitalPipette` and `ElectronicPipette` satisfy this protocol. Backend selected via `configs/pipette.yaml`.
+**`app/so101/pipette.py` defines `PipetteProtocol`** — `aspirate(volume)`, `dispense(volume)`, `eject_tip()`. Both `DigitalPipette` and `ElectronicPipette` satisfy this protocol. Backend selected via `configs/pipette.yaml`.
 
 ## Future Vision: VLM + Embodied AI for Hands-Off Autonomous Operation
 

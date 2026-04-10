@@ -89,6 +89,7 @@ Each document has a specific authority. Do not duplicate information across docu
 | [docs/UserStory.md](docs/UserStory.md) | Acceptance criteria | Both | User stories US-1.1–US-5.2 with testable criteria |
 | [docs/demo-scenarios.md](docs/demo-scenarios.md) | Operations | Both | How to run and verify each use case |
 | [docs/hardware/BOM.md](docs/hardware/BOM.md) | Hardware | Both | Shopping list, vendor links, cost summary |
+| [docs/research.md](docs/research.md) | Research (informational) | Both | Community designs, papers, future vision |
 | [CHANGELOG.md](CHANGELOG.md) | Version history | Both | Keep a Changelog format |
 | [AGENT_LEARNINGS.md](AGENT_LEARNINGS.md) | Patterns | AI agents | Discovered patterns and solutions |
 | [AGENT_REQUESTS.md](AGENT_REQUESTS.md) | Escalation | AI agents | Blocked items requiring human input |
