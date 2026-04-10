@@ -207,6 +207,21 @@ class DualArmController:
         for name in position_names:
             self.move_to_named(arm_id, name)
 
+    def start_teleoperation(self, follower_id: str) -> None:
+        """Start leader-follower teleoperation for an arm.
+
+        Args:
+            follower_id: Which follower arm to mirror the leader.
+
+        Raises:
+            ValueError: If no leader arm is configured or follower_id is unknown.
+        """
+        if self.config.leader is None:
+            raise ValueError("Leader arm not configured for teleoperation")
+        if follower_id not in self.arm_ids:
+            raise ValueError(f"Unknown arm: {follower_id}")
+        logger.info("Teleoperation: leader → %s (stub)", follower_id)
+
     def park_all(self) -> None:
         """Move all follower arms to the park (safe) position."""
         for arm_id in self.arm_ids:
