@@ -72,21 +72,21 @@ See [docs/architecture.md](docs/architecture.md) for full system design, module 
 ## Project Structure
 
 ```text
-src/biolab/            Core: arms, pipette (multi-backend), bento_lab, plate, tool changer, safety, workflow
-src/dashboard/         FastAPI server, WebSocket commands, browser UI
+app/so101/             Core: arms, pipette (multi-backend), bento_lab, plate, tool changer, safety, workflow
+app/dashboard/         FastAPI server, WebSocket commands, browser UI
+app/hardware/          CAD pipeline (build123d + OpenSCAD), slicer validation, render
 scripts/               CLI entry points for use cases and demo orchestration
-configs/               Arm ports, plate layout, tool dock, pipette backend, Bento Lab (YAML)
+configs/               Arm ports + positions, plate layout, tool dock, pipette backend (YAML)
 hardware/cad/so101/    SO-101 arm end-effectors (tool changer, dock, mount, gripper, hook)
 hardware/cad/dpette/   dPette accessories (cradles, tip ejection post)
 hardware/cad/labware/  Universal lab holders (plate holder, tip rack)
 hardware/cad/deferred/ Future parts (XZ gantry frame, carriage)
 hardware/cad/util/     SVG theming and STL→SVG conversion
 hardware/scad/         OpenSCAD scripts — archived fallback
-hardware/slicer/       PrusaSlicer CLI printability validation (optional)
-hardware/stl/{so101,dpette,labware}/ Generated STL files (via make render_wireframe, gitignored)
-hardware/svg/{so101,dpette,labware}/ SVG 2D projections of parts (tracked, for documentation)
-docs/              Architecture, user stories, demo scenarios, BOM, research
-tests/                 167 tests across 16 test files
+hardware/stl/          Generated STL files (via make render_wireframe, gitignored)
+hardware/svg/          SVG 2D projections of parts (tracked, for documentation)
+docs/                  Architecture, user stories, demo scenarios, BOM, research
+tests/                 206 tests with hypothesis property tests, 87% coverage
 ```
 
 ## Documentation

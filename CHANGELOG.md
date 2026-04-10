@@ -6,7 +6,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ### Added
 
-- E2E workflow orchestration (`src/biolab/workflow.py`): UC1 pipetting (single/row/col/full plate), UC2 fridge ops, UC3 tool interchange, UC4 demo mode
+- Config-driven named positions in `configs/arms.yaml` (`DualArmConfig.positions`)
+- `move_to_named()`, `execute_sequence()`, `start_teleoperation()` on `DualArmController`
+- Position sequence pipetting: `pipette_well` uses approach/lower patterns instead of stub zeros
+- `park_all()` uses config `park` position instead of hardcoded constant
+- Hypothesis property tests (well coords, parse_well roundtrip, aspirate/dispense roundtrip, joint limits)
+- 206 tests with 87% coverage, cognitive complexity gate (max 15/function)
+- CadQuery → build123d migration for all 13 CAD files
+- `app/` directory restructure (`src/biolab/` → `app/so101/`, `src/dashboard/` → `app/dashboard/`)
+- E2E workflow orchestration (`app/so101/workflow.py`): UC1 pipetting (single/row/col/full plate), UC2 fridge ops, UC3 tool interchange, UC4 demo mode
 - `PlateLayout` config loader for workspace-frame coordinates
 - `create_workflow_context()` factory wiring all modules from YAML
 - `--use-case` CLI dispatch in `run_demo.py`
@@ -28,9 +36,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - CC plugins: python-dev, docs-governance, commit-helper, codebase-tools
 - `LICENSE` (Apache-2.0)
 - 104 tests across 11 test files
-- `PipetteProtocol` interface + `ElectronicPipette` backend for AELAB dPette 7016 / DLAB dPette+ (`src/biolab/pipette.py`)
-- `XZGantry` dedicated pipetting arm controller (`src/biolab/xz_gantry.py`) — simpler 2-axis alternative to SO-101
-- `BentoLab` portable PCR thermocycler module (`src/biolab/bento_lab.py`) — lid, programs, status
+- `PipetteProtocol` interface + `ElectronicPipette` backend for AELAB dPette 7016 / DLAB dPette+ (`app/so101/pipette.py`)
+- `XZGantry` dedicated pipetting arm controller (`app/so101/xz_gantry.py`) — simpler 2-axis alternative to SO-101
+- `BentoLab` portable PCR thermocycler module (`app/so101/bento_lab.py`) — lid, programs, status
 - YAML configs: `configs/pipette.yaml`, `configs/xz_gantry.yaml`, `configs/bento_lab.yaml`
 - USB RE tools, commercial pipettes, Bento Lab, XZ gantry in `docs/research.md` and `docs/hardware/BOM.md`
 - UC5 gantry-based pipetting workflow (`uc5_gantry_pipette`, `uc5_gantry_strip`) — XZ gantry + any PipetteProtocol backend
