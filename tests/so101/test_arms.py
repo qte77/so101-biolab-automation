@@ -1,6 +1,9 @@
 """Tests for dual arm controller — must work without LeRobot hardware."""
 
+from pathlib import Path
+
 import pytest
+import yaml
 
 from so101.arms import ArmConfig, DualArmConfig, DualArmController
 
@@ -66,3 +69,72 @@ class TestDualArmController:
         """get_observation raises ValueError for unknown arm ID."""
         with pytest.raises(ValueError, match="Unknown arm"):
             connected_stub.get_observation("nonexistent")
+
+
+class TestNamedPositions:
+    """Config-driven named positions loaded from YAML."""
+
+    @pytest.fixture
+    def positions_yaml(self, tmp_path: Path) -> Path:
+        """Create a config with named positions."""
+        cfg = {
+            "arm_a": {"arm_id": "arm_a", "port": "/dev/null", "role": "follower"},
+            "arm_b": {"arm_id": "arm_b", "port": "/dev/null", "role": "follower"},
+            "positions": {
+                "park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0],
+                "home": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "well_approach": [10.0, -30.0, -60.0, 5.0, 0.0, 0.0],
+            },
+        }
+        path = tmp_path / "arms.yaml"
+        path.write_text(yaml.dump(cfg))
+        return path
+
+    @pytest.fixture
+    def no_positions_yaml(self, tmp_path: Path) -> Path:
+        """Create a config without positions section."""
+        cfg = {
+            "arm_a": {"arm_id": "arm_a", "port": "/dev/null", "role": "follower"},
+            "arm_b": {"arm_id": "arm_b", "port": "/dev/null", "role": "follower"},
+        }
+        path = tmp_path / "arms.yaml"
+        path.write_text(yaml.dump(cfg))
+        return path
+
+    def test_config_loads_positions(self, positions_yaml: Path) -> None:
+        """DualArmConfig.from_yaml parses positions dict."""
+        config = DualArmConfig.from_yaml(positions_yaml)
+        assert config.positions == {
+            "park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0],
+            "home": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            "well_approach": [10.0, -30.0, -60.0, 5.0, 0.0, 0.0],
+        }
+
+    def test_config_defaults_empty_positions(self, no_positions_yaml: Path) -> None:
+        """DualArmConfig.from_yaml defaults to empty dict when no positions."""
+        config = DualArmConfig.from_yaml(no_positions_yaml)
+        assert config.positions == {}
+
+    def test_move_to_named_sends_position(self, positions_yaml: Path) -> None:
+        """move_to_named looks up position by name and sends to arm."""
+        config = DualArmConfig.from_yaml(positions_yaml)
+        ctrl = DualArmController(config)
+        ctrl.connect()
+        # Should not raise — sends the looked-up joint array
+        ctrl.move_to_named("arm_a", "park")
+
+    def test_move_to_named_unknown_position_raises(self, positions_yaml: Path) -> None:
+        """move_to_named raises KeyError for unknown position name."""
+        config = DualArmConfig.from_yaml(positions_yaml)
+        ctrl = DualArmController(config)
+        ctrl.connect()
+        with pytest.raises(KeyError, match="no_such_position"):
+            ctrl.move_to_named("arm_a", "no_such_position")
+
+    def test_move_to_named_unknown_arm_raises(self, positions_yaml: Path) -> None:
+        """move_to_named raises ValueError for unknown arm ID."""
+        config = DualArmConfig.from_yaml(positions_yaml)
+        ctrl = DualArmController(config)
+        ctrl.connect()
+        with pytest.raises(ValueError, match="Unknown arm"):
+            ctrl.move_to_named("nonexistent", "park")
