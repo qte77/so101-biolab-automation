@@ -26,21 +26,26 @@ MANIFEST = HARDWARE_DIR / "parts.json"
 STL_DIR = HARDWARE_DIR / "stl"
 SVG_DIR = HARDWARE_DIR / "svg"
 
+# Backend constants — normalize manifest values to these
+BACKEND_CAD = "cad"
+BACKEND_SCAD = "scad"
+_CAD_ALIASES = frozenset({"cad", "cadquery", "build123d"})
+
 
 def load_manifest() -> list[dict]:
     return json.loads(MANIFEST.read_text())
 
 
 def detect_backend() -> str:
-    """Return 'cad' if build123d importable, 'scad' if openscad binary found, else error."""
+    """Return BACKEND_CAD if build123d importable, BACKEND_SCAD if openscad found, else error."""
     try:
         import build123d  # noqa: F401
 
-        return "cad"
+        return BACKEND_CAD
     except ImportError:
         pass
     if shutil.which("openscad"):
-        return "scad"
+        return BACKEND_SCAD
     print("ERROR: Neither build123d nor OpenSCAD found")
     print("  Run: make setup_cad   (preferred)")
     print("  Or:  make setup_scad  (fallback)")
@@ -75,20 +80,25 @@ def render_cad(parts: list[dict], *, solid: bool = False) -> None:
 
     print("--- Rendering via build123d")
 
-    # Cache modules (tool_changer.py is used by multiple parts)
+    # Cache modules and build results (tool_changer.py exports same shape 3x)
     _modules: dict[str, object] = {}
+    _shapes: dict[tuple[str, str], object] = {}
 
     for part in parts:
         if "cad" not in part or "build_func" not in part:
             print(f"  SKIP {part['name']} — no CAD script")
             continue
         cad_rel = part["cad"]
-        if cad_rel not in _modules:
-            _modules[cad_rel] = _load_module(HARDWARE_DIR / cad_rel)
+        func_name = part["build_func"]
+        cache_key = (cad_rel, func_name)
 
-        mod = _modules[cad_rel]
-        build_fn = getattr(mod, part["build_func"])
-        shape = _to_solid(build_fn())
+        if cache_key not in _shapes:
+            if cad_rel not in _modules:
+                _modules[cad_rel] = _load_module(HARDWARE_DIR / cad_rel)
+            mod = _modules[cad_rel]
+            _shapes[cache_key] = _to_solid(getattr(mod, func_name)())
+
+        shape = _shapes[cache_key]
 
         stl_out = STL_DIR / part["stl"]
         svg_out = SVG_DIR / part["svg"]
@@ -174,7 +184,7 @@ def main() -> int:
     scad_parts = []
     for part in parts:
         backend = force_backend or part.get("primary_backend", "build123d")
-        if backend in ("cad", "cadquery", "build123d"):
+        if backend in _CAD_ALIASES:
             cad_parts.append(part)
         else:
             scad_parts.append(part)
@@ -182,8 +192,11 @@ def main() -> int:
     # Render each group with the appropriate backend
     if cad_parts:
         available = detect_backend()
-        if available == "cad" or force_backend == "cad":
+        if available == BACKEND_CAD:
             render_cad(cad_parts, solid=args.solid)
+        elif force_backend == BACKEND_CAD:
+            print("ERROR: --backend cad requested but build123d not installed")
+            sys.exit(1)
         else:
             print(f"  build123d unavailable — falling back to OpenSCAD for {len(cad_parts)} parts")
             render_scad(cad_parts)
