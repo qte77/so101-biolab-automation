@@ -15,6 +15,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hardware" / "sl
 validate = importlib.import_module("validate")
 sys.path.pop(0)
 
+BACKEND = "prusa"
+BINARY = "prusa-slicer"
+
 
 @pytest.fixture
 def tmp_stl(tmp_path: Path) -> Path:
@@ -31,16 +34,24 @@ def profile_path() -> Path:
 
 class TestGetProfile:
     def test_default_is_pla(self) -> None:
-        profile = validate.get_profile("plate_holder.stl")
+        profile = validate.get_profile("plate_holder.stl", "prusa")
         assert "pla" in profile.name.lower()
 
     def test_tpu_for_gripper_tips(self) -> None:
-        profile = validate.get_profile("gripper_tips_tpu.stl")
+        profile = validate.get_profile("gripper_tips_tpu.stl", "prusa")
         assert "tpu" in profile.name.lower()
 
     def test_override_tpu(self) -> None:
-        profile = validate.get_profile("plate_holder.stl", override="tpu")
+        profile = validate.get_profile("plate_holder.stl", "prusa", override="tpu")
         assert "tpu" in profile.name.lower()
+
+    def test_cura_returns_json(self) -> None:
+        profile = validate.get_profile("plate_holder.stl", "cura")
+        assert profile.suffix == ".json"
+
+    def test_prusa_returns_ini(self) -> None:
+        profile = validate.get_profile("plate_holder.stl", "prusa")
+        assert profile.suffix == ".ini"
 
 
 class TestValidateStl:
@@ -49,7 +60,7 @@ class TestValidateStl:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[], returncode=0, stdout="Slicing done\n", stderr=""
         )
-        result = validate.validate_stl(tmp_stl, profile_path)
+        result = validate.validate_stl(tmp_stl, BACKEND, BINARY, profile_path)
         assert result["status"] == "PASS"
         assert result["warnings"] == []
 
@@ -61,7 +72,7 @@ class TestValidateStl:
             stdout="Warning: overhang detected at layer 5\n",
             stderr="",
         )
-        result = validate.validate_stl(tmp_stl, profile_path)
+        result = validate.validate_stl(tmp_stl, BACKEND, BINARY, profile_path)
         assert result["status"] == "WARN"
         assert "overhang" in result["warnings"]
 
@@ -70,19 +81,19 @@ class TestValidateStl:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[], returncode=1, stdout="", stderr="Error: invalid mesh"
         )
-        result = validate.validate_stl(tmp_stl, profile_path)
+        result = validate.validate_stl(tmp_stl, BACKEND, BINARY, profile_path)
         assert result["status"] == "FAIL"
         assert result["error"] is not None
 
     @patch("subprocess.run", side_effect=subprocess.TimeoutExpired(cmd="", timeout=120))
     def test_skip_on_timeout(self, mock_run, tmp_stl: Path, profile_path: Path) -> None:
-        result = validate.validate_stl(tmp_stl, profile_path)
+        result = validate.validate_stl(tmp_stl, BACKEND, BINARY, profile_path)
         assert result["status"] == "SKIP"
         assert "Timeout" in result["error"]
 
     @patch("subprocess.run", side_effect=FileNotFoundError)
     def test_skip_on_missing_binary(self, mock_run, tmp_stl: Path, profile_path: Path) -> None:
-        result = validate.validate_stl(tmp_stl, profile_path)
+        result = validate.validate_stl(tmp_stl, BACKEND, BINARY, profile_path)
         assert result["status"] == "SKIP"
 
     @patch("subprocess.run")
@@ -93,7 +104,7 @@ class TestValidateStl:
             stdout="overhang at layer 3, bridge detected\n",
             stderr="unsupported area found",
         )
-        result = validate.validate_stl(tmp_stl, profile_path)
+        result = validate.validate_stl(tmp_stl, BACKEND, BINARY, profile_path)
         assert result["status"] == "WARN"
         assert "overhang" in result["warnings"]
         assert "bridge" in result["warnings"]
@@ -110,7 +121,6 @@ class TestMeshIntegrity:
         stl = tmp_path / "valid.stl"
         header = b"\x00" * 80
         num_triangles = 2
-        # Each triangle: normal (3 floats) + 3 vertices (9 floats) + attribute (1 short) = 50 bytes
         triangle = struct.pack("<12fH", 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0)
         stl.write_bytes(header + struct.pack("<I", num_triangles) + triangle * num_triangles)
         result = validate.check_mesh_integrity(stl)
@@ -137,7 +147,10 @@ class TestMeshIntegrity:
 class TestPrintReport:
     def test_all_pass(self, capsys) -> None:
         results = [
-            {"file": "a.stl", "profile": "pla", "warnings": [], "status": "PASS", "error": None}
+            {
+                "file": "a.stl", "profile": "pla", "slicer": "prusa",
+                "warnings": [], "status": "PASS", "error": None,
+            }
         ]
         code = validate.print_report(results)
         assert code == 0
@@ -145,7 +158,10 @@ class TestPrintReport:
 
     def test_fail_returns_nonzero(self) -> None:
         results = [
-            {"file": "a.stl", "profile": "pla", "warnings": [], "status": "FAIL", "error": "bad"}
+            {
+                "file": "a.stl", "profile": "pla", "slicer": "prusa",
+                "warnings": [], "status": "FAIL", "error": "bad",
+            }
         ]
         code = validate.print_report(results)
         assert code == 1

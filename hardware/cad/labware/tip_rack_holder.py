@@ -8,7 +8,7 @@ Usage:
 
 from pathlib import Path
 
-from build123d import Box, Pos, export_stl, ExportSVG
+from build123d import Box, ExportSVG, Pos, export_stl
 
 # --- Parameters (all in mm) ---
 # Standard tip rack (approximate — varies by manufacturer)
@@ -29,12 +29,8 @@ def build_tip_rack_holder():
     """Build tip rack holder tray."""
     base = Box(OUTER_L, OUTER_W, BASE_THICKNESS)
 
-    walls = Pos(0, 0, BASE_THICKNESS / 2 + WALL_HEIGHT / 2) * Box(
-        OUTER_L, OUTER_W, WALL_HEIGHT
-    )
-    inner = Pos(0, 0, BASE_THICKNESS / 2 + WALL_HEIGHT / 2) * Box(
-        INNER_L, INNER_W, WALL_HEIGHT + 1
-    )
+    walls = Pos(0, 0, BASE_THICKNESS / 2 + WALL_HEIGHT / 2) * Box(OUTER_L, OUTER_W, WALL_HEIGHT)
+    inner = Pos(0, 0, BASE_THICKNESS / 2 + WALL_HEIGHT / 2) * Box(INNER_L, INNER_W, WALL_HEIGHT + 1)
     walls = walls - inner
 
     return base + walls

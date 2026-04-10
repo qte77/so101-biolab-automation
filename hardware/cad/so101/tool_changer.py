@@ -98,26 +98,20 @@ def build_male_cone():
     cone = Cone(CONE_BOTTOM_RADIUS - 0.3, CONE_TOP_RADIUS - 0.3, CONE_HEIGHT)
 
     # Base plate for tool attachment
-    base = Pos(0, 0, -CONE_HEIGHT / 2 - BASE_THICKNESS / 2) * Cylinder(
-        BASE_RADIUS, BASE_THICKNESS
-    )
+    base = Pos(0, 0, -CONE_HEIGHT / 2 - BASE_THICKNESS / 2) * Cylinder(BASE_RADIUS, BASE_THICKNESS)
 
     result = cone + base
 
     # Dowel pin protrusions (0.1mm smaller for fit)
     for sign in [1, -1]:
         z = CONE_HEIGHT / 2 + DOWEL_HEIGHT / 2
-        pin = Pos(sign * DOWEL_OFFSET, 0, z) * Cylinder(
-            DOWEL_DIAMETER / 2 - 0.1, DOWEL_HEIGHT
-        )
+        pin = Pos(sign * DOWEL_OFFSET, 0, z) * Cylinder(DOWEL_DIAMETER / 2 - 0.1, DOWEL_HEIGHT)
         result = result + pin
 
     # Magnet pockets (matching robot side)
     for sign in [1, -1]:
         z = CONE_HEIGHT / 2 - MAGNET_DEPTH / 2
-        pocket = Pos(0, sign * MAGNET_OFFSET, z) * Cylinder(
-            MAGNET_DIAMETER / 2, MAGNET_DEPTH
-        )
+        pocket = Pos(0, sign * MAGNET_OFFSET, z) * Cylinder(MAGNET_DIAMETER / 2, MAGNET_DEPTH)
         result = result - pocket
 
     return result

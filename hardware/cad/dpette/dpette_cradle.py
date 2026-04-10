@@ -8,7 +8,7 @@ Usage:
 
 from pathlib import Path
 
-from build123d import Box, Cylinder, Pos, export_stl, ExportSVG
+from build123d import Box, Cylinder, ExportSVG, Pos, export_stl
 
 # --- Common parameters (all in mm) ---
 WALL = 2.5

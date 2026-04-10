@@ -21,7 +21,7 @@ Usage:
 
 from pathlib import Path
 
-from build123d import Box, Cone, Cylinder, Pos, export_stl, ExportSVG
+from build123d import Box, Cone, Cylinder, ExportSVG, Pos, export_stl
 
 # --- Parameters (all in mm) ---
 # Post dimensions (contacts the top-mounted ejector button)

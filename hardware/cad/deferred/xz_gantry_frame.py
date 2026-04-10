@@ -11,7 +11,7 @@ Usage:
 
 from pathlib import Path
 
-from build123d import Box, Cylinder, Pos, Rot, Solid, export_stl, ExportSVG
+from build123d import Box, Cylinder, ExportSVG, Pos, Rot, Solid, export_stl
 
 # --- Parameters (all in mm) ---
 BRACKET_WIDTH = 40.0

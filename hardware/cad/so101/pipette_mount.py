@@ -70,8 +70,10 @@ def build_pipette_mount():
 
     # Screw holes for clamp tightening (2x M3)
     for z_off in [CLAMP_LENGTH * 0.25, CLAMP_LENGTH * 0.65]:
-        hole = Pos(0, 0, MOUNT_THICKNESS / 2 + z_off) * Rot(90, 0, 0) * Cylinder(
-            SCREW_DIAMETER / 2, CLAMP_OUTER + 10
+        hole = (
+            Pos(0, 0, MOUNT_THICKNESS / 2 + z_off)
+            * Rot(90, 0, 0)
+            * Cylinder(SCREW_DIAMETER / 2, CLAMP_OUTER + 10)
         )
         clamp = clamp - hole
 

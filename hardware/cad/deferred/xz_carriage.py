@@ -11,7 +11,7 @@ Usage:
 
 from pathlib import Path
 
-from build123d import Box, Cylinder, Pos, Rot, Solid, export_stl, ExportSVG
+from build123d import Box, Cylinder, ExportSVG, Pos, Rot, Solid, export_stl
 
 # --- Parameters (all in mm) ---
 CARRIAGE_W = 50.0
@@ -44,9 +44,7 @@ def build_xz_carriage() -> Solid:
     # Y = -CARRIAGE_D/2 + MAGNET_DEPTH/2 so it only cuts partway in.
     front_y = -CARRIAGE_D / 2 + MAGNET_DEPTH / 2
     for x_off in (-10, 10):
-        body = body - Pos(x_off, front_y, 0) * Rot(90, 0, 0) * Cylinder(
-            MAGNET_D / 2, MAGNET_DEPTH
-        )
+        body = body - Pos(x_off, front_y, 0) * Rot(90, 0, 0) * Cylinder(MAGNET_D / 2, MAGNET_DEPTH)
 
     return body
 

@@ -74,7 +74,15 @@ def _build_cura_cmd(binary: str, stl_path: Path, profile: Path, gcode_out: Path)
 
 def _build_prusa_cmd(binary: str, stl_path: Path, profile: Path, gcode_out: Path) -> list[str]:
     """Build PrusaSlicer CLI command."""
-    return [binary, "--export-gcode", "--load", str(profile), "--output", str(gcode_out), str(stl_path)]
+    return [
+        binary,
+        "--export-gcode",
+        "--load",
+        str(profile),
+        "--output",
+        str(gcode_out),
+        str(stl_path),
+    ]
 
 
 def validate_stl(stl_path: Path, backend: str, binary: str, profile: Path) -> dict:
@@ -188,11 +196,11 @@ def print_report(results: list[dict]) -> int:
 
     exit_code = 0
     for r in results:
-        warnings = ", ".join(r["warnings"]) if r["warnings"] else "none"
-        status = r["status"]
-        error_suffix = f" ({r['error']})" if r["error"] else ""
-        print(f"{r['file']:<35} {r['profile']:<18} {r['slicer']:<8} {warnings:<25} {status}{error_suffix}")
-        if status == "FAIL":
+        warns = ", ".join(r["warnings"]) if r["warnings"] else "none"
+        err = f" ({r['error']})" if r["error"] else ""
+        slicer = r["slicer"]
+        print(f"{r['file']:<35} {r['profile']:<18} {slicer:<8} {warns:<25} {r['status']}{err}")
+        if r["status"] == "FAIL":
             exit_code = 1
 
     passed = sum(1 for r in results if r["status"] == "PASS")

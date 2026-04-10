@@ -13,7 +13,7 @@ Exports:
 
 from pathlib import Path
 
-from build123d import Box, Cylinder, Pos, export_stl, ExportSVG
+from build123d import Box, Cylinder, ExportSVG, Pos, export_stl
 
 # --- Parameters (all in mm) ---
 # SBS standard plate footprint
@@ -71,9 +71,7 @@ def build_plate_holder():
         (-INNER_LENGTH / 2 + PIN_INSET, -INNER_WIDTH / 2 + PIN_INSET),
     ]
     for x, y in pin_positions:
-        pin = Pos(x, y, BASE_THICKNESS + PIN_HEIGHT / 2) * Cylinder(
-            PIN_DIAMETER / 2, PIN_HEIGHT
-        )
+        pin = Pos(x, y, BASE_THICKNESS + PIN_HEIGHT / 2) * Cylinder(PIN_DIAMETER / 2, PIN_HEIGHT)
         holder = holder + pin
 
     return holder
