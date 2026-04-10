@@ -24,6 +24,7 @@
       "Bash(git:log:*)",
       "Bash(git:status:*)",
       "Bash(git:log:--grep:*)",
+      "Bash(git:push:*)",
       "Bash(git:rev-list:*)",
       "Bash(jq:*)",
       "Bash(make:*)",
@@ -33,6 +34,12 @@
       "Edit(src/**)",
       "Edit(configs/)",
       "Edit(scripts/)",
+      
+      "Edit(Makefile)",
+      "Edit(pyproject.toml)",
+      "Edit(CHANGELOG.md)",
+      "Edit(README.md)",
+      
       "mcp__ide__getDiagnostics",
       "Read(.claude/skills/)",
       "Read(.claude/rules/)",
@@ -43,7 +50,6 @@
       "Bash(awk:*)",
       "Bash(cat:*)",
       "Bash(find:*)",
-      "Bash(git:push:*)",
       "Bash(grep:*)",
       "Bash(head:*)",
       "Bash(ls:*)",
@@ -64,10 +70,7 @@
       "Bash(rm:*)",
       "Edit(.claude/**)",
       "Edit(AGENTS.md)",
-      "Edit(CLAUDE.md)",
-      "Edit(Makefile)",
-      "Edit(pyproject.toml)",
-      "Edit(README.md)"
+      "Edit(CLAUDE.md)"
     ]
   },
   "enabledPlugins": {
