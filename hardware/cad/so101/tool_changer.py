@@ -40,7 +40,7 @@ DOWEL_DIAMETER = 3.0
 DOWEL_HEIGHT = 8.0
 DOWEL_OFFSET = 10.0
 
-# Magnet pockets (5mm dia × 3mm deep neodymium)
+# Magnet pockets (5mm dia x 3mm deep neodymium)
 MAGNET_DIAMETER = 5.0
 MAGNET_DEPTH = 3.0
 MAGNET_OFFSET = 12.0

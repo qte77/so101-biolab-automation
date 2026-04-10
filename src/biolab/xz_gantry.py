@@ -85,7 +85,7 @@ class XZGantry:
         except ImportError:
             logger.warning("pyserial not installed — running in stub mode")
             self._stub_mode = True
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("Serial connection failed (%s) — running in stub mode", exc)
             self._stub_mode = True
 

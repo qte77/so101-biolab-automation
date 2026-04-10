@@ -1,6 +1,6 @@
 """96-well plate holder with alignment pins.
 
-SBS/ANSI standard footprint: 127.76 × 85.48 mm.
+SBS/ANSI standard footprint: 127.76 x 85.48 mm.
 Reference: https://en.wikipedia.org/wiki/Microplate#Standards
 
 Usage:

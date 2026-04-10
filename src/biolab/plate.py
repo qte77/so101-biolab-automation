@@ -83,8 +83,8 @@ def parse_well_name(name: str) -> WellPosition:
         raise ValueError(f"Invalid well name: {name}")
     try:
         col = int(name[1:])
-    except ValueError:
-        raise ValueError(f"Invalid well name: {name}")
+    except ValueError as err:
+        raise ValueError(f"Invalid well name: {name}") from err
     if col < 1 or col > 12:
         raise ValueError(f"Column out of range: {col}")
     return get_well(name[0], col)

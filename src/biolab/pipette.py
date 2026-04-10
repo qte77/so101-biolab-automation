@@ -76,7 +76,7 @@ class DigitalPipette:
             logger.info("Pipette connected on %s", self.config.serial_port)
         except ImportError:
             logger.warning("pyserial not installed — running in stub mode")
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             # Reason: SerialException (port missing/inaccessible) degrades to stub mode
             logger.warning("Serial connection failed (%s) — running in stub mode", exc)
 
@@ -239,7 +239,7 @@ class ElectronicPipette:
         except ImportError:
             logger.warning("dpette package not installed — running in stub mode")
             self._stub_mode = True
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("dpette driver connection failed (%s) — running in stub mode", exc)
             self._stub_mode = True
 

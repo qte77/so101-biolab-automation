@@ -104,7 +104,7 @@ class SafetyMonitor:
         lo, hi = self.config.joint_limits[joint_name]
         if value < lo or value > hi:
             logger.warning(
-                "Joint limit violation: %s=%.1f (limits: %.1f–%.1f)", joint_name, value, lo, hi
+                "Joint limit violation: %s=%.1f (limits: %.1f-%.1f)", joint_name, value, lo, hi
             )
             return False
         return True
