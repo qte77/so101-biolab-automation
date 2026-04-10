@@ -26,16 +26,18 @@ def connected_stub(stub_config: DualArmConfig) -> DualArmController:
 class TestDualArmController:
     """Test DualArmController in stub mode (no LeRobot)."""
 
-    def test_connect_stub_mode(self, stub_config: DualArmConfig) -> None:
-        """connect() succeeds in stub mode without LeRobot."""
+    def test_connect_enables_operations(self, stub_config: DualArmConfig) -> None:
+        """After connect(), arm operations work without raising."""
         ctrl = DualArmController(stub_config)
         ctrl.connect()
-        assert ctrl._connected is True
+        obs = ctrl.get_observation("arm_a")
+        assert "joints" in obs
 
-    def test_disconnect_stub_mode(self, connected_stub: DualArmController) -> None:
-        """disconnect() works in stub mode."""
+    def test_disconnect_prevents_operations(self, connected_stub: DualArmController) -> None:
+        """After disconnect(), arm operations raise ValueError."""
         connected_stub.disconnect()
-        assert connected_stub._connected is False
+        with pytest.raises(ValueError):
+            connected_stub.get_observation("arm_a")
 
     def test_get_observation_stub(self, connected_stub: DualArmController) -> None:
         """get_observation returns stub data when no real robots connected."""
