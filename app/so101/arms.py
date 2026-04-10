@@ -188,6 +188,25 @@ class DualArmController:
             raise KeyError(position_name)
         self.send_action(arm_id, list(self.config.positions[position_name]))
 
+    def execute_sequence(self, arm_id: str, position_names: list[str]) -> None:
+        """Send a sequence of named positions to an arm.
+
+        Validates all names exist before sending any.
+
+        Args:
+            arm_id: Which arm to move.
+            position_names: Ordered list of position names from config.
+
+        Raises:
+            ValueError: If arm_id is not a configured follower arm.
+            KeyError: If any position_name is not defined in config.
+        """
+        for name in position_names:
+            if name not in self.config.positions:
+                raise KeyError(name)
+        for name in position_names:
+            self.move_to_named(arm_id, name)
+
     def park_all(self) -> None:
         """Move all follower arms to the park (safe) position."""
         for arm_id in self.arm_ids:
