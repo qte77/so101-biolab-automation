@@ -271,3 +271,33 @@ class TestExecuteSequence:
         ctrl.connect()
         with pytest.raises(ValueError, match="Unknown arm"):
             ctrl.execute_sequence("nonexistent", ["home"])
+
+
+class TestTeleoperation:
+    """Teleoperation skeleton — deferred implementation."""
+
+    def test_teleoperate_requires_leader(self) -> None:
+        """start_teleoperation raises if no leader arm configured."""
+        config = DualArmConfig(
+            arm_a=ArmConfig(arm_id="arm_a", port="/dev/null", role="follower"),
+            arm_b=ArmConfig(arm_id="arm_b", port="/dev/null", role="follower"),
+            leader=None,
+            positions={"park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0]},
+        )
+        ctrl = DualArmController(config)
+        ctrl.connect()
+        with pytest.raises(ValueError, match="[Ll]eader"):
+            ctrl.start_teleoperation("arm_a")
+
+    def test_teleoperate_with_leader(self) -> None:
+        """start_teleoperation succeeds when leader arm is configured."""
+        config = DualArmConfig(
+            arm_a=ArmConfig(arm_id="arm_a", port="/dev/null", role="follower"),
+            arm_b=ArmConfig(arm_id="arm_b", port="/dev/null", role="follower"),
+            leader=ArmConfig(arm_id="leader", port="/dev/null", role="leader"),
+            positions={"park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0]},
+        )
+        ctrl = DualArmController(config)
+        ctrl.connect()
+        # Should not raise — stub mode just logs
+        ctrl.start_teleoperation("arm_a")
