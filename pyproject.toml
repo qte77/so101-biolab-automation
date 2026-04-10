@@ -71,7 +71,7 @@ reportMissingImports = "warning"
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = "--strict-markers"
+addopts = "--strict-markers -m 'not hardware and not network'"
 asyncio_mode = "auto"
 markers = [
     "integration: tests loading real config files",
