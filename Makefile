@@ -11,7 +11,7 @@ endif
 .PHONY: \
 	setup_uv setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee \
 	render_wireframe render_solid check_prints render_all \
-	lint_code check_links check_types run_tests rerun_tests quick_validate validate \
+	autofix lint check_links check_types test retest quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
 	eval_policy serve_dashboard run_demo \
 	help
@@ -59,6 +59,7 @@ setup_dev: setup_uv ## Install dev + test dependencies
 setup_all: setup_dev setup_cad ## Install all dependencies + tools
 	-$(MAKE) setup_slicer
 	-$(MAKE) setup_lychee
+	-$(MAKE) setup_rtk
 
 ## setup_train: setup_uv  # Uncomment when GPU available
 ##	uv sync --group train
@@ -124,16 +125,13 @@ setup_lychee: ## Install lychee link checker
 # MARK: HARDWARE
 
 
-render_wireframe: ## Generate STL + wireframe SVG from parts.json
+render_parts: ## Generate STL + SVG from hardware/parts.json (build123d preferred, OpenSCAD fallback)
 	uv run --group cad python hardware/render.py
-
-render_solid: ## Generate STL + solid-filled SVG from parts.json
-	uv run --group cad python hardware/render.py --solid
 
 check_prints: ## Run slicer printability checks on STLs (CuraEngine or PrusaSlicer)
 	uv run python hardware/slicer/validate.py --all
 
-render_all: render_wireframe check_prints ## Generate parts + validate printability
+render_all: render_parts check_prints ## Generate parts + validate printability
 
 calibrate_arms: ## Calibrate all arms (leader + followers)
 	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_A_PORT) --robot.id=arm_a
@@ -147,7 +145,7 @@ start_teleop: ## Start teleoperation (leader → follower)
 		--robot.id=arm_a \
 		--robot.cameras="{ overhead: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 30}, wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 30}}" \
 		--teleop.type=so101_leader \
-		--teleop.port=$(LEADER_PORT) \
+		--teleop.port=$(LEADER_PORT) \solid/filled
 		--teleop.id=leader \
 		--display_data=true
 
@@ -179,8 +177,11 @@ train_policy: ## Train policy on recorded data
 # MARK: DEV
 
 
-lint_code: ## Format and lint with ruff
+autofix: ## Auto-format and fix lint issues (use before committing)
 	uv run ruff format . $(RUFF_QUIET) && uv run ruff check . --fix $(RUFF_QUIET)
+
+lint: ## Check formatting + lint (fails on issues, does not fix)
+	uv run ruff format --check . $(RUFF_QUIET) && uv run ruff check . $(RUFF_QUIET)
 
 check_links: ## Check links with lychee
 	if command -v lychee > /dev/null 2>&1; then
@@ -192,15 +193,15 @@ check_links: ## Check links with lychee
 check_types: ## Run pyright type checking
 	uv run pyright src $(PYRIGHT_QUIET)
 
-run_tests: ## Run all tests with pytest
+test: ## Run all tests with pytest
 	uv run pytest $(PYTEST_QUIET)
 
-rerun_tests: ## Rerun last failed tests only
+retest: ## Rerun last failed tests only
 	uv run pytest --lf -x
 
-quick_validate: lint_code check_types ## Fast validation (lint + type check)
+quick_validate: lint check_types ## Fast gate (lint + type check)
 
-validate: lint_code check_types run_tests ## Full validation (lint + type check + test)
+validate: lint check_types test ## Full gate (lint + types + tests) — must pass before commit
 
 
 # MARK: APP
