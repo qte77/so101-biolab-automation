@@ -47,7 +47,7 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 default-groups = ["dev", "test"]
-exclude-newer = "2026-04-09T00:00:00Z"
+exclude-newer = "2026-04-11T00:00:00Z"
 link-mode = "copy"
 
 [tool.ruff]
