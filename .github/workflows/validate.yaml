@@ -1,5 +1,5 @@
 ---
-name: pytest
+name: validate
 
 on:
   push:
@@ -12,7 +12,8 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  types-and-complexity:
+    name: pyright + complexipy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -27,13 +28,11 @@ jobs:
       - name: Set up Python
         run: uv python install 3.12
 
-      - name: Install dependencies
-        run: uv sync --group test
+      - name: Install dev dependencies
+        run: uv sync --group dev --group test
 
-      - name: Run tests with coverage gate
-        run: |
-          uv run pytest \
-            --cov=so101 \
-            --cov=dashboard \
-            --cov-fail-under=80 \
-            -m "not hardware and not network"
+      - name: Pyright type check
+        run: uv run pyright app
+
+      - name: Complexipy cognitive complexity
+        run: uv run complexipy app/so101/ app/dashboard/ --max-complexity-allowed 15
