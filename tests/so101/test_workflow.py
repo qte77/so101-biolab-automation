@@ -119,14 +119,14 @@ class TestUC1SingleWell:
         """After aspirate+dispense, pipette fill is 0."""
         pipette_well(stub_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
     def test_single_well_invalid_dest(
         self, stub_controller: DualArmController, stub_pipette: DigitalPipette, layout: PlateLayout
     ) -> None:
         """Invalid well name raises ValueError."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Invalid well name"):
             pipette_well(stub_controller, stub_pipette, layout, "arm_a", "TROUGH", "Z99", 50.0)
 
     def test_uc1_single_well_wrapper(
@@ -135,7 +135,7 @@ class TestUC1SingleWell:
         """uc1_single_well is a convenience wrapper over pipette_well."""
         uc1_single_well(stub_controller, stub_pipette, layout, "arm_a", "A1", 50.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
 
@@ -247,14 +247,14 @@ class TestUC1Row:
         """After full row, pipette fill is 0."""
         uc1_row(stub_controller, stub_pipette, layout, "arm_a", "A", 25.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
     def test_invalid_row_raises(
         self, stub_controller: DualArmController, stub_pipette: DigitalPipette, layout: PlateLayout
     ) -> None:
         """Invalid row letter raises ValueError."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Invalid row"):
             uc1_row(stub_controller, stub_pipette, layout, "arm_a", "Z", 25.0)
 
 
@@ -267,7 +267,7 @@ class TestUC1Col:
         """Column 1 pipettes 8 wells without error."""
         uc1_col(stub_controller, stub_pipette, layout, "arm_a", 1, 20.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
 
@@ -286,7 +286,7 @@ class TestUC1FullPlate:
         """After full plate, pipette fill is 0."""
         uc1_full_plate(stub_controller, stub_pipette, layout, "arm_a", 20.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
 
@@ -362,7 +362,7 @@ class TestUC4DemoAll:
         """After demo, pipette fill is 0."""
         uc4_demo_all(stub_controller, stub_pipette, changer, layout, "arm_a")
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
 
@@ -387,14 +387,14 @@ class TestUC5GantryPipette:
         """Full cycle: trough → aspirate → plate → dispense."""
         uc5_gantry_pipette(stub_gantry, stub_pipette, "trough", "plate_a1", 50.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
     def test_gantry_fill_resets(self, stub_gantry: XZGantry, stub_pipette: DigitalPipette) -> None:
         """Pipette fill returns to 0 after dispense."""
         uc5_gantry_pipette(stub_gantry, stub_pipette, "trough", "plate_a1", 100.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
     def test_gantry_invalid_position_raises(
@@ -412,7 +412,7 @@ class TestUC5GantryPipette:
         epipette.connect()
         uc5_gantry_pipette(stub_gantry, epipette, "trough", "plate_a1", 50.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             epipette.dispense(0.1)
 
 
@@ -425,7 +425,7 @@ class TestUC5GantryStrip:
         """Pipette multiple positions in sequence."""
         uc5_gantry_strip(stub_gantry, stub_pipette, "trough", ["plate_a1", "plate_a2"], 25.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
     def test_gantry_strip_empty_list(
@@ -434,7 +434,7 @@ class TestUC5GantryStrip:
         """Empty destination list is a no-op."""
         uc5_gantry_strip(stub_gantry, stub_pipette, "trough", [], 25.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
 

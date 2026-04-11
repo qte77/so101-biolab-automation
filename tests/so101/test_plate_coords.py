@@ -108,15 +108,15 @@ class TestParseWellName:
         assert well.name == "C5"
 
     def test_invalid_row(self) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Invalid well name"):
             parse_well_name("Z1")
 
     def test_invalid_column(self) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Column out of range"):
             parse_well_name("A13")
 
     def test_empty(self) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Invalid well name"):
             parse_well_name("")
 
 

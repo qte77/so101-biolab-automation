@@ -41,7 +41,7 @@ class TestDualArmController:
     def test_disconnect_prevents_operations(self, connected_stub: DualArmController) -> None:
         """After disconnect(), arm operations raise ValueError."""
         connected_stub.disconnect()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Unknown arm"):
             connected_stub.get_observation("arm_a")
 
     def test_get_observation_stub(self, connected_stub: DualArmController) -> None:
@@ -60,7 +60,7 @@ class TestDualArmController:
 
     def test_send_to_well_invalid(self, connected_stub: DualArmController) -> None:
         """send_to_well raises ValueError for invalid well name."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Invalid well name"):
             connected_stub.send_to_well("arm_a", "Z99")
 
     def test_park_all(self, connected_stub: DualArmController) -> None:

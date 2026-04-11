@@ -42,7 +42,7 @@ def load_manifest() -> list[dict]:
 def detect_backend() -> str:
     """Return BACKEND_CAD if build123d importable, BACKEND_SCAD if openscad found, else error."""
     try:
-        import build123d  # noqa: F401
+        import build123d  # noqa: F401  # pyright: ignore[reportMissingImports]
 
         return BACKEND_CAD
     except ImportError:
@@ -58,6 +58,8 @@ def detect_backend() -> str:
 def _load_module(cad_path: Path):
     """Import a CAD script as a module."""
     spec = importlib.util.spec_from_file_location(cad_path.stem, cad_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Cannot load CAD module from {cad_path}")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -65,7 +67,7 @@ def _load_module(cad_path: Path):
 
 def _to_solid(shape):
     """Coerce build123d result (Solid, Compound, or ShapeList) to exportable Shape."""
-    from build123d import Compound, Solid
+    from build123d import Compound, Solid  # pyright: ignore[reportMissingImports]
 
     if isinstance(shape, Solid):
         return shape
@@ -79,7 +81,13 @@ def _to_solid(shape):
 
 def render_cad(parts: list[dict], *, solid: bool = False) -> None:
     """Render all parts via build123d — import build functions, export using manifest filenames."""
-    from build123d import Color, ExportSVG, LineType, Rot, export_stl
+    from build123d import (  # pyright: ignore[reportMissingImports]
+        Color,
+        ExportSVG,
+        LineType,
+        Rot,
+        export_stl,
+    )
 
     print("--- Rendering via build123d")
 

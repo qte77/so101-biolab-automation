@@ -84,7 +84,10 @@ class DualArmController:
     def connect(self) -> None:
         """Connect to all configured arms via LeRobot."""
         try:
-            from lerobot.robots.so_follower import SO101Follower, SO101FollowerConfig
+            from lerobot.robots.so_follower import (  # pyright: ignore[reportMissingImports]
+                SO101Follower,
+                SO101FollowerConfig,
+            )
         except ImportError:
             logger.warning("lerobot not installed — running in stub mode")
             self._stub_mode = True
