@@ -1,5 +1,7 @@
 """Tests for camera pipeline — must work without cv2/camera hardware."""
 
+import pytest
+
 from so101.camera import CameraConfig, CameraPipeline
 
 
@@ -18,8 +20,15 @@ class TestCameraPipeline:
         assert "overhead" in pipeline.cameras
         assert "wrist" in pipeline.cameras
 
+    @pytest.mark.hardware
     def test_start_without_cv2(self) -> None:
-        """start() gracefully handles missing cv2."""
+        """start() gracefully handles missing cv2.
+
+        Marked ``hardware`` because when cv2 IS installed in the dev env,
+        ``start()`` calls ``cv2.VideoCapture(0)`` which opens a real camera
+        device if /dev/video0 exists. Excluded from the default suite to
+        keep CI portable; run with ``pytest -m hardware`` on a rig.
+        """
         pipeline = CameraPipeline([CameraConfig("test", 0)])
         # cv2 may or may not be installed — either way, start should not crash
         pipeline.start()
