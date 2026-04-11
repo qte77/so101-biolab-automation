@@ -1,8 +1,24 @@
-"""dPette+ 8-channel U-bracket mount for SO-101.
+"""dPette+ 8-channel gripper replacement for SO-101.
 
-Same U-bracket as single-channel but with rectangular bore in bottom
-bar for the 50x25mm 8-channel body. Nozzles are FIXED (no rotation).
-Shares the same straight cam arm (from dpette_handle.py).
+The SO-101 gripper has two jaws:
+  - BOTTOM JAW (fixed, on M5 horn frame) → replaced by PIPETTE CLAMP
+  - TOP JAW (on M6 horn, moves) → replaced by EJECTOR LEVER
+
+The robot already provides:
+  - M5 wrist rotation (horn = mounting base for clamp)
+  - M6 gripper motor (horn = mounting base for lever)
+  - Structural wrist housing (holds M6, no cradle needed)
+
+PIPETTE CLAMP (replaces bottom jaw):
+  Bolts to M5 horn (4× M3 at 20mm bolt circle).
+  Extends out from the horn with a Ø32mm split bore
+  to clamp the pipette handle. Manifold + nozzles hang below.
+
+EJECTOR LEVER (replaces top jaw):
+  Bolts to M6 horn (25T spline + 4× M2 at 16mm bolt circle).
+  When M6 rotates (like closing the gripper), the lever sweeps
+  and pushes DOWN on the ejector hook.
+  Short arm (20mm) → ~175N from 35 kg·cm stall torque.
 
 Usage:
     uv run --group cad python hardware/cad/dpette/dpette_multi_handle.py
@@ -13,102 +29,138 @@ from pathlib import Path
 
 import cadquery as cq
 
-# --- STS3215 servo ---
-MOTOR_W = 24.7
-MOTOR_L = 45.2
-MOTOR_H = 35.0
-M2 = 2.2
-HORN_DIA = 24.0
-
-# --- dPette+ 8-channel body (nozzles fixed) ---
-BODY_W = 50.0
-BODY_D = 25.0
-CL = 0.4
-
-# --- U-bracket ---
-BAR_W = 90.0
-BAR_D = 50.0
-BAR_T = 5.0
-SIDE_W = 5.0
-SIDE_H = 55.0
-
-# --- Positions ---
-MOTOR_X = -18.0
-BODY_X = 15.0
-
+# --- STS3215 servo horn dimensions ---
+# M5 horn (wrist — where bottom jaw mounts)
 M5_BOLT_CIRCLE = 20.0
-M3 = 3.2
-CLAMP_BOLT = 3.2
+M3 = 3.2  # M3 clearance
+
+# M6 horn (gripper — where top jaw mounts)
+M6_HORN_DIA = 24.0
+M6_HORN_BORE = 6.0
+M6_HORN_THICK = 3.0
+M6_HORN_SCREW = 2.2  # M2 clearance
+M6_BOLT_CIRCLE = 16.0
+
+# --- dPette+ handle (3D scan verified) ---
+HANDLE_DIA = 32.0  # Round Ø32mm
+CL = 0.3           # Clearance per side
+
+# --- Pipette clamp dims ---
+CLAMP_LENGTH = 50.0   # Extension from horn center to bore center
+CLAMP_WIDTH = 42.0    # Wide enough for Ø32 bore + walls
+CLAMP_THICK = 8.0     # Z thickness — rigid
+CLAMP_WALL = 5.0      # Wall around bore
+CLAMP_BOLT = 3.2      # M3 pinch bolts
+
+# --- Ejector lever dims ---
+LEVER_ARM = 20.0    # Horn center to contact tip (short = more force)
+LEVER_W = 10.0      # Width
+LEVER_T = 6.0       # Thickness
+FINGER_H = 15.0     # Downward reach of contact finger
 
 
 def build_dpette_multi_handle() -> cq.Workplane:
-    """U-bracket: top bar + vertical side + bottom bar with rect bore."""
-    top = cq.Workplane("XY").box(BAR_W, BAR_D, BAR_T)
-    top = top.translate((0, 0, SIDE_H + BAR_T / 2))
+    """Pipette clamp — replaces SO-101 bottom jaw.
 
-    bot = cq.Workplane("XY").box(BAR_W, BAR_D, BAR_T)
-    bot = bot.translate((0, 0, -BAR_T / 2))
+    Bolts to M5 horn. Extends outward. Ø32mm split bore at the end.
+    """
+    # Main body — extends from horn mount to bore
+    body = cq.Workplane("XY").box(CLAMP_LENGTH, CLAMP_WIDTH, CLAMP_THICK)
+    # Shift so horn end is at X=0, bore end at X=+CLAMP_LENGTH
+    body = body.translate((CLAMP_LENGTH / 2, 0, 0))
 
-    side_x = BAR_W / 2 - SIDE_W / 2
-    side = cq.Workplane("XY").box(SIDE_W, BAR_D, SIDE_H)
-    side = side.translate((side_x, 0, SIDE_H / 2))
-
-    bracket = top.union(bot).union(side)
-
-    # M5 horn bolt holes (top bar)
+    # --- Horn end (X=0): M5 horn bolt holes ---
     for i in range(4):
         a = math.radians(i * 90 + 45)
         bx = M5_BOLT_CIRCLE / 2 * math.cos(a)
         by = M5_BOLT_CIRCLE / 2 * math.sin(a)
-        h = cq.Workplane("XY").circle(M3 / 2).extrude(BAR_T + 2)
-        bracket = bracket.cut(h.translate((bx, by, SIDE_H)))
+        h = cq.Workplane("XY").circle(M3 / 2).extrude(CLAMP_THICK + 2)
+        body = body.cut(h.translate((bx, by, -1)))
 
-    # Motor 6 pocket (top bar underside)
-    pocket = cq.Workplane("XY").box(MOTOR_W + 1, MOTOR_L + 1, BAR_T + 1)
-    bracket = bracket.cut(pocket.translate((MOTOR_X, 0, SIDE_H + BAR_T / 2)))
+    # Horn center hole (shaft clearance)
+    shaft = cq.Workplane("XY").circle(7).extrude(CLAMP_THICK + 2)
+    body = body.cut(shaft.translate((0, 0, -1)))
 
-    # Horn shaft hole
-    horn_exit = cq.Workplane("XY").circle(HORN_DIA / 2 + 1).extrude(BAR_T + 2)
-    bracket = bracket.cut(horn_exit.translate((MOTOR_X, 0, SIDE_H)))
+    # --- Bore end (X=CLAMP_LENGTH): Ø32mm split clamp ---
+    bore_x = CLAMP_LENGTH
 
-    # Motor mount holes (through side)
-    motor_z = SIDE_H - MOTOR_H / 2
-    for z_off in [-8, 8]:
-        h = (
-            cq.Workplane("XY").circle(M2 / 2).extrude(SIDE_W + 10)
-            .rotateAboutCenter((0, 1, 0), 90)
-            .translate((side_x, 0, motor_z + z_off))
-        )
-        bracket = bracket.cut(h)
+    # Clamp ring (hangs below plate, wraps around handle)
+    ring_h = 18.0
+    ring_od = HANDLE_DIA + CL * 2 + CLAMP_WALL * 2
+    ring = cq.Workplane("XY").circle(ring_od / 2).extrude(ring_h)
+    ring_bore = cq.Workplane("XY").circle((HANDLE_DIA + CL * 2) / 2).extrude(ring_h + 2)
+    ring = ring.cut(ring_bore.translate((0, 0, -1)))
+    ring = ring.translate((bore_x, 0, -ring_h + CLAMP_THICK / 2))
+    body = body.union(ring)
 
-    # Bottom bar: rectangular bore for 8-channel body
-    bore = cq.Workplane("XY").box(BODY_W + CL * 2, BODY_D + CL * 2, BAR_T + 2)
-    bracket = bracket.cut(bore.translate((BODY_X, 0, -BAR_T / 2)))
+    # Cut bore through the ENTIRE height (plate + ring) so pipette passes through
+    full_bore = cq.Workplane("XY").circle((HANDLE_DIA + CL * 2) / 2).extrude(ring_h + CLAMP_THICK + 4)
+    body = body.cut(full_bore.translate((bore_x, 0, -ring_h - 2)))
 
-    # Pinch bolts (2x M3, through bottom bar Y direction)
-    for x_off in [-BODY_W / 4, BODY_W / 4]:
+    # Split in clamp ring ONLY (not through plate — plate holds halves together)
+    split = cq.Workplane("XY").box(1.5, ring_od + 2, ring_h)
+    body = body.cut(split.translate((bore_x, 0, -CLAMP_THICK / 2 - ring_h / 2)))
+
+    # Pinch bolts (2× M3, through clamp in Y direction)
+    for x_off in [-8, 8]:
         pinch = (
-            cq.Workplane("XY").circle(CLAMP_BOLT / 2).extrude(BAR_D + 10)
+            cq.Workplane("XY").circle(CLAMP_BOLT / 2).extrude(ring_od + 10)
             .rotateAboutCenter((1, 0, 0), 90)
-            .translate((BODY_X + x_off, 0, -BAR_T / 2))
+            .translate((bore_x + x_off, 0, -ring_h / 2 + CLAMP_THICK / 2))
         )
-        bracket = bracket.cut(pinch)
+        body = body.cut(pinch)
 
-    # Split in bottom bar
-    split = cq.Workplane("XY").box(1.5, BAR_D + 2, BAR_T + 2)
-    bracket = bracket.cut(split.translate((BODY_X, 0, -BAR_T / 2)))
-
-    return bracket
+    return body
 
 
-def export(part: cq.Workplane) -> None:
+def build_ejector_lever() -> cq.Workplane:
+    """Ejector lever — replaces SO-101 top jaw.
+
+    Bolts to M6 horn. When M6 rotates (gripper close motion),
+    the lever sweeps and the finger pushes DOWN on the ejector hook.
+
+    Force budget: 35 kg·cm / 2.0 cm = 175N (needs ~100N for 8 tips).
+    """
+    # Horn disc (M6 25T spline)
+    horn = cq.Workplane("XY").circle(M6_HORN_DIA / 2).extrude(M6_HORN_THICK)
+    horn = horn.faces(">Z").workplane().hole(M6_HORN_BORE)
+
+    # Horn bolt holes (4× M2 at 16mm bolt circle)
+    for i in range(4):
+        a = math.radians(i * 90)
+        hx = M6_BOLT_CIRCLE / 2 * math.cos(a)
+        hy = M6_BOLT_CIRCLE / 2 * math.sin(a)
+        bh = cq.Workplane("XY").circle(M6_HORN_SCREW / 2).extrude(M6_HORN_THICK + 2)
+        horn = horn.cut(bh.translate((hx, hy, -1)))
+
+    # Lever arm — extends radially from horn
+    arm = cq.Workplane("XY").box(LEVER_W, LEVER_ARM, LEVER_T)
+    arm_y = M6_HORN_DIA / 2 + LEVER_ARM / 2 - 2
+    arm = arm.translate((0, arm_y, LEVER_T / 2))
+
+    # Downward finger at tip — pushes ejector hook
+    finger_y = M6_HORN_DIA / 2 + LEVER_ARM - 2
+    finger = cq.Workplane("XY").box(LEVER_W, LEVER_T, FINGER_H)
+    finger = finger.translate((0, finger_y, -FINGER_H / 2 + LEVER_T / 2))
+
+    # Rounded contact pad at bottom of finger (cylinder, not sphere — cleaner mesh)
+    pad = cq.Workplane("XY").circle(LEVER_W / 2).extrude(3)
+    pad = pad.translate((0, finger_y, -FINGER_H + LEVER_T / 2 - 3))
+
+    return horn.union(arm).union(finger).union(pad)
+
+
+def export(part: cq.Workplane, name: str) -> None:
     base = Path(__file__).parent.parent.parent
-    stl = base / "stl" / "dpette" / "dpette_multi_handle.stl"
-    svg = base / "svg" / "dpette" / "dpette_multi_handle.svg"
+    stl = base / "stl" / "dpette" / f"{name}.stl"
+    svg = base / "svg" / "dpette" / f"{name}.svg"
+    stl.parent.mkdir(parents=True, exist_ok=True)
+    svg.parent.mkdir(parents=True, exist_ok=True)
     cq.exporters.export(part, str(stl))
     cq.exporters.export(part, str(svg), exportType="SVG")
-    print(f"Exported: dpette_multi_handle")
+    print(f"Exported: {name}")
 
 
 if __name__ == "__main__":
-    export(build_dpette_multi_handle())
+    export(build_dpette_multi_handle(), "dpette_multi_handle")
+    export(build_ejector_lever(), "dpette_ejector_lever")

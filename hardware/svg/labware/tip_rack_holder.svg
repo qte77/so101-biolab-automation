@@ -6,6 +6,24 @@
    height="240.0"
 
 >
+  <defs>
+    <style>
+      .cq-bg { fill: #ffffff; }
+      @media (prefers-color-scheme: dark) {
+        .cq-bg { fill: #0d1117; }
+        /* CadQuery SVG selectors */
+        g[stroke="rgb(0,0,0)"] { stroke: #c9d1d9 !important; }
+        g[stroke="rgb(160,160,160)"] { stroke: #484f58 !important; }
+        /* OpenSCAD SVG selectors */
+        path { stroke: #c9d1d9 !important; }
+        polygon { stroke: #c9d1d9 !important; fill: #161b22 !important; }
+        /* Common selectors */
+        line { stroke: #c9d1d9 !important; }
+        text { stroke: #c9d1d9 !important; fill: #c9d1d9 !important; }
+      }
+    </style>
+  </defs>
+  <rect width="800.0" height="240.0" class="cq-bg"/>
     <g transform="scale(1.9098303150523135, -1.9098303150523135)   translate(165.15187662550125,-56.6372518154421)" stroke-width="0.5236067267958349"  fill="none">
        <!-- hidden lines -->
        <g  stroke="rgb(160,160,160)" fill="none" stroke-dasharray="0.5236067267958349,0.5236067267958349" >

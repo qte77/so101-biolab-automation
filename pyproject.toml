@@ -31,6 +31,9 @@ train = [
 ]
 cad = [
     "cadquery>=2.4",
+    "scipy>=1.17.1",
+    "shapely>=2.1.2",
+    "trimesh>=4.11.5",
 ]
 
 [tool.hatch.build.targets.wheel]
