@@ -109,6 +109,17 @@ This allows the full workflow to run end-to-end without any hardware attached. R
 - **No fridge module**: Fridge joint arrays are constants in workflow.py. YAGNI until hardware exists.
 - **Dashboard runs workflow in thread**: `run_workflow` WebSocket command spawns `uc4_demo_all` in a daemon thread to avoid blocking the event loop.
 
+## Hardware Asset Layout
+
+Build-time assets (generated STL/SVG, reference scans) are kept separate from code:
+
+- **Code** — `app/hardware/` (authoritative): `cad/` (build123d parametric scripts, primary), `scad/` (OpenSCAD fallback), `slicer/` (profile validation), `parts.json` (manifest), `render.py` (dispatcher).
+- **Assets** — top-level `hardware/`: `stl/` (generated printable meshes), `svg/` (generated isometric wireframes), `scans/` (reference 3D scans from Revopoint / structured light, used as design inputs).
+
+Parts in `app/hardware/parts.json` may carry an optional `scan_source` field pointing at a file under `hardware/scans/` when their geometry is derived from a physical scan rather than being purely parametric. Example: `dpette_multi_handle` (Ø32mm split-bore clamp) was designed from a 1:1 mm Revopoint scan of the DLAB dPette+ handle.
+
+See [app/hardware/README.md](../app/hardware/README.md) for the full parts table, print settings, assembly notes, and scan provenance.
+
 ## Prior Art & Vision
 
 - [docs/notes.md](notes.md) — academic papers, community designs, tools, known hardware issues informing these decisions
