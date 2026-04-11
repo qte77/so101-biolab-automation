@@ -165,27 +165,39 @@ class XZGantry:
         else:
             logger.debug("Stub mode — skipping command: %s", cmd)
 
-    def _send_maestro(self, cmd: str) -> None:
-        """Send command using Pololu Maestro compact binary protocol.
+    @staticmethod
+    def encode_maestro(cmd: str, x_range_mm: float, z_range_mm: float) -> bytes:
+        """Encode a MOVE_X/MOVE_Z command into Pololu Maestro wire bytes.
 
-        Protocol: 0x84, channel, target_low_bits, target_high_bits
+        Protocol: 0x84, channel, target_low_bits, target_high_bits.
         Channel 0 = X axis servo, Channel 1 = Z axis servo.
         Target is in quarter-microseconds (e.g., 6000 = 1500µs center).
+        Map mm to servo pulse (quarter-microseconds): 1000-2000µs → 4000-8000 qµs.
+
+        Pure function — no hardware required, safe to call in tests.
         """
-        # Parse axis and value from command string
         parts = cmd.split()
         channel = 0 if "X" in parts[0] else 1
         value_mm = float(parts[1])
-
-        # Map mm to servo pulse (quarter-microseconds): 1000-2000µs → 4000-8000 qµs
-        axis_range = self.config.x_range_mm if channel == 0 else self.config.z_range_mm
+        axis_range = x_range_mm if channel == 0 else z_range_mm
         fraction = max(0.0, min(1.0, value_mm / axis_range)) if axis_range > 0 else 0.0
         target = int(4000 + fraction * 4000)  # 4000-8000 range
+        return struct.pack("<BBH", 0x84, channel, target)
 
-        data = struct.pack("<BBH", 0x84, channel, target)
+    @staticmethod
+    def encode_pico(cmd: str) -> bytes:
+        """Encode a command as plain text for Pico W over USB serial.
+
+        Pure function — no hardware required, safe to call in tests.
+        """
+        return f"{cmd}\n".encode()
+
+    def _send_maestro(self, cmd: str) -> None:
+        """Send command using Pololu Maestro compact binary protocol."""
+        data = self.encode_maestro(cmd, self.config.x_range_mm, self.config.z_range_mm)
         self._serial.write(data)
 
     def _send_pico(self, cmd: str) -> None:
         """Send command as plain text to Pico W over USB serial."""
-        self._serial.write(f"{cmd}\n".encode())
+        self._serial.write(self.encode_pico(cmd))
         self._serial.readline()

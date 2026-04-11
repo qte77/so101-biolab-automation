@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from unittest.mock import Mock
-
 import pytest
 
 from so101.xz_gantry import XZGantry, XZGantryConfig
@@ -55,33 +53,39 @@ class TestXZGantryMotion:
         gantry.raise_z()
 
 
-@pytest.mark.hardware
 class TestXZGantryProtocols:
-    """Tests for controller-specific serial wire format."""
+    """Tests for controller-specific serial wire format.
+
+    These drive the pure ``encode_maestro`` / ``encode_pico`` static methods —
+    no serial, no mocks, no hardware. The encoders are what must match what
+    real controllers expect, so pinning their byte-level output is the
+    behavioural contract to test.
+    """
 
     def test_maestro_command_format(self) -> None:
-        """Pololu Maestro uses compact binary protocol (0x84)."""
-        import serial
-
-        g = XZGantry(XZGantryConfig(controller="pololu_maestro"))
-        g._serial = Mock(spec=serial.Serial)
-        g._stub_mode = False
-        g._send_command("MOVE_X 100.0")
-        g._serial.write.assert_called_once()
-        data = g._serial.write.call_args[0][0]
+        """Pololu Maestro uses compact binary protocol starting with 0x84."""
+        data = XZGantry.encode_maestro("MOVE_X 100.0", x_range_mm=200.0, z_range_mm=100.0)
         assert isinstance(data, bytes)
+        assert len(data) == 4  # 0x84 + channel + 2-byte target
         assert data[0] == 0x84  # Maestro compact protocol command byte
+        assert data[1] == 0  # X axis → channel 0
+
+    def test_maestro_z_uses_channel_1(self) -> None:
+        """Z-axis commands map to Maestro servo channel 1."""
+        data = XZGantry.encode_maestro("MOVE_Z 50.0", x_range_mm=200.0, z_range_mm=100.0)
+        assert data[1] == 1  # Z axis → channel 1
+
+    def test_maestro_target_scales_with_range(self) -> None:
+        """Half-range input maps to the mid-point of the 4000-8000 servo range."""
+        import struct
+
+        data = XZGantry.encode_maestro("MOVE_X 100.0", x_range_mm=200.0, z_range_mm=100.0)
+        _, _, target = struct.unpack("<BBH", data)
+        assert target == 6000  # 4000 + 0.5 * 4000
 
     def test_pico_command_format(self) -> None:
-        """Pico W uses plain text protocol."""
-        import serial
-
-        g = XZGantry(XZGantryConfig(controller="pico_w"))
-        g._serial = Mock(spec=serial.Serial)
-        g._stub_mode = False
-        g._send_command("MOVE_X 100.0")
-        g._serial.write.assert_called_once()
-        data = g._serial.write.call_args[0][0]
+        """Pico W uses newline-terminated plain text."""
+        data = XZGantry.encode_pico("MOVE_X 100.0")
         assert data == b"MOVE_X 100.0\n"
 
 
