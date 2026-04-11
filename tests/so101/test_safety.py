@@ -1,10 +1,10 @@
 """Tests for safety monitoring."""
 
-import time
-
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
+from so101 import safety
 from so101.safety import JOINT_LIMITS, SafetyConfig, SafetyMonitor
 
 
@@ -37,25 +37,45 @@ class TestSafetyMonitor:
         monitor = SafetyMonitor(SafetyConfig(), park_callback=lambda: None)
         assert monitor.check_joint_limits("unknown_joint", 999.0) is True
 
-    def test_watchdog_triggers_park_on_timeout(self) -> None:
-        parked = []
+    def test_watchdog_triggers_park_on_timeout(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Watchdog parks arms once the heartbeat goes past the timeout.
+
+        Drives virtual time via a patched ``time.monotonic`` so the test is
+        deterministic — no real sleeping, no background-thread race.
+        """
+        fake_time = [1000.0]
+        monkeypatch.setattr(safety.time, "monotonic", lambda: fake_time[0])
+
+        parked: list[bool] = []
         config = SafetyConfig(watchdog_timeout_s=0.5)
         monitor = SafetyMonitor(config, park_callback=lambda: parked.append(True))
-        monitor.start()
-        time.sleep(1.5)
-        monitor.stop()
-        assert len(parked) >= 1
 
-    def test_heartbeat_prevents_timeout(self) -> None:
-        parked = []
+        fake_time[0] += 1.5  # 1.5s > 0.5s timeout
+        monitor._check_watchdog()
+
+        assert parked == [True]
+        assert monitor.is_e_stopped
+
+    def test_heartbeat_prevents_timeout(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Regular heartbeats keep the watchdog from ever firing."""
+        fake_time = [1000.0]
+        monkeypatch.setattr(safety.time, "monotonic", lambda: fake_time[0])
+
+        parked: list[bool] = []
         config = SafetyConfig(watchdog_timeout_s=1.0)
         monitor = SafetyMonitor(config, park_callback=lambda: parked.append(True))
-        monitor.start()
+
         for _ in range(5):
+            fake_time[0] += 0.3  # advance below timeout
             monitor.heartbeat()
-            time.sleep(0.3)
-        monitor.stop()
-        assert len(parked) == 0
+            monitor._check_watchdog()
+
+        assert parked == []
+        assert not monitor.is_e_stopped
 
     def test_e_stop_is_idempotent(self) -> None:
         """Multiple e_stop calls park once each but stay stopped."""
