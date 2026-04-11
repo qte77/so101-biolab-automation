@@ -8,16 +8,16 @@ For AI agent behavioral rules, see [AGENTS.md](AGENTS.md).
 | Command | Purpose |
 |---------|---------|
 | `make setup_dev` | Install dev + test dependencies |
-| `make setup_all` | Install all dependencies + tools (CadQuery, PrusaSlicer, lychee) |
+| `make setup_all` | Install all dependencies + tools (build123d, slicer, lychee) |
 | `make setup_scad` | Install OpenSCAD (fallback CAD) |
-| `make setup_slicer` | Install PrusaSlicer for printability validation |
-| `make render_parts` | Generate STL + SVG (CadQuery preferred, OpenSCAD fallback) |
-| `make check_prints` | Run PrusaSlicer printability checks on STLs |
+| `make setup_slicer` | Install CuraEngine (or PrusaSlicer fallback) for printability validation |
+| `make render_parts` | Generate STL + SVG (build123d preferred, OpenSCAD fallback) |
+| `make check_prints` | Run slicer printability checks on STLs |
 | `make render_all` | Generate parts + validate printability |
-| `make complexity` | Check cognitive complexity (max 15/function) |
-| `make validate` | Full gate (lint + types + tests + coverage 80% + complexity) |
+| `make check_complexity` | Check cognitive complexity |
+| `make validate` | Full gate (lint + types + tests + coverage + complexity) |
 | `make quick_validate` | Fast development validation (lint + type check) |
-| `make run_tests` | Run all non-hardware tests with pytest |
+| `make test` | Run all non-hardware tests with pytest |
 | `make calibrate_arms` | Calibrate all arms |
 | `make start_teleop` | Start teleoperation |
 | `make record_episodes` | Record training episodes |
@@ -42,7 +42,7 @@ uv run pytest -m "not hardware"
 
 ### Hardware Tests (opt-in)
 
-- Tag with `@pytest.mark.hardware` — excluded from `make run_tests` by default
+- Tag with `@pytest.mark.hardware` — excluded from `make test` by default
 - Run explicitly: `uv run pytest -m hardware`
 - Require physical arms connected and calibrated
 
@@ -89,7 +89,8 @@ Each document has a specific authority. Do not duplicate information across docu
 | [docs/UserStory.md](docs/UserStory.md) | Acceptance criteria | Both | User stories US-1.1–US-5.2 with testable criteria |
 | [docs/demo-scenarios.md](docs/demo-scenarios.md) | Operations | Both | How to run and verify each use case |
 | [docs/hardware/BOM.md](docs/hardware/BOM.md) | Hardware | Both | Shopping list, vendor links, cost summary |
-| [docs/research.md](docs/research.md) | Research (informational) | Both | Community designs, papers, future vision |
+| [docs/notes.md](docs/notes.md) | Research (informational) | Both | Community designs, papers, tools, known issues |
+| [docs/roadmap.md](docs/roadmap.md) | Vision (informational) | Both | Closed-loop printing, tool genesis, VLM/embodied AI phases |
 | [CHANGELOG.md](CHANGELOG.md) | Version history | Both | Keep a Changelog format |
 | [AGENT_LEARNINGS.md](AGENT_LEARNINGS.md) | Patterns | AI agents | Discovered patterns and solutions |
 | [AGENT_REQUESTS.md](AGENT_REQUESTS.md) | Escalation | AI agents | Blocked items requiring human input |
