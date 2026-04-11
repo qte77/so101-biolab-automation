@@ -1,0 +1,28 @@
+---
+# Pre-commit hooks for so101-biolab-automation.
+#
+# Install locally:
+#   make setup_precommit
+#
+# These hooks run on staged files before each commit. They mirror the
+# fast parts of `make validate` — not the slow ones (pyright, pytest,
+# complexipy) which would make commits sluggish. The slow gates run in
+# CI via .github/workflows/validate.yaml.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.2
+    hooks:
+      - id: ruff-format
+      - id: ruff
+        args: [--fix]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=10000]  # scan files allowed; 10 MB cap

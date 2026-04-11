@@ -7,35 +7,35 @@ license = "Apache-2.0"
 # Pin 3.12: build123d → cadquery-ocp → VTK has no cp313 wheels
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "fastapi>=0.115",
-    "uvicorn[standard]>=0.30",
-    "websockets>=13.0",
-    "opencv-python>=4.10",
-    "pyserial>=3.5",
-    "pyyaml>=6.0",
-    "numpy>=1.26",
+    "fastapi>=0.115,<1.0",
+    "uvicorn[standard]>=0.30,<1.0",
+    "websockets>=13.0,<15.0",
+    "opencv-python>=4.10,<5.0",
+    "pyserial>=3.5,<4.0",
+    "pyyaml>=6.0,<7.0",
+    "numpy>=1.26,<3.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.8",
-    "pyright>=1.1",
-    "complexipy>=0.8",
+    "ruff>=0.8,<1.0",
+    "pyright>=1.1,<2.0",
+    "complexipy>=0.8,<1.0",
 ]
 test = [
-    "pytest>=8.0",
-    "pytest-asyncio>=0.24",
-    "pytest-cov>=6.0",
-    "hypothesis>=6.100",
-    "inline-snapshot>=0.18",
-    "httpx>=0.27",
+    "pytest>=8.0,<9.0",
+    "pytest-asyncio>=0.24,<1.0",
+    "pytest-cov>=6.0,<7.0",
+    "hypothesis>=6.100,<7.0",
+    "inline-snapshot>=0.18,<1.0",
+    "httpx>=0.27,<1.0",
 ]
 # train = [  # ACT policy training — uncomment when GPU available
-#     "torch>=2.4",
-#     "wandb>=0.18",
+#     "torch>=2.4,<3.0",
+#     "wandb>=0.18,<1.0",
 # ]
 cad = [
-    "build123d>=0.10",
+    "build123d>=0.10,<1.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -56,12 +56,11 @@ line-length = 100
 src = ["app", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP", "B", "S", "SIM", "RUF"]
+select = ["E", "F", "I", "N", "W", "UP", "B", "S", "SIM", "RUF", "PT"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S603"]   # assert is pytest; subprocess calls run project scripts
 "app/hardware/**" = ["S603"]    # subprocess calls run trusted internal scripts
-"tests/test_*" = ["S603"]      # test subprocess calls run project scripts
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -69,9 +68,12 @@ convention = "google"
 [tool.pyright]
 pythonVersion = "3.12"
 typeCheckingMode = "standard"
-include = ["app/so101", "app/dashboard"]
-exclude = ["app/hardware"]  # CAD scripts use dynamic sys.path; not runtime code
-reportMissingImports = "warning"
+include = ["app/so101", "app/dashboard", "app/hardware/render.py", "app/hardware/slicer"]
+exclude = ["app/hardware/cad", "app/hardware/scad"]  # CAD/SCAD scripts use dynamic sys.path
+reportMissingImports = "error"
+reportUnusedVariable = "error"
+reportInconsistentConstructor = "error"
+reportConstantRedefinition = "error"
 
 [tool.pytest.ini_options]
 pythonpath = ["app"]
