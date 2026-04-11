@@ -74,9 +74,13 @@
   {"name": "dpette_multi_handle", "stl": "dpette/dpette_multi_handle.stl", "svg": "dpette/dpette_multi_handle.svg",
    "cad": "cad/dpette/dpette_multi_handle.py", "build_func": "build_dpette_multi_handle",
    "shape": "complex",
-   "status": "active", "primary_backend": "build123d", "notes": "dPette+ 8-ch pipette clamp replacing SO-101 bottom jaw — Ø32mm split bore from 3D scan data. Core redesign from Antonio's PR #48"},
+   "status": "active", "primary_backend": "build123d",
+   "scan_source": "../../hardware/scans/dpette/0410_02_mesh.stl",
+   "notes": "dPette+ 8-ch pipette clamp replacing SO-101 bottom jaw — Ø32mm split bore from 3D scan data (Revopoint, 1:1 mm). Core redesign from Antonio's PR #48"},
   {"name": "dpette_ejector_lever", "stl": "dpette/dpette_ejector_lever.stl", "svg": "dpette/dpette_ejector_lever.svg",
    "cad": "cad/dpette/dpette_multi_handle.py", "build_func": "build_ejector_lever",
    "shape": "complex",
-   "status": "active", "primary_backend": "build123d", "notes": "Ejector lever replacing SO-101 top jaw — M6 horn-mounted, ~175N from 35 kg-cm stall torque. From Antonio's PR #48"}
+   "status": "active", "primary_backend": "build123d",
+   "scan_source": "../../hardware/scans/dpette/0410_02_mesh.stl",
+   "notes": "Ejector lever replacing SO-101 top jaw — M6 horn-mounted, ~175N from 35 kg-cm stall torque. Derived geometry verified against dPette+ 3D scan. From Antonio's PR #48"}
 ]
