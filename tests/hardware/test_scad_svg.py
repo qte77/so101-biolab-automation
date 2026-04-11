@@ -14,9 +14,9 @@ import re
 
 import pytest
 
-from _paths import HARDWARE_DIR
+from _paths import ASSETS_DIR, HARDWARE_DIR
 
-SVG_DIR = HARDWARE_DIR / "svg"
+SVG_DIR = ASSETS_DIR / "svg"  # top-level hardware/svg/ (generated assets)
 MANIFEST = json.loads((HARDWARE_DIR / "parts.json").read_text())
 
 # Derive part lists from manifest "shape" field — skip deferred/planned parts (no SVGs)

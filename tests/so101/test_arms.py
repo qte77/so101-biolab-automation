@@ -157,9 +157,7 @@ class TestConfigDrivenOperations:
             },
         )
 
-    def test_park_all_uses_config_position(
-        self, config_with_positions: DualArmConfig
-    ) -> None:
+    def test_park_all_uses_config_position(self, config_with_positions: DualArmConfig) -> None:
         """park_all sends the config 'park' position, not the hardcoded constant."""
         ctrl = DualArmController(config_with_positions)
         ctrl.connect()
@@ -175,12 +173,10 @@ class TestConfigDrivenOperations:
 
         # Both arms should receive the config park position
         assert len(sent_actions) == 2
-        for arm_id, action in sent_actions:
+        for _arm_id, action in sent_actions:
             assert action == [5.0, -40.0, -85.0, 2.0, 1.0, 0.0]
 
-    def test_send_to_well_uses_config_position(
-        self, config_with_positions: DualArmConfig
-    ) -> None:
+    def test_send_to_well_uses_config_position(self, config_with_positions: DualArmConfig) -> None:
         """send_to_well uses well_approach from config, not zero-filled stub."""
         ctrl = DualArmController(config_with_positions)
         ctrl.connect()
@@ -238,9 +234,7 @@ class TestExecuteSequence:
         assert sent[1] == [10.0, -30.0, -60.0, 5.0, 0.0, 0.0]
         assert sent[2] == [10.0, -30.0, -80.0, 5.0, 0.0, 0.0]
 
-    def test_sequence_validates_all_names_before_sending(
-        self, seq_config: DualArmConfig
-    ) -> None:
+    def test_sequence_validates_all_names_before_sending(self, seq_config: DualArmConfig) -> None:
         """execute_sequence raises KeyError if any name is invalid, sends nothing."""
         ctrl = DualArmController(seq_config)
         ctrl.connect()
@@ -251,8 +245,9 @@ class TestExecuteSequence:
             sent.append(action)
             original_send(arm_id, action)
 
-        with patch.object(ctrl, "send_action", side_effect=spy), pytest.raises(
-            KeyError, match="bogus"
+        with (
+            patch.object(ctrl, "send_action", side_effect=spy),
+            pytest.raises(KeyError, match="bogus"),
         ):
             ctrl.execute_sequence("arm_a", ["home", "bogus", "approach"])
 
@@ -286,7 +281,7 @@ class TestTeleoperation:
         )
         ctrl = DualArmController(config)
         ctrl.connect()
-        with pytest.raises(ValueError, match="[Ll]eader"):
+        with pytest.raises(ValueError, match=r"[Ll]eader"):
             ctrl.start_teleoperation("arm_a")
 
     def test_teleoperate_with_leader(self) -> None:
