@@ -1,23 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
 <svg width="138.682929mm" height="127.684815mm" viewBox="-69.341465 -63.842407 138.682929 127.684815" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <style>
-      .cq-bg { fill: #ffffff; }
-      @media (prefers-color-scheme: dark) {
-        .cq-bg { fill: #0d1117; }
-        /* CadQuery SVG selectors */
-        g[stroke="rgb(0,0,0)"] { stroke: #c9d1d9 !important; }
-        g[stroke="rgb(160,160,160)"] { stroke: #484f58 !important; }
-        /* OpenSCAD SVG selectors */
-        path { stroke: #c9d1d9 !important; }
-        polygon { stroke: #c9d1d9 !important; fill: #161b22 !important; }
-        /* Common selectors */
-        line { stroke: #c9d1d9 !important; }
-        text { stroke: #c9d1d9 !important; fill: #c9d1d9 !important; }
-      }
-    </style>
-  </defs>
-  <rect width="138.682929mm" height="127.684815mm" class="cq-bg"/>
   <g transform="scale(1,-1)" stroke-linecap="round">
     <g fill="none" stroke="rgb(0,0,0)" stroke-width="0.09">
       <path d="M -69.296465,36.084461 L -69.296465,21.650843 L -35.355339,49.36379 L -35.355339,63.797407 L -69.296465,36.084461" />
