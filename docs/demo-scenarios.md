@@ -17,6 +17,8 @@ make setup_all      # install all dependencies + tools
 make serve          # (optional) start dashboard on :8080
 ```
 
+**Physical demo setup (optional).** The pipetting use cases (UC1, UC5) can be demonstrated on real hardware once the printed parts and pipette are mounted. The DLAB dPette+ 8-channel mount is the primary configuration — see [../app/hardware/README.md](../app/hardware/README.md#dpette-8-channel-mount-replaces-so-101-gripper-jaws) for the assembly and print settings, [../docs/hardware/BOM.md](hardware/BOM.md) for the parts list, and [prusa-mk4-ops.md](hardware/prusa-mk4-ops.md) for uploading gcode to a Prusa MK4 via PrusaLink. All demo commands below also run cleanly in **stub mode** without any hardware.
+
 ## UC1: Pipette a 96-Well Plate
 
 ### UC1.1: Single Well
