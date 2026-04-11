@@ -332,31 +332,26 @@ openscad -p params.json -P set_name -o out.stl input.scad  # parameter file
 OpenSCAD (.scad) ──→ STL ──→ PrusaSlicer CLI ──→ printability report
 ```
 
-- OpenSCAD: parametric generator (reliable CLI, SVG via projection)
-- PrusaSlicer: printability validator (optional, graceful fallback if unavailable)
-- build123d: primary CAD backend in `hardware/cad/` (migrated from CadQuery 2026-04)
+- OpenSCAD: parametric generator (reliable CLI, SVG via projection) — archived under `app/hardware/scad/`
+- PrusaSlicer / CuraEngine: printability validator (optional, graceful fallback if unavailable)
+- build123d: primary CAD backend in `app/hardware/cad/` (migrated from CadQuery 2026-04; scan-informed CAD delivered 2026-04-11)
+- **PrusaLink API**: first concrete printer-API integration in the stack — see [`docs/hardware/prusa-mk4-ops.md`](hardware/prusa-mk4-ops.md) for MK4 endpoint reference and curl examples
 
-## STL Files Plan
+## STL Files Status
 
-Add draft STL files to `hardware/stl/` for custom parts. Mark as experimental — these are starting points for iteration once hardware arrives.
+See [`app/hardware/parts.json`](../app/hardware/parts.json) for the machine-readable manifest and [`app/hardware/README.md`](../app/hardware/README.md) for the assembly guide. All parts are rendered via `make render_parts` (build123d primary, OpenSCAD fallback) into top-level `hardware/stl/`.
 
-| File | Status | Source/Approach |
-|------|--------|----------------|
-| `hardware/README.md` | NEW | Index of all parts with status, print settings, assembly notes |
-| `hardware/stl/so101/pipette_mount_so101.stl` | EXPERIMENTAL | SO-101 wrist clamp for dPette barrel. Ejector button cutout for accessibility. |
-| `hardware/stl/tool_dock_3station.stl` | EXPERIMENTAL | 3 parking slots side-by-side. Berkeley cone geometry (10° angle). Magnets for retention. Reference: [BerkeleyAutomation/RobotToolChanger](https://github.com/BerkeleyAutomation/RobotToolChanger/tree/tool-changer). |
-| `hardware/stl/tool_cone_robot.stl` | EXPERIMENTAL | Female cone adapter for SO-101 wrist (motor 5 horn mount, M3 pattern). Berkeley design. |
-| `hardware/stl/tool_cone_pipette.stl` | EXPERIMENTAL | Male cone base for pipette tool. Mates with robot-side cone. |
-| `hardware/stl/tool_cone_gripper.stl` | EXPERIMENTAL | Male cone base for stock gripper. |
-| `hardware/stl/tool_cone_hook.stl` | EXPERIMENTAL | Male cone base for fridge hook. |
-| `hardware/stl/fridge_hook_tool.stl` | EXPERIMENTAL | Hook end-effector for fridge door handle. |
-| `hardware/stl/96well_plate_holder.stl` | EXPERIMENTAL | SBS footprint (127.76 x 85.48 mm) with alignment pins. Reference: [Microplate Handling Accuracy paper](https://www.biorxiv.org/content/10.1101/2023.12.29.573685v1) for tolerance targets. |
-| `hardware/stl/tip_rack_holder.stl` | EXPERIMENTAL | Holds standard pipette tip rack at fixed workspace position. |
-| `hardware/stl/gripper_tips_tpu.stl` | EXPERIMENTAL | Compliant fingertips. Reference: [NekoMaker TPU grip](https://www.thingiverse.com/thing:7153144). Print in TPU 95A. |
+As of 2026-04-11:
 
-**Print settings:** PLA+ default, 0.4mm nozzle, 0.2mm layer, 15% infill. TPU 95A for gripper tips only.
+- **11 legacy parts** (tool changer system, pipette mount, plate holder, tip rack holder, gripper tips, dPette cradles, tip ejection bar) — all ported to build123d in Phase 2, rendered at `hardware/stl/{so101,labware,dpette}/`
+- **5 new dPette+ parts** from Antonio's PR #48 (ported to build123d):
+  - `dpette_handle` / `dpette_cam_arm` — U-bracket single-channel mount (M5 horn → dPette 7016 barrel)
+  - `dpette_tip_release` — L-bracket tip ejector station, universal single/multi-channel
+  - `dpette_multi_handle` / `dpette_ejector_lever` — Ø32mm split-bore 8-channel clamp replacing SO-101 gripper jaws, **derived from a 1:1 mm Revopoint scan** (see `hardware/scans/dpette/`)
 
-**Note:** STL files generated programmatically (OpenSCAD or CadQuery) are preferred over manual CAD — reproducible, parametric, version-controlled. If using FreeCAD/Fusion360, commit the source file alongside the STL.
+**Print settings:** PLA+ default, 0.4mm nozzle, 0.2mm layer, 15% infill (25% for functional mounts). TPU 95A for gripper tips only. Prusa MK4 profiles available in `app/hardware/slicer/profiles/prusa_mk4_*.ini`.
+
+**Design philosophy:** STL files are generated programmatically from build123d parametric scripts — reproducible, parametric, version-controlled. OpenSCAD scripts under `app/hardware/scad/` are archived as a fallback. Scan-derived geometry (Revopoint or similar) is captured at 1:1 mm in `hardware/scans/`; the parts.json `scan_source` field provides queryable provenance.
 
 ## Target Application: PCR Master Mix Preparation
 

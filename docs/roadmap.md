@@ -21,9 +21,11 @@ Toward general-purpose voice/agent-to-print. This repo is the first showcase.
 **Milestones:**
 
 1. **Done** — build123d + CuraEngine CLI pipeline (`make render_parts`, `make check_prints`)
-2. **Next** — LLM-assisted build123d generation from text prompts
-3. **Future** — Autonomous agent loop with Bambu camera + VLM print inspection
-4. **Vision** — Closed-loop tool genesis: agent identifies missing tool → generates CAD → slices → prints → mounts via tool changer → validates with VLM — true self-evolving multi-tool
+2. **Done** — **PrusaLink API integration** as the first concrete printer API in the stack. MK4 slicer profiles (production PLA, prototype, TPU) + upload/print curl examples in [docs/hardware/prusa-mk4-ops.md](hardware/prusa-mk4-ops.md). Bambu remains the target for the agent-loop's camera+VLM step; PrusaLink fills the gap for single-printer workflows today.
+3. **Done** — **Scan-informed parametric CAD**. First scan-derived parts delivered: `dpette_multi_handle` + `dpette_ejector_lever` from a 1:1 mm Revopoint scan of the DLAB dPette+ (see `hardware/scans/dpette/`). `parts.json` now carries a `scan_source` field for queryable scan provenance.
+4. **Next** — LLM-assisted build123d generation from text prompts + scan input
+5. **Future** — Autonomous agent loop with Bambu camera + VLM print inspection
+6. **Vision** — Closed-loop tool genesis: agent identifies missing tool → generates CAD (optionally from a fresh scan) → slices → prints → mounts via tool changer → validates with VLM — true self-evolving multi-tool
 
 ## Closed-Loop 3D Printing
 

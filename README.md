@@ -58,7 +58,7 @@ make run_demo
 
 ## Architecture
 
-![Workspace Layout](app/hardware/svg/system_overview.svg)
+![Workspace Layout](hardware/svg/system_overview.svg)
 
 See [docs/architecture.md](docs/architecture.md) for full system design, module responsibilities, and data flows.
 

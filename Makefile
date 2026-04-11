@@ -9,7 +9,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_rtk setup_lychee setup_mdlint \
+	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_rtk setup_lychee setup_mdlint setup_diagramforge \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
@@ -60,6 +60,7 @@ setup_all: setup_dev setup_cad ## Install all dependencies + tools
 	-$(MAKE) setup_slicer
 	-$(MAKE) setup_lychee
 	-$(MAKE) setup_rtk
+	-$(MAKE) setup_diagramforge
 
 setup_cad: setup_uv ## Install build123d for BREP CAD generation
 	uv sync --group cad
@@ -128,6 +129,21 @@ setup_mdlint: ## Install markdownlint-cli2 (requires npm)
 		npm install -g markdownlint-cli2
 	else
 		echo "npm not found — install Node.js first"
+	fi
+
+setup_diagramforge: ## Clone diagramforge from URL in .gitmodules if missing (not a tracked submodule)
+	if [ -e diagramforge/.git ]; then
+		echo "diagramforge already present"
+	elif [ ! -f .gitmodules ]; then
+		echo "WARN: .gitmodules missing — skipping"
+	else
+		url=$$(git config --file .gitmodules submodule.diagramforge.url 2>/dev/null)
+		if [ -z "$$url" ]; then
+			echo "WARN: submodule.diagramforge.url not set in .gitmodules — skipping"
+		else
+			echo "Cloning diagramforge from $$url ..."
+			git clone "$$url" diagramforge
+		fi
 	fi
 
 

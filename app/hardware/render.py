@@ -21,10 +21,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-HARDWARE_DIR = Path(__file__).resolve().parent
+HARDWARE_DIR = Path(__file__).resolve().parent  # app/hardware/ — code
 MANIFEST = HARDWARE_DIR / "parts.json"
-STL_DIR = HARDWARE_DIR / "stl"
-SVG_DIR = HARDWARE_DIR / "svg"
+ASSETS_DIR = (
+    HARDWARE_DIR.parents[1] / "hardware"
+)  # top-level hardware/ — generated + reference assets
+STL_DIR = ASSETS_DIR / "stl"
+SVG_DIR = ASSETS_DIR / "svg"
 
 # Backend constants — normalize manifest values to these
 BACKEND_CAD = "cad"

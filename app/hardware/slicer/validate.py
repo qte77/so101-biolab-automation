@@ -23,7 +23,7 @@ import tempfile
 from pathlib import Path
 
 TIMEOUT_SEC = 120
-STL_DIR = Path(__file__).resolve().parent.parent / "stl"
+STL_DIR = Path(__file__).resolve().parents[3] / "hardware" / "stl"
 PROFILE_DIR = Path(__file__).resolve().parent / "profiles"
 
 # Part-to-profile mapping (default: PLA+)

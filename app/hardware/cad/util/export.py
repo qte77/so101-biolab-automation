@@ -7,20 +7,34 @@ from __future__ import annotations
 
 from pathlib import Path
 
-HARDWARE_DIR = Path(__file__).resolve().parent.parent.parent
-STL_DIR = HARDWARE_DIR / "stl"
-SVG_DIR = HARDWARE_DIR / "svg"
+CODE_DIR = Path(__file__).resolve().parent.parent.parent  # app/hardware/
+ASSETS_DIR = CODE_DIR.parents[1] / "hardware"  # top-level hardware/
+STL_DIR = ASSETS_DIR / "stl"
+SVG_DIR = ASSETS_DIR / "svg"
+
+
+def _to_compound(shape):
+    """Coerce build123d result (Solid, Compound, or ShapeList) to exportable Compound."""
+    from build123d import Compound, Solid
+
+    if isinstance(shape, (Solid, Compound)):
+        return shape
+    if hasattr(shape, "__iter__"):
+        return Compound(children=list(shape))
+    return shape
 
 
 def export_part(part, subdir: str, filename: str) -> None:
     """Export a build123d shape to STL and isometric wireframe SVG.
 
     Args:
-        part: build123d Solid/Compound.
+        part: build123d Solid/Compound/ShapeList.
         subdir: output subdirectory (e.g. "so101", "dpette", "labware").
         filename: stem without extension (e.g. "pipette_mount_so101").
     """
     from build123d import ExportSVG, Rot, export_stl
+
+    part = _to_compound(part)
 
     stl_path = STL_DIR / subdir / f"{filename}.stl"
     svg_path = SVG_DIR / subdir / f"{filename}.svg"
