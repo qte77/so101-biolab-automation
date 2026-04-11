@@ -7,9 +7,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-HARDWARE_DIR = Path(__file__).resolve().parent.parent.parent
-STL_DIR = HARDWARE_DIR / "stl"
-SVG_DIR = HARDWARE_DIR / "svg"
+CODE_DIR = Path(__file__).resolve().parent.parent.parent  # app/hardware/
+ASSETS_DIR = CODE_DIR.parents[1] / "hardware"  # top-level hardware/
+STL_DIR = ASSETS_DIR / "stl"
+SVG_DIR = ASSETS_DIR / "svg"
 
 
 def export_part(part, subdir: str, filename: str) -> None:
