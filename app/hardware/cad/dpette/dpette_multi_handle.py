@@ -55,20 +55,20 @@ M6_BOLT_CIRCLE = 16.0
 
 # --- dPette+ handle (3D scan verified) ---
 HANDLE_DIA = 32.0  # Round Ø32mm
-CL = 0.3           # Clearance per side
+CL = 0.3  # Clearance per side
 
 # --- Pipette clamp dims ---
-CLAMP_LENGTH = 50.0   # Extension from horn center to bore center
-CLAMP_WIDTH = 42.0    # Wide enough for Ø32 bore + walls
-CLAMP_THICK = 8.0     # Z thickness — rigid
-CLAMP_WALL = 5.0      # Wall around bore
-CLAMP_BOLT = 3.2      # M3 pinch bolts
+CLAMP_LENGTH = 50.0  # Extension from horn center to bore center
+CLAMP_WIDTH = 42.0  # Wide enough for Ø32 bore + walls
+CLAMP_THICK = 8.0  # Z thickness — rigid
+CLAMP_WALL = 5.0  # Wall around bore
+CLAMP_BOLT = 3.2  # M3 pinch bolts
 
 # --- Ejector lever dims ---
-LEVER_ARM = 20.0    # Horn center to contact tip (short = more force)
-LEVER_W = 10.0      # Width
-LEVER_T = 6.0       # Thickness
-FINGER_H = 15.0     # Downward reach of contact finger
+LEVER_ARM = 20.0  # Horn center to contact tip (short = more force)
+LEVER_W = 10.0  # Width
+LEVER_T = 6.0  # Thickness
+FINGER_H = 15.0  # Downward reach of contact finger
 
 # Derived
 RING_H = 18.0
@@ -108,7 +108,9 @@ def build_dpette_multi_handle():
     body = body - full_bore
 
     # Split in the lower portion of the ring (bottom half only — plate top holds halves together)
-    split_z = -CLAMP_THICK / 2 - RING_H / 2 + RING_H / 2  # = -CLAMP_THICK/2 (top of split coincides with ring top half)
+    split_z = (
+        -CLAMP_THICK / 2 - RING_H / 2 + RING_H / 2
+    )  # = -CLAMP_THICK/2 (top of split coincides with ring top half)
     split = Pos(bore_x, 0, split_z - RING_H / 4) * Box(1.5, RING_OD + 2, RING_H / 2)
     body = body - split
 
@@ -144,7 +146,9 @@ def build_ejector_lever():
         a = math.radians(i * 90)
         hx = M6_BOLT_CIRCLE / 2 * math.cos(a)
         hy = M6_BOLT_CIRCLE / 2 * math.sin(a)
-        horn = horn - (Pos(hx, hy, M6_HORN_THICK / 2) * Cylinder(M6_HORN_SCREW / 2, M6_HORN_THICK + 2))
+        horn = horn - (
+            Pos(hx, hy, M6_HORN_THICK / 2) * Cylinder(M6_HORN_SCREW / 2, M6_HORN_THICK + 2)
+        )
 
     # Lever arm — straight, along +Y from the horn edge
     arm_y = M6_HORN_DIA / 2 + LEVER_ARM / 2 - 2
@@ -156,7 +160,9 @@ def build_ejector_lever():
 
     # Contact pad at the bottom of the finger (cylinder, clean mesh)
     pad_thick = 3.0
-    pad = Pos(0, finger_y, -FINGER_H + LEVER_T / 2 - pad_thick / 2) * Cylinder(LEVER_W / 2, pad_thick)
+    pad = Pos(0, finger_y, -FINGER_H + LEVER_T / 2 - pad_thick / 2) * Cylinder(
+        LEVER_W / 2, pad_thick
+    )
 
     return horn + arm + finger + pad
 

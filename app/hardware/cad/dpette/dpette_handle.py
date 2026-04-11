@@ -32,7 +32,7 @@ import math
 import sys
 from pathlib import Path
 
-from build123d import Box, Cylinder, Pos, Rot, Sphere
+from build123d import Box, Cylinder, Pos, Rot
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from util.export import export_part
@@ -55,15 +55,15 @@ BARREL_D = 20.0
 BARREL_CL = 0.3
 
 # --- U-bracket dims ---
-BAR_W = 80.0              # Width of top and bottom bars (X)
-BAR_D = 38.0              # Depth of bars (Y)
-BAR_T = 5.0               # Thickness of bars (Z)
-SIDE_W = 5.0              # Vertical side wall thickness (X)
-SIDE_H = 50.0             # Distance between top and bottom bars (Z)
+BAR_W = 80.0  # Width of top and bottom bars (X)
+BAR_D = 38.0  # Depth of bars (Y)
+BAR_T = 5.0  # Thickness of bars (Z)
+SIDE_W = 5.0  # Vertical side wall thickness (X)
+SIDE_H = 50.0  # Distance between top and bottom bars (Z)
 
 # --- Positions ---
-MOTOR_X = -15.0           # Motor offset in bracket
-BARREL_X = 18.0           # Barrel offset in bracket
+MOTOR_X = -15.0  # Motor offset in bracket
+BARREL_X = 18.0  # Barrel offset in bracket
 
 # --- M5 horn bolt pattern (top bar) ---
 M5_BOLT_CIRCLE = 20.0
@@ -120,11 +120,7 @@ def build_mount_bracket():
     bracket = bracket - bore
 
     # Bottom bar: pinch bolt — horizontal through along Y, at barrel X
-    pinch = (
-        Pos(BARREL_X, 0, -BAR_T / 2)
-        * Rot(90, 0, 0)
-        * Cylinder(CLAMP_BOLT / 2, BAR_D + 10)
-    )
+    pinch = Pos(BARREL_X, 0, -BAR_T / 2) * Rot(90, 0, 0) * Cylinder(CLAMP_BOLT / 2, BAR_D + 10)
     bracket = bracket - pinch
 
     # Bottom bar split — a thin slot so the barrel bore can be clamped shut
@@ -158,9 +154,10 @@ def build_cam_arm():
     arm_y = HORN_DIA / 2 + CAM_LENGTH / 2 - 2
     arm = Pos(0, arm_y, CAM_T / 2) * Box(CAM_W, CAM_LENGTH, CAM_T)
 
-    # Rounded contact tip at the arm end
+    # Contact tip at the arm end — cylinder aligned with Z for clean SVG projection
+    # (sphere tips cause build123d 2D projection to fail)
     tip_y = HORN_DIA / 2 + CAM_LENGTH - 2
-    tip = Pos(0, tip_y, CAM_T / 2) * Sphere(CAM_TIP_R)
+    tip = Pos(0, tip_y, CAM_T / 2) * Cylinder(CAM_TIP_R, CAM_T)
 
     return horn + arm + tip
 
