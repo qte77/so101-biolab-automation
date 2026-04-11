@@ -1,0 +1,14 @@
+{
+    "_comment": "CuraEngine profile: TPU 95A 0.2mm — printability validation only",
+    "layer_height": 0.2,
+    "layer_height_0": 0.2,
+    "wall_line_count": 3,
+    "infill_sparse_density": 20,
+    "support_enable": false,
+    "material_print_temperature": 230,
+    "material_bed_temperature": 50,
+    "machine_nozzle_size": 0.4,
+    "machine_width": 220,
+    "machine_depth": 220,
+    "machine_height": 250
+}

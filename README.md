@@ -17,14 +17,7 @@
 
 Dual-path bio-lab automation: SO-101 arms for complex tasks + XZ gantry for dedicated pipetting. Supports commercial electronic pipettes (AELAB dPette, DLAB dPette+) and Bento Lab PCR.
 
-## What This Demonstrates
-
-- **Dual-path architecture** — SO-101 6-DOF arms for tool changing and fridge ops; XZ gantry for dedicated pipetting
-- **Multi-backend pipettes** — PipetteProtocol supports DIY (digital-pipette-v2) and commercial (AELAB/DLAB) backends
-- **Teacher-student learning** — Leader arm teaches follower via imitation learning (ACT policy)
-- **Remote oversight** — WebSocket command injection + dashboard from browser
-- **Tool changing** — Arms swap between pipette, gripper, and fridge hook autonomously
-- **PCR integration** — Bento Lab thermocycler module (stub, control interface TBD)
+See [docs/UserStory.md](docs/UserStory.md) for use cases (UC1-5) and acceptance criteria.
 
 ## Hardware
 
@@ -40,10 +33,10 @@ See [docs/hardware/BOM.md](docs/hardware/BOM.md) for full shopping list with lin
 # Setup (all deps + tools)
 make setup_all
 
-# Generate 3D-printed parts (CadQuery preferred, OpenSCAD fallback)
+# Generate 3D-printed parts (build123d preferred, OpenSCAD fallback)
 make render_parts
 
-# Optional: validate printability (PrusaSlicer)
+# Optional: validate printability (CuraEngine / PrusaSlicer)
 make setup_slicer
 make check_prints
 
@@ -65,29 +58,20 @@ make run_demo
 
 ## Architecture
 
-![Workspace Layout](hardware/svg/system_overview.svg)
+![Workspace Layout](app/hardware/svg/system_overview.svg)
 
 See [docs/architecture.md](docs/architecture.md) for full system design, module responsibilities, and data flows.
 
 ## Project Structure
 
-```text
-src/biolab/            Core: arms, pipette (multi-backend), bento_lab, plate, tool changer, safety, workflow
-src/dashboard/         FastAPI server, WebSocket commands, browser UI
-scripts/               CLI entry points for use cases and demo orchestration
-configs/               Arm ports, plate layout, tool dock, pipette backend, Bento Lab (YAML)
-hardware/cad/so101/    SO-101 arm end-effectors (tool changer, dock, mount, gripper, hook)
-hardware/cad/dpette/   dPette accessories (cradles, tip ejection post)
-hardware/cad/labware/  Universal lab holders (plate holder, tip rack)
-hardware/cad/deferred/ Future parts (XZ gantry frame, carriage)
-hardware/cad/util/     SVG theming and STL→SVG conversion
-hardware/scad/         OpenSCAD scripts — archived fallback
-hardware/slicer/       PrusaSlicer CLI printability validation (optional)
-hardware/stl/{so101,dpette,labware}/ Generated STL files (via make render_parts, gitignored)
-hardware/svg/{so101,dpette,labware}/ SVG 2D projections of parts (tracked, for documentation)
-docs/              Architecture, user stories, demo scenarios, BOM, research
-tests/                 167 tests across 16 test files
-```
+- `app/` — software (arms, pipette, workflow, dashboard, CAD pipeline)
+- `hardware/` — CAD sources, STLs, SVGs for 3D-printed parts
+- `configs/` — YAML runtime config (ports, positions, backends)
+- `scripts/` — CLI entry points
+- `docs/` — design, user stories, demo scenarios, BOM, research
+- `tests/` — unit + property tests
+
+See [docs/architecture.md](docs/architecture.md) for module responsibilities and data flows.
 
 ## Documentation
 
@@ -95,33 +79,29 @@ tests/                 167 tests across 16 test files
 - [User Stories](docs/UserStory.md) — use case (UC1-5) acceptance criteria
 - [Demo Scenarios](docs/demo-scenarios.md) — how to run and verify each use case
 - [Hardware BOM](docs/hardware/BOM.md) — shopping list with links ($350-$3000+)
-- [Research](docs/research.md) — community designs, papers, future vision (VLM, embodied AI)
+- [Research Notes](docs/notes.md) — prior art, papers, tools, known issues
+- [Roadmap](docs/roadmap.md) — closed-loop printing, tool genesis, VLM/embodied AI vision
 
 ## Key Dependencies
 
 - [LeRobot](https://github.com/huggingface/lerobot) — Teleoperation + imitation learning
 - [PyLabRobot](https://github.com/PyLabRobot/pylabrobot) — Liquid handling abstractions
 - [digital-pipette-v2](https://github.com/ac-rad/digital-pipette-v2) — DIY pipette (alternative backend)
-- [CadQuery](https://github.com/CadQuery/cadquery) — Primary CAD for 3D-printed parts
+- [build123d](https://github.com/gumyr/build123d) — Primary CAD for 3D-printed parts
 - [OpenSCAD](https://openscad.org/) — Fallback CAD for 3D-printed parts
-- [PrusaSlicer](https://github.com/prusa3d/PrusaSlicer) — Printability validation (optional)
+- [CuraEngine](https://github.com/Ultimaker/CuraEngine) — Printability validation (headless, preferred)
+- [PrusaSlicer](https://github.com/prusa3d/PrusaSlicer) — Printability validation (fallback)
 - FastAPI + WebRTC — Remote dashboard
 - OpenCV — Camera pipeline
 
+## Development
+
+For dev setup, testing, and contribution workflow, see [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
+Run `make help` to list available targets; `make validate` is the canonical quality gate.
+
 ## Roadmap
 
-Toward general-purpose voice/agent-to-print. This repo is the first showcase.
-
-**Human loop** — voice/text → LLM → OpenSCAD → slicer → print → human inspects → iterate
-
-**Agent loop** — goal spec → agent generates CAD → slicer validates → printer API → camera + VLM inspects → agent fixes → reprints autonomously
-
-1. **Done** — CadQuery + PrusaSlicer CLI pipeline (`make render_parts`, `make check_prints`)
-2. **Next** — LLM-assisted CadQuery generation from text prompts
-3. **Future** — Autonomous agent loop with Bambu camera + VLM print inspection
-4. **Vision** — Closed-loop tool genesis: agent identifies missing tool → generates CadQuery → slices → prints → mounts via tool changer → validates with VLM — true self-evolving multi-tool
-
-See [docs/research.md](docs/research.md) § "Closed-Loop 3D Printing" for prior art.
+Toward general-purpose voice/agent-to-print. See [docs/roadmap.md](docs/roadmap.md) for full vision (human loop, agent loop, autonomous tool genesis, VLM/embodied AI phases).
 
 ## License
 

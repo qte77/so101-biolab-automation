@@ -15,7 +15,7 @@ from __future__ import annotations
 import argparse
 import logging
 
-from biolab.workflow import (
+from so101.workflow import (
     create_workflow_context,
     uc1_col,
     uc1_full_plate,
@@ -26,7 +26,7 @@ from biolab.workflow import (
     uc4_demo_all,
     uc5_gantry_pipette,
 )
-from biolab.xz_gantry import XZGantry, XZGantryConfig
+from so101.xz_gantry import XZGantry, XZGantryConfig
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
