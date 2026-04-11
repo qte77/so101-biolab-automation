@@ -1,0 +1,3 @@
+[submodule "diagramforge"]
+	path = diagramforge
+	url = https://github.com/qte77/diagramforge
