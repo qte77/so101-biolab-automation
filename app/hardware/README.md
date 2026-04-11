@@ -24,7 +24,7 @@ make render_all           # Generate + validate
 
 **Status:** EXPERIMENTAL = draft dimensions, untested on hardware.
 
-**Layout:** code stays under `app/hardware/` (CAD scripts, render.py, parts.json, slicer/). Generated STL/SVG assets and reference scans live at top-level `hardware/` (see `../../hardware/README.md` equivalents and `../../hardware/scans/` for 3D scan reference data).
+Generated STL/SVG outputs and reference scans live under the top-level `../../hardware/` directory; only code lives here. See [../../docs/architecture.md](../../docs/architecture.md#hardware-asset-layout) for the authoritative layout description.
 
 ## System Overview
 
@@ -137,26 +137,19 @@ Current scans:
 
 Parts derived from a scan carry an optional `scan_source` field in `parts.json` pointing at the scan file — queryable for tool-genesis workflows and design audits. See [../../hardware/scans/dpette/README.md](../../hardware/scans/dpette/README.md) for provenance and scale.
 
-## Parts Table
+## Parts Catalog
 
-| STL File | SVG | Source | Description |
-|----------|-----|--------|-------------|
-| `tool_cone_robot.stl` | [svg](../../hardware/svg/so101/tool_cone_robot.svg) | `cad/so101/tool_changer.py` | Female cone — mounts on SO-101 wrist |
-| `tool_cone_pipette.stl` | [svg](../../hardware/svg/so101/tool_cone_pipette.svg) | `cad/so101/tool_changer.py` | Male cone — pipette tool base |
-| `tool_cone_gripper.stl` | [svg](../../hardware/svg/so101/tool_cone_gripper.svg) | `cad/so101/tool_changer.py` | Male cone — gripper tool base |
-| `tool_dock_3station.stl` | [svg](../../hardware/svg/so101/tool_dock_3station.svg) | `cad/so101/tool_dock.py` | 3-slot parking rack with magnet pockets |
-| `pipette_mount_so101.stl` | [svg](../../hardware/svg/so101/pipette_mount_so101.svg) | `cad/so101/pipette_mount.py` | dPette barrel clamp for SO-101 wrist |
-| `gripper_tips_tpu.stl` | [svg](../../hardware/svg/so101/gripper_tips_tpu.svg) | `cad/so101/gripper_tips.py` | Compliant fingertips (TPU 95A) |
-| `96well_plate_holder.stl` | [svg](../../hardware/svg/labware/96well_plate_holder.svg) | `cad/labware/plate_holder.py` | SBS plate holder with alignment pins |
-| `tip_rack_holder.stl` | [svg](../../hardware/svg/labware/tip_rack_holder.svg) | `cad/labware/tip_rack_holder.py` | Tip rack tray |
-| `dpette_single_cradle.stl` | [svg](../../hardware/svg/dpette/dpette_single_cradle.svg) | `cad/dpette/dpette_cradle.py` | Rest cradle for dPette 7016 |
-| `dpette_multi_cradle.stl` | [svg](../../hardware/svg/dpette/dpette_multi_cradle.svg) | `cad/dpette/dpette_cradle.py` | Rest cradle for dPette+ 8-channel |
-| `tip_ejection_bar.stl` | [svg](../../hardware/svg/dpette/tip_ejection_bar.svg) | `cad/dpette/tip_ejection_bar.py` | Tip ejection post (top-button) |
-| `dpette_handle.stl` | [svg](../../hardware/svg/dpette/dpette_handle.svg) | `cad/dpette/dpette_handle.py` | U-bracket mount for dPette+ (top→M5 horn, bottom clamps barrel) |
-| `dpette_cam_arm.stl` | [svg](../../hardware/svg/dpette/dpette_cam_arm.svg) | `cad/dpette/dpette_handle.py` | Straight radial cam arm on M6 horn — sweeps into ejector hook |
-| `dpette_tip_release.stl` | [svg](../../hardware/svg/dpette/dpette_tip_release.svg) | `cad/dpette/dpette_tip_release.py` | L-bracket tip ejector station (universal single/multi-channel) |
-| `dpette_multi_handle.stl` | [svg](../../hardware/svg/dpette/dpette_multi_handle.svg) | `cad/dpette/dpette_multi_handle.py` | Ø32mm split-bore pipette clamp (replaces SO-101 bottom jaw) — from 3D scan |
-| `dpette_ejector_lever.stl` | [svg](../../hardware/svg/dpette/dpette_ejector_lever.svg) | `cad/dpette/dpette_multi_handle.py` | M6-horn ejector lever (replaces SO-101 top jaw) — ~175N @ 20mm arm |
+The machine-readable manifest of all parts (name, STL/SVG outputs, CAD source, build function, status, backend, scan source) is [`parts.json`](parts.json). It is the single source of truth — `render.py` reads it to generate outputs, tests validate it, and this README links to it rather than duplicating it.
+
+Query examples:
+
+```bash
+# List all active parts
+jq '.[] | select(.status == "active") | .name' app/hardware/parts.json
+
+# Find scan-derived parts
+jq '.[] | select(.scan_source) | {name, scan_source}' app/hardware/parts.json
+```
 
 ## Structural Review Checklist
 
