@@ -20,7 +20,6 @@ sys.path.pop()
 
 # --- Parameters (all in mm) ---
 # SO-101 gripper finger (approximate)
-# TODO: measure from real hardware
 FINGER_WIDTH = 20.0
 FINGER_DEPTH = 8.0
 TIP_THICKNESS = 3.0
