@@ -108,3 +108,8 @@ This allows the full workflow to run end-to-end without any hardware attached. R
 - **PlateLayout in workflow.py**: Separates pure SBS math (plate.py) from hardware workspace config (workflow.py). Single responsibility.
 - **No fridge module**: Fridge joint arrays are constants in workflow.py. YAGNI until hardware exists.
 - **Dashboard runs workflow in thread**: `run_workflow` WebSocket command spawns `uc4_demo_all` in a daemon thread to avoid blocking the event loop.
+
+## Prior Art & Vision
+
+- [docs/notes.md](notes.md) — academic papers, community designs, tools, known hardware issues informing these decisions
+- [docs/roadmap.md](roadmap.md) — forward-looking direction (closed-loop printing, tool genesis, VLM/embodied AI phases)
