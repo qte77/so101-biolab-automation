@@ -7,20 +7,20 @@ updated: 2026-04-09
 
 # Hardware Parts
 
-Generated from `parts.json` manifest via `render.py` (CadQuery preferred, OpenSCAD fallback).
+Generated from `parts.json` manifest via `render.py` (build123d preferred, OpenSCAD fallback).
 
 ```bash
-make setup_cad            # Install CadQuery (preferred)
+make setup_cad            # Install build123d (preferred)
 make setup_scad           # Install OpenSCAD (fallback)
 make render_parts         # Generate STL + SVG from parts.json
-make setup_slicer         # Install PrusaSlicer (optional)
+make setup_slicer         # Install slicer (optional)
 make check_prints         # Check printability
 make render_all           # Generate + validate
 ```
 
-**How it works:** `hardware/parts.json` defines all parts (names, filenames, scripts, build functions). `hardware/render.py` reads the manifest and dispatches to CadQuery (imports `build_func`, exports STL+SVG) or OpenSCAD (CLI calls with `scad_args`). Adding a part means editing `parts.json` and writing the script.
+**How it works:** `hardware/parts.json` defines all parts (names, filenames, scripts, build functions). `hardware/render.py` reads the manifest and dispatches to build123d (imports `build_func`, exports STL+SVG) or OpenSCAD (CLI calls with `scad_args`). Adding a part means editing `parts.json` and writing the script.
 
-**Why CadQuery + slicer?** CadQuery generates parametric STLs with isometric wireframe SVGs. PrusaSlicer validates FDM printability (overhangs, unsupported regions, gravity failures) as fast CLI feedback.
+**Why build123d + slicer?** build123d generates parametric STLs with isometric wireframe SVGs. A slicer (CuraEngine / PrusaSlicer) validates FDM printability (overhangs, unsupported regions, gravity failures) as fast CLI feedback.
 
 **Status:** EXPERIMENTAL = draft dimensions, untested on hardware.
 
