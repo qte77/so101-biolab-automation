@@ -9,7 +9,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_precommit \
+	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_rtk setup_lychee setup_mdlint setup_diagramforge \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
@@ -61,7 +61,6 @@ setup_all: setup_dev setup_cad ## Install all dependencies + tools
 	-$(MAKE) setup_lychee
 	-$(MAKE) setup_rtk
 	-$(MAKE) setup_diagramforge
-	-$(MAKE) setup_precommit
 
 setup_cad: setup_uv ## Install build123d for BREP CAD generation
 	uv sync --group cad
@@ -146,18 +145,6 @@ setup_diagramforge: ## Clone diagramforge from URL in .gitmodules if missing (no
 			git clone "$$url" diagramforge
 		fi
 	fi
-
-setup_precommit: ## Install pre-commit hooks (reads .pre-commit-config.yaml)
-	if [ ! -f .pre-commit-config.yaml ]; then
-		echo "WARN: .pre-commit-config.yaml missing — skipping"
-	elif command -v pre-commit > /dev/null 2>&1; then
-		pre-commit install
-	elif command -v uvx > /dev/null 2>&1; then
-		uvx pre-commit install
-	else
-		echo "WARN: pre-commit not available — run: uv tool install pre-commit"
-	fi
-
 
 # MARK: HARDWARE
 
