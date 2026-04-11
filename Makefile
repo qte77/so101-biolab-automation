@@ -6,12 +6,12 @@ ifeq ($(filter oneshell,$(.FEATURES)),)
 $(error GNU Make >= 3.82 required. macOS: brew install make, then use gmake)
 endif
 
-.SILENT:  # TODO: replace with per-recipe @ prefix so render/test show progress
+.SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_train setup_cad setup_scad setup_slicer setup_rtk setup_lychee setup_mdlint \
-	render_wireframe render_solid check_prints render_all \
-	autofix lint check_links check_docs check_types test test_cov retest complexity quick_validate validate \
+	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_rtk setup_lychee setup_mdlint \
+	render_parts check_prints render_all \
+	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
 	eval_policy serve_dashboard run_demo \
 	help
@@ -60,9 +60,6 @@ setup_all: setup_dev setup_cad ## Install all dependencies + tools
 	-$(MAKE) setup_slicer
 	-$(MAKE) setup_lychee
 	-$(MAKE) setup_rtk
-
-## setup_train: setup_uv  # Uncomment when GPU available
-##	uv sync --group train
 
 setup_cad: setup_uv ## Install build123d for BREP CAD generation
 	uv sync --group cad
@@ -157,7 +154,7 @@ start_teleop: ## Start teleoperation (leader → follower)
 		--robot.id=arm_a \
 		--robot.cameras="{ overhead: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 30}, wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 30}}" \
 		--teleop.type=so101_leader \
-		--teleop.port=$(LEADER_PORT) \solid/filled
+		--teleop.port=$(LEADER_PORT) \
 		--teleop.id=leader \
 		--display_data=true
 
@@ -221,12 +218,12 @@ test_cov: ## Run tests with coverage report
 retest: ## Rerun last failed tests only
 	uv run pytest --lf -x
 
-complexity: ## Check cognitive complexity (max 15/function)
+check_complexity: ## Check cognitive complexity (max 15/function)
 	uv run complexipy app/so101/ app/dashboard/ --max-complexity-allowed 15
 
 quick_validate: lint check_types ## Fast gate (lint + type check)
 
-validate: lint check_types test_cov complexity ## Full gate (lint + types + tests + coverage + complexity)
+validate: lint check_types test_cov check_complexity ## Full gate (lint + types + tests + coverage + complexity)
 
 
 # MARK: APP
