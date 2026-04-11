@@ -3,7 +3,7 @@ title: Bill of Materials
 purpose: Hardware shopping list with first-party vendor links and cost estimates
 authority: Hardware (AUTHORITY)
 created: 2026-03-27
-updated: 2026-03-27
+updated: 2026-04-11
 validated_links: 2026-03-27
 ---
 
@@ -58,9 +58,33 @@ PLA+, 0.4mm nozzle, 0.2mm layer, 15% infill, supports >45 degrees.
 | dPette single cradle | Designed | `cad/dpette/dpette_cradle.py` | PLA+ | Rest cradle for AELAB dPette 7016 |
 | dPette multi cradle | Designed | `cad/dpette/dpette_cradle.py` | PLA+ | Rest cradle for DLAB dPette+ 8-channel |
 | Tip ejection post | Designed | `cad/dpette/tip_ejection_bar.py` | PLA+ | Fixed post — arm pushes ejector button onto post to pop tips |
+| dPette handle (U-bracket mount) | Designed | `cad/dpette/dpette_handle.py` | PLA+ | Single-channel dPette mount for SO-101 (M5 horn → barrel clamp) |
+| dPette cam arm | Designed | `cad/dpette/dpette_handle.py` | PLA+ | Straight radial arm on M6 horn — sweeps into ejector hook |
+| dPette tip release station | Designed | `cad/dpette/dpette_tip_release.py` | PLA+ | L-bracket ejector + waste slot, universal single/multi-channel |
+| dPette+ 8-ch mount (split-bore clamp) | Designed | `cad/dpette/dpette_multi_handle.py` | PLA+ | Ø32mm split-bore clamp replacing SO-101 bottom jaw — **derived from 1:1 mm Revopoint scan** (`hardware/scans/dpette/`) |
+| dPette+ ejector lever | Designed | `cad/dpette/dpette_multi_handle.py` | PLA+ | M6-horn-mounted lever replacing SO-101 top jaw — ~175N @ 20mm arm |
 | Fridge hook end-effector | Designed (deferred) | `cad/so101/fridge_hook.py` | PLA+ | Hook for fridge door handle |
 | XZ gantry frame | Designed (deferred) | `cad/deferred/xz_gantry_frame.py` | PLA+ | XZ gantry structural frame |
 | XZ carriage pipette dock | Designed (deferred) | `cad/deferred/xz_carriage.py` | PLA+ | XZ gantry carriage with pipette dock |
+
+## 3D Printer (for custom parts)
+
+| Part | ~Cost | Source | Notes |
+|------|-------|--------|-------|
+| [Original Prusa MK4](https://www.prusa3d.com/product/original-prusa-mk4s-3d-printer/) | ~$800 kit / ~$1,100 assembled | Prusa Research | Nextruder + input shaper. PrusaLink HTTP API + MK4 slicer profiles bundled at `app/hardware/slicer/profiles/prusa_mk4_*.ini`. See [prusa-mk4-ops.md](prusa-mk4-ops.md) for the API reference and upload / print curl examples. |
+| PLA+ filament (1 kg) | $20–25 | [Prusament PLA](https://shop.prusa3d.com/en/prusament/1208-prusament-pla-prusa-galaxy-black-1kg.html) or generic | Default material for functional parts |
+| TPU 95A filament (0.5 kg) | $25 | Generic | Only for `gripper_tips_tpu.stl` |
+| 0.4mm nozzle | — | included with MK4 | Default profile targets 0.4mm |
+
+**Alternative printers** supported by the slicer pipeline: any PrusaSlicer-compatible printer. Pipeline is slicer-agnostic — swap profiles to target a different machine without code changes. Bambu Lab printers remain the target for the future camera + VLM agent-loop step (see [roadmap.md](../roadmap.md)).
+
+## 3D Scanner (for scan-informed CAD, optional)
+
+| Part | ~Cost | Source | Notes |
+|------|-------|--------|-------|
+| [Revopoint MINI](https://www.revopoint3d.com/products/revopoint-mini-3d-scanner) or similar | $450–800 | Revopoint | Structured-light scanner for capturing physical parts as reference geometry. Output PLY/STL at 1:1 mm. See `hardware/scans/dpette/` for the dPette+ handle scan that drove the `dpette_multi_handle` redesign. |
+
+Scanner is **optional** — most parts are purely parametric. Scan-informed design is useful for fitting custom mounts to off-the-shelf hardware with complex curved geometry (pipettes, grips, handles).
 
 ## Cameras
 
@@ -138,5 +162,7 @@ Seeed Studio offers [reComputer Jetson + SO-101 kits](https://wiki.seeedstudio.c
 | Minimum (1 follower + 1 leader, RPi, no pipette) | ~$350 |
 | Full SO-101 (2 followers + 1 leader, RPi, DIY pipette, cameras) | ~$650 |
 | Full SO-101 + Jetson (GPU training on-device) | ~$820 |
+| Full SO-101 + Prusa MK4 (for on-site custom part iteration) | ~$1,450 |
 | XZ gantry only (dedicated pipetting, commercial pipettes) | ~$860 (gantry ~$60 + dPette 7016 ~$200 + dPette+ ~$600) |
-| Full system (SO-101 + XZ gantry + Bento Lab) | ~$3,000+ |
+| Full system (SO-101 + XZ gantry + Bento Lab + MK4) | ~$4,000+ |
+| Full system + Revopoint scanner (scan-informed CAD workflow) | ~$4,500+ |
