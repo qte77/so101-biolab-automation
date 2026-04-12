@@ -73,6 +73,16 @@ class DualArmController:
         self._stub_action_log: dict[str, list[list[float]]] = {}
 
     @property
+    def is_connected(self) -> bool:
+        """Whether arms are currently connected."""
+        return self._connected
+
+    @property
+    def is_stub_mode(self) -> bool:
+        """Whether the controller is running in stub mode."""
+        return self._stub_mode
+
+    @property
     def arm_ids(self) -> list[str]:
         """IDs of configured follower arms."""
         return [
@@ -83,8 +93,8 @@ class DualArmController:
         """Connect to all configured arms via LeRobot."""
         try:
             from lerobot.robots.so_follower import (  # pyright: ignore[reportMissingImports]
-                SO101Follower,
-                SO101FollowerConfig,
+                SO101Follower,  # pyright: ignore[reportUnknownVariableType]
+                SO101FollowerConfig,  # pyright: ignore[reportUnknownVariableType]
             )
         except ImportError:
             logger.warning("lerobot not installed — running in stub mode")
@@ -95,13 +105,13 @@ class DualArmController:
         for arm_cfg in [self.config.arm_a, self.config.arm_b]:
             if arm_cfg.role != "follower":
                 continue
-            robot_config = SO101FollowerConfig(
+            robot_config: Any = SO101FollowerConfig(  # pyright: ignore[reportUnknownVariableType]
                 port=arm_cfg.port,
                 id=arm_cfg.arm_id,
                 cameras=arm_cfg.cameras,
             )
-            robot = SO101Follower(robot_config)
-            robot.connect()
+            robot: Any = SO101Follower(robot_config)  # pyright: ignore[reportUnknownVariableType]
+            robot.connect()  # pyright: ignore[reportUnknownMemberType]
             self._robots[arm_cfg.arm_id] = robot
             logger.info("Connected arm %s on %s", arm_cfg.arm_id, arm_cfg.port)
 

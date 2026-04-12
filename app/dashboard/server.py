@@ -139,7 +139,7 @@ def _get_status(controller: DualArmController, monitor: SafetyMonitor) -> dict[s
     return {
         "mode": _mode,
         "e_stopped": monitor.is_e_stopped,
-        "connected": controller._connected,
+        "connected": controller.is_connected,
         "arm_ids": controller.arm_ids,
     }
 

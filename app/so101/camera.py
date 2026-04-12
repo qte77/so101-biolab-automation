@@ -102,7 +102,7 @@ class CameraPipeline:
         Returns:
             Dict mapping camera name to BGR image array.
         """
-        frames = {}
+        frames: dict[str, Any] = {}
         for name in self._captures:
             frame = self.get_frame(name)
             if frame is not None:

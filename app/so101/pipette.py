@@ -241,15 +241,20 @@ class ElectronicPipette:
         Falls back to stub mode if the package or hardware is unavailable.
         """
         try:
-            from dpette.config import SerialConfig  # pyright: ignore[reportMissingImports]
-            from dpette.driver import DPetteDriver  # pyright: ignore[reportMissingImports]
+            from dpette.config import (  # pyright: ignore[reportMissingImports]
+                SerialConfig,  # pyright: ignore[reportUnknownVariableType]
+            )
+            from dpette.driver import (  # pyright: ignore[reportMissingImports]
+                DPetteDriver,  # pyright: ignore[reportUnknownVariableType]
+            )
 
-            cfg = SerialConfig(
+            cfg: Any = SerialConfig(  # pyright: ignore[reportUnknownVariableType]
                 port=self.config.serial_port,
                 baudrate=self.config.baud_rate,
             )
-            self._driver = DPetteDriver(cfg)
-            self._driver.connect()
+            driver: Any = DPetteDriver(cfg)  # pyright: ignore[reportUnknownVariableType]
+            driver.connect()  # pyright: ignore[reportUnknownMemberType]
+            self._driver = driver
             logger.info(
                 "Electronic pipette (%s) connected via dpette driver on %s",
                 self.config.model,

@@ -74,13 +74,11 @@ convention = "google"
 
 [tool.pyright]
 pythonVersion = "3.12"
-typeCheckingMode = "standard"
-include = ["app/so101", "app/dashboard", "app/hardware/render.py", "app/hardware/slicer"]
-exclude = ["app/hardware/cad", "app/hardware/scad"]  # CAD/SCAD scripts use dynamic sys.path
+typeCheckingMode = "strict"
+extraPaths = ["app"]
+include = ["app/so101", "app/dashboard"]
+exclude = ["app/hardware"]  # CAD/render/slicer use dynamic imports without type stubs
 reportMissingImports = "error"
-reportUnusedVariable = "error"
-reportInconsistentConstructor = "error"
-reportConstantRedefinition = "error"
 
 [tool.pytest.ini_options]
 pythonpath = ["app"]

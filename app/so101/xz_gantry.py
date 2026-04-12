@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 import struct
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, cast
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -42,7 +42,15 @@ class XZGantryConfig(BaseSettings):
     def _coerce_position_lists(cls, v: Any) -> Any:  # noqa: ANN401
         """YAML loads positions as lists — coerce to tuples."""
         if isinstance(v, dict):
-            return {k: tuple(val) if isinstance(val, list) else val for k, val in v.items()}
+            typed: dict[str, Any] = cast("dict[str, Any]", v)
+            result: dict[str, tuple[float, float]] = {}
+            for k, val in typed.items():
+                if isinstance(val, list):
+                    nums: list[float] = cast("list[float]", val)
+                    result[k] = (nums[0], nums[1])
+                else:
+                    result[k] = val
+            return result
         return v
 
     @classmethod
