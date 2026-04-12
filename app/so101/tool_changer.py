@@ -11,12 +11,13 @@ Reference: Berkeley passive modular tool changer (3D-printed, magnetic).
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from pathlib import Path
+from typing import Any, Self
 
 import yaml
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
 
@@ -40,35 +41,28 @@ class DockStation(BaseModel):
     engage_joints: list[float]  # Joint positions to engage/disengage
     dock_joints: list[float]  # Joint positions when docked
 
+    @field_validator("tool", mode="before")
+    @classmethod
+    def _coerce_tool_str(cls, v: Any) -> Any:
+        """YAML loads enum values as strings — coerce to Tool enum."""
+        if isinstance(v, str):
+            return Tool(v)
+        return v
 
-@dataclass
-class ToolDockConfig:
+
+class ToolDockConfig(BaseSettings):
     """Configuration for the 3-station tool dock."""
+
+    model_config = SettingsConfigDict(strict=True)
 
     stations: dict[str, DockStation]
 
     @classmethod
-    def from_yaml(cls, path: str) -> ToolDockConfig:
-        """Load dock configuration from YAML.
-
-        Args:
-            path: Path to tool_dock.yaml.
-
-        Returns:
-            ToolDockConfig instance.
-        """
+    def from_yaml(cls, path: str | Path) -> Self:
+        """Load dock configuration from YAML."""
         with open(path) as f:
             data = yaml.safe_load(f)
-
-        stations = {}
-        for name, station_data in data["stations"].items():
-            stations[name] = DockStation(
-                tool=Tool(station_data["tool"]),
-                approach_joints=station_data["approach_joints"],
-                engage_joints=station_data["engage_joints"],
-                dock_joints=station_data["dock_joints"],
-            )
-        return cls(stations=stations)
+        return cls.model_validate(data)
 
 
 class ToolChanger:

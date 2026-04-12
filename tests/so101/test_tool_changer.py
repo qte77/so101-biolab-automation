@@ -69,6 +69,20 @@ class StubArmController:
         self.actions.append((arm_id, action))
 
 
+class TestToolDockConfigModel:
+    """Strict pydantic-settings validation for ToolDockConfig."""
+
+    @pytest.mark.integration
+    def test_from_yaml(self) -> None:
+        cfg = ToolDockConfig.from_yaml("configs/tool_dock.yaml")
+        assert "pipette" in cfg.stations
+        assert cfg.stations["pipette"].tool == Tool.PIPETTE
+
+    def test_strict_rejects_wrong_station_type(self) -> None:
+        with pytest.raises(ValidationError):
+            ToolDockConfig(stations={"bad": "not_a_station"})  # type: ignore[dict-item]
+
+
 class TestToolChanger:
     """Test tool change sequences."""
 
