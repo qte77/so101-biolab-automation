@@ -82,6 +82,27 @@ class TestDigitalPipetteConnect:
         p.connect()
 
 
+class TestDigitalPipetteErrorRecovery:
+    """Failures must leave the pipette in a usable state (atomic aspirate)."""
+
+    def test_failed_aspirate_leaves_pipette_usable(self, pipette: DigitalPipette) -> None:
+        """An over-capacity aspirate must not half-commit fill state.
+
+        After the ValueError, a subsequent valid aspirate/dispense cycle
+        must still obey the true fill state — otherwise a rejected command
+        could silently corrupt accounting on the real pipette.
+        """
+        pipette.aspirate(100.0)
+
+        with pytest.raises(ValueError, match="exceed"):
+            pipette.aspirate(150.0)  # would overflow (100 + 150 > 200)
+
+        # Exactly 100 µL remains — dispensing 100 clears it cleanly
+        pipette.dispense(100.0)
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
+            pipette.dispense(0.1)
+
+
 class TestElectronicPipetteCapacity:
     """Same behavioral contracts for electronic pipette."""
 

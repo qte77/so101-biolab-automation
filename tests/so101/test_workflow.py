@@ -129,6 +129,22 @@ class TestUC1SingleWell:
         with pytest.raises(ValueError, match=r"Invalid well name"):
             pipette_well(stub_controller, stub_pipette, layout, "arm_a", "TROUGH", "Z99", 50.0)
 
+    def test_invalid_dest_leaves_pipette_unchanged(
+        self, stub_controller: DualArmController, stub_pipette: DigitalPipette, layout: PlateLayout
+    ) -> None:
+        """A bad destination must fail atomically — no partial aspirate.
+
+        pipette_well validates the dest well BEFORE moving or aspirating.
+        If it raised after aspirating, the physical pipette would hold
+        liquid with nowhere to put it — a spill hazard.
+        """
+        with pytest.raises(ValueError, match=r"Invalid well name"):
+            pipette_well(stub_controller, stub_pipette, layout, "arm_a", "TROUGH", "Z99", 50.0)
+
+        # Pipette must still be empty — a subsequent dispense must fail
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
+            stub_pipette.dispense(0.1)
+
     def test_uc1_single_well_wrapper(
         self, stub_controller: DualArmController, stub_pipette: DigitalPipette, layout: PlateLayout
     ) -> None:

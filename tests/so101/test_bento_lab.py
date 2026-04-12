@@ -56,3 +56,21 @@ class TestBentoLabProgram:
         assert "lid_open" in status
         assert "running" in status
         assert "program" in status
+
+
+class TestBentoLabErrorRecovery:
+    """Failed operations must not leave stale instrument state."""
+
+    def test_start_with_lid_open_leaves_running_false(self, bento: BentoLab) -> None:
+        """A rejected start_program must not flip the running flag.
+
+        If this fails, a subsequent get_status() would report "running"
+        even though no program was launched — misleading the dashboard.
+        """
+        bento.open_lid()
+        with pytest.raises(ValueError, match="lid must be closed"):
+            bento.start_program("pcr_standard")
+
+        status = bento.get_status()
+        assert status["running"] is False
+        assert status["program"] is None

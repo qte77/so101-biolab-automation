@@ -235,6 +235,36 @@ class TestExecuteSequence:
             ctrl.execute_sequence("nonexistent", ["home"])
 
 
+class TestErrorRecovery:
+    """Behaviour of the controller after failures or disconnects."""
+
+    def test_disconnect_prevents_further_motion(self, connected_stub: DualArmController) -> None:
+        """After disconnect, send_action and get_observation reject every arm.
+
+        This is the safety-critical guarantee: once the controller is torn
+        down, no more actions can slip through, even for arm IDs that were
+        previously valid.
+        """
+        connected_stub.send_action("arm_a", [0.0] * 6)  # OK before disconnect
+        connected_stub.disconnect()
+
+        with pytest.raises(ValueError, match=r"Unknown arm"):
+            connected_stub.send_action("arm_a", [0.0] * 6)
+        with pytest.raises(ValueError, match=r"Unknown arm"):
+            connected_stub.get_observation("arm_a")
+
+    def test_reconnect_after_disconnect_clears_history(self, stub_config: DualArmConfig) -> None:
+        """Reconnecting after disconnect starts from a clean history."""
+        ctrl = DualArmController(stub_config)
+        ctrl.connect()
+        ctrl.park_all()
+        assert ctrl.get_observation("arm_a")["history"]  # non-empty
+        ctrl.disconnect()
+
+        ctrl.connect()
+        assert ctrl.get_observation("arm_a")["history"] == []
+
+
 class TestTeleoperation:
     """Teleoperation skeleton — deferred implementation."""
 

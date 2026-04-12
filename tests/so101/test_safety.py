@@ -37,9 +37,7 @@ class TestSafetyMonitor:
         monitor = SafetyMonitor(SafetyConfig(), park_callback=lambda: None)
         assert monitor.check_joint_limits("unknown_joint", 999.0) is True
 
-    def test_watchdog_triggers_park_on_timeout(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_watchdog_triggers_park_on_timeout(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Watchdog parks arms once the heartbeat goes past the timeout.
 
         Drives virtual time via a patched ``time.monotonic`` so the test is
@@ -58,9 +56,7 @@ class TestSafetyMonitor:
         assert parked == [True]
         assert monitor.is_e_stopped
 
-    def test_heartbeat_prevents_timeout(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_heartbeat_prevents_timeout(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Regular heartbeats keep the watchdog from ever firing."""
         fake_time = [1000.0]
         monkeypatch.setattr(safety.time, "monotonic", lambda: fake_time[0])
@@ -75,6 +71,33 @@ class TestSafetyMonitor:
             monitor._check_watchdog()
 
         assert parked == []
+        assert not monitor.is_e_stopped
+
+    def test_watchdog_latches_e_stop_after_timeout(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """After a timeout-triggered park, further checks are a no-op.
+
+        Latching ensures the operator has to explicitly reset the e-stop
+        after a watchdog-driven park — a subsequent tick must not call
+        park() a second time or clear the e_stop flag on its own.
+        """
+        fake_time = [1000.0]
+        monkeypatch.setattr(safety.time, "monotonic", lambda: fake_time[0])
+
+        parked: list[bool] = []
+        config = SafetyConfig(watchdog_timeout_s=0.5)
+        monitor = SafetyMonitor(config, park_callback=lambda: parked.append(True))
+
+        fake_time[0] += 1.0  # past timeout
+        monitor._check_watchdog()
+        fake_time[0] += 5.0  # way past
+        monitor._check_watchdog()
+        monitor._check_watchdog()
+
+        assert parked == [True]  # park called exactly once
+        assert monitor.is_e_stopped
+
+        # Explicit reset clears the latch
+        monitor.reset_e_stop()
         assert not monitor.is_e_stopped
 
     def test_e_stop_is_idempotent(self) -> None:
