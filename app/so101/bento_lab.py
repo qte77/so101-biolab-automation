@@ -10,15 +10,17 @@ Reference: https://www.bento.bio/
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 from typing import Any
+
+from pydantic import BaseModel, ConfigDict
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class BentoLabConfig:
+class BentoLabConfig(BaseModel):
     """Configuration for the Bento Lab."""
+
+    model_config = ConfigDict(strict=True)
 
     serial_port: str = "/dev/ttyACM0"
     baud_rate: int = 9600

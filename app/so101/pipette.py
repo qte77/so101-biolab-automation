@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import logging
 import time
-from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
+
+from pydantic import BaseModel, ConfigDict
 
 logger = logging.getLogger(__name__)
 
@@ -35,9 +36,10 @@ DEFAULT_ASPIRATE_SPEED = 200  # ms delay between steps
 DEFAULT_DISPENSE_SPEED = 150  # ms delay between steps
 
 
-@dataclass
-class PipetteConfig:
+class PipetteConfig(BaseModel):
     """Configuration for the digital pipette."""
+
+    model_config = ConfigDict(strict=True)
 
     serial_port: str = "/dev/ttyUSB0"
     baud_rate: int = 9600
@@ -175,13 +177,14 @@ ELECTRONIC_MODELS: dict[str, dict[str, Any]] = {
 }
 
 
-@dataclass
-class ElectronicPipetteConfig:
+class ElectronicPipetteConfig(BaseModel):
     """Configuration for a commercial electronic pipette.
 
     USB protocol is undocumented — the serial_port is a placeholder for
     future reverse-engineering via USBREVue / pyserial.
     """
+
+    model_config = ConfigDict(strict=True)
 
     serial_port: str = "/dev/ttyACM0"
     baud_rate: int = 9600

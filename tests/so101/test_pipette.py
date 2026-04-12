@@ -7,6 +7,7 @@ never internal state like _current_fill or _volume_to_steps.
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+from pydantic import ValidationError
 
 from so101.pipette import (
     DigitalPipette,
@@ -15,6 +16,37 @@ from so101.pipette import (
     PipetteConfig,
     PipetteProtocol,
 )
+
+
+class TestPipetteConfigModel:
+    """PipetteConfig pydantic model validation."""
+
+    def test_defaults(self) -> None:
+        cfg = PipetteConfig()
+        assert cfg.serial_port == "/dev/ttyUSB0"
+        assert cfg.baud_rate == 9600
+        assert cfg.max_volume_ul == 200.0
+        assert cfg.actuator_stroke_mm == 50.0
+
+    def test_strict_rejects_str_for_int(self) -> None:
+        with pytest.raises(ValidationError):
+            PipetteConfig(baud_rate="9600")  # type: ignore[arg-type]
+
+
+class TestElectronicPipetteConfigModel:
+    """ElectronicPipetteConfig pydantic model validation."""
+
+    def test_defaults(self) -> None:
+        cfg = ElectronicPipetteConfig()
+        assert cfg.serial_port == "/dev/ttyACM0"
+        assert cfg.baud_rate == 9600
+        assert cfg.max_volume_ul == 1000.0
+        assert cfg.channels == 1
+        assert cfg.model == "aelab_dpette_7016"
+
+    def test_strict_rejects_str_for_int(self) -> None:
+        with pytest.raises(ValidationError):
+            ElectronicPipetteConfig(baud_rate="9600")  # type: ignore[arg-type]
 
 
 @pytest.fixture

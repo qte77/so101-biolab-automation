@@ -1,8 +1,23 @@
 """Tests for BentoLab thermocycler controller."""
 
 import pytest
+from pydantic import ValidationError
 
 from so101.bento_lab import BentoLab, BentoLabConfig
+
+
+class TestBentoLabConfigModel:
+    """BentoLabConfig pydantic model validation."""
+
+    def test_defaults(self) -> None:
+        cfg = BentoLabConfig()
+        assert cfg.serial_port == "/dev/ttyACM0"
+        assert cfg.baud_rate == 9600
+        assert cfg.model == "bento_lab_standard"
+
+    def test_strict_rejects_wrong_types(self) -> None:
+        with pytest.raises(ValidationError):
+            BentoLabConfig(baud_rate="9600")  # type: ignore[arg-type]
 
 
 @pytest.fixture

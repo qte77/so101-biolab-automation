@@ -8,15 +8,17 @@ Captures from overhead + wrist cameras, provides frames for:
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 from typing import Any
+
+from pydantic import BaseModel, ConfigDict
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class CameraConfig:
+class CameraConfig(BaseModel):
     """Configuration for a single camera."""
+
+    model_config = ConfigDict(strict=True)
 
     name: str
     device_index: int  # /dev/videoN or index
@@ -30,9 +32,9 @@ class CameraPipeline:
 
     Usage:
         pipeline = CameraPipeline([
-            CameraConfig("overhead", 0),
-            CameraConfig("wrist_a", 2),
-            CameraConfig("wrist_b", 4),
+            CameraConfig(name="overhead", device_index=0),
+            CameraConfig(name="wrist_a", device_index=2),
+            CameraConfig(name="wrist_b", device_index=4),
         ])
         pipeline.start()
         frames = pipeline.get_frames()  # {"overhead": ndarray, ...}
