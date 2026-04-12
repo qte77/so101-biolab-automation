@@ -50,4 +50,15 @@ exclude = [
     # Reference sites — timeout in CI
     "^https://keepachangelog\\.com",
     "^https://semver\\.org",
+    # OpenBuilds — 423 Locked to bots
+    "^https://us\\.openbuilds\\.com",
+    # Autoprotocol — expired SSL (dead project)
+    "^https://www\\.autoprotocol\\.org",
+    # Publisher sites — 403 bot protection
+    "^https://3dprintingindustry\\.com",
+    "^https://journals\\.sagepub\\.com",
+    "^https://pubs\\.acs\\.org",
+    "^https://www\\.hardware-x\\.com",
+    # Reddit — 403 to bots
+    "^https://www\\.reddit\\.com",
 ]
