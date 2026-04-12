@@ -22,11 +22,25 @@ logger = logging.getLogger(__name__)
 class PipetteProtocol(Protocol):
     """Interface that all pipette backends must satisfy."""
 
-    def connect(self) -> None: ...
-    def disconnect(self) -> None: ...
-    def aspirate(self, volume_ul: float) -> None: ...
-    def dispense(self, volume_ul: float) -> None: ...
-    def eject_tip(self) -> None: ...
+    def connect(self) -> None:
+        """Connect to the pipette."""
+        ...
+
+    def disconnect(self) -> None:
+        """Disconnect from the pipette."""
+        ...
+
+    def aspirate(self, volume_ul: float) -> None:
+        """Aspirate the given volume in microliters."""
+        ...
+
+    def dispense(self, volume_ul: float) -> None:
+        """Dispense the given volume in microliters."""
+        ...
+
+    def eject_tip(self) -> None:
+        """Eject the current tip."""
+        ...
 
 
 # Actuator positions (0-1023 range for 5cm stroke linear actuator)
@@ -59,6 +73,7 @@ class DigitalPipette:
     """
 
     def __init__(self, config: PipetteConfig) -> None:
+        """Initialize with pipette configuration."""
         self.config = config
         self._serial = None
         self._current_position = ACTUATOR_MAX  # Start fully extended (empty)
@@ -213,6 +228,7 @@ class ElectronicPipette:
     """
 
     def __init__(self, config: ElectronicPipetteConfig) -> None:
+        """Initialize with electronic pipette configuration."""
         self.config = config
         self._driver: Any = None  # dpette.DPetteDriver when available
         self._stub_mode = False

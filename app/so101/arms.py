@@ -6,8 +6,10 @@ Manages two follower arms and optional leader arm for teleoperation.
 from __future__ import annotations
 
 import logging
-from pathlib import Path
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import yaml
 from pydantic import BaseModel, ConfigDict
@@ -60,6 +62,7 @@ class DualArmController:
     """
 
     def __init__(self, config: DualArmConfig) -> None:
+        """Initialize with dual-arm configuration."""
         self.config = config
         self._connected = False
         self._stub_mode = False
@@ -140,7 +143,7 @@ class DualArmController:
             raise ValueError(f"Unknown arm: {arm_id}")
         return self._robots[arm_id].get_observation()
 
-    def send_action(self, arm_id: str, action: Any) -> None:
+    def send_action(self, arm_id: str, action: Any) -> None:  # noqa: ANN401
         """Send a joint-space action to an arm.
 
         Args:

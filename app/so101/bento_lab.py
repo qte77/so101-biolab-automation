@@ -40,6 +40,7 @@ class BentoLab:
     """
 
     def __init__(self, config: BentoLabConfig) -> None:
+        """Initialize with Bento Lab configuration."""
         self.config = config
         self._serial: Any = None
         self._stub_mode = False

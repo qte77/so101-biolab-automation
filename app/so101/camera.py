@@ -42,6 +42,7 @@ class CameraPipeline:
     """
 
     def __init__(self, cameras: list[CameraConfig]) -> None:
+        """Initialize with camera configurations."""
         self.cameras = {cam.name: cam for cam in cameras}
         self._captures: dict[str, Any] = {}
 
@@ -80,7 +81,7 @@ class CameraPipeline:
             logger.info("Camera %s released", name)
         self._captures.clear()
 
-    def get_frame(self, name: str) -> Any | None:
+    def get_frame(self, name: str) -> Any | None:  # noqa: ANN401
         """Capture a single frame from a named camera.
 
         Args:

@@ -8,7 +8,10 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from collections.abc import Callable
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -49,6 +52,7 @@ class SafetyMonitor:
     """
 
     def __init__(self, config: SafetyConfig, park_callback: Callable[[], None]) -> None:
+        """Initialize with safety config and park callback."""
         self.config = config
         self._park = park_callback
         self._last_heartbeat = time.monotonic()

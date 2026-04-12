@@ -20,6 +20,10 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import types
 
 HARDWARE_DIR = Path(__file__).resolve().parent  # app/hardware/ — code
 MANIFEST = HARDWARE_DIR / "parts.json"
@@ -36,6 +40,7 @@ _CAD_ALIASES = frozenset({"cad", "cadquery", "build123d"})
 
 
 def load_manifest() -> list[dict]:
+    """Load the parts manifest from JSON."""
     return json.loads(MANIFEST.read_text())
 
 
@@ -55,7 +60,7 @@ def detect_backend() -> str:
     sys.exit(1)
 
 
-def _load_module(cad_path: Path):
+def _load_module(cad_path: Path) -> types.ModuleType:
     """Import a CAD script as a module."""
     spec = importlib.util.spec_from_file_location(cad_path.stem, cad_path)
     if spec is None or spec.loader is None:
@@ -65,7 +70,7 @@ def _load_module(cad_path: Path):
     return mod
 
 
-def _to_solid(shape):
+def _to_solid(shape: Any) -> Any:  # noqa: ANN401
     """Coerce build123d result (Solid, Compound, or ShapeList) to exportable Shape."""
     from build123d import Compound, Solid  # pyright: ignore[reportMissingImports]
 
@@ -172,6 +177,7 @@ def run_theme() -> None:
 
 
 def main() -> int:
+    """CLI entry point for rendering parts."""
     parser = argparse.ArgumentParser(description="Render parts from manifest")
     parser.add_argument(
         "--backend", choices=["cad", "scad"], help="Force backend (default: auto-detect)"

@@ -11,8 +11,10 @@ from __future__ import annotations
 
 import logging
 import struct
-from pathlib import Path
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import yaml
 from pydantic import field_validator
@@ -37,7 +39,7 @@ class XZGantryConfig(BaseSettings):
 
     @field_validator("positions", mode="before")
     @classmethod
-    def _coerce_position_lists(cls, v: Any) -> Any:
+    def _coerce_position_lists(cls, v: Any) -> Any:  # noqa: ANN401
         """YAML loads positions as lists — coerce to tuples."""
         if isinstance(v, dict):
             return {k: tuple(val) if isinstance(val, list) else val for k, val in v.items()}
@@ -66,6 +68,7 @@ class XZGantry:
     """
 
     def __init__(self, config: XZGantryConfig) -> None:
+        """Initialize with gantry configuration."""
         self.config = config
         self._serial: Any = None
         self._stub_mode = False

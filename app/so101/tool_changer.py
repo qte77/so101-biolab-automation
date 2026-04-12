@@ -12,8 +12,10 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
-from pathlib import Path
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import yaml
 from pydantic import BaseModel, ConfigDict, field_validator
@@ -43,7 +45,7 @@ class DockStation(BaseModel):
 
     @field_validator("tool", mode="before")
     @classmethod
-    def _coerce_tool_str(cls, v: Any) -> Any:
+    def _coerce_tool_str(cls, v: Any) -> Any:  # noqa: ANN401
         """YAML loads enum values as strings — coerce to Tool enum."""
         if isinstance(v, str):
             return Tool(v)
@@ -75,7 +77,8 @@ class ToolChanger:
         changer.change_tool(Tool.GRIPPER)
     """
 
-    def __init__(self, config: ToolDockConfig, arm_controller: Any, arm_id: str) -> None:
+    def __init__(self, config: ToolDockConfig, arm_controller: Any, arm_id: str) -> None:  # noqa: ANN401
+        """Initialize with dock config, arm controller, and arm ID."""
         self.config = config
         self.arm = arm_controller
         self.arm_id = arm_id

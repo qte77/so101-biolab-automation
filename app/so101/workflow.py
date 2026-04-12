@@ -11,8 +11,10 @@ Use cases (UC):
 from __future__ import annotations
 
 import logging
-from pathlib import Path
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import yaml
 from pydantic import model_validator
@@ -60,7 +62,7 @@ class PlateLayout(BaseSettings):
 
     @model_validator(mode="before")
     @classmethod
-    def _flatten_yaml(cls, data: Any) -> Any:
+    def _flatten_yaml(cls, data: Any) -> Any:  # noqa: ANN401
         """Flatten nested YAML structure into flat fields.
 
         YAML has plate.origin_x_mm, heights.safe_z_mm, reagent_trough.*
@@ -360,7 +362,7 @@ def uc4_demo_all(
 
 
 def uc5_gantry_pipette(
-    gantry: Any,
+    gantry: Any,  # noqa: ANN401
     pipette: PipetteProtocol,
     source: str,
     dest: str,
@@ -394,7 +396,7 @@ def uc5_gantry_pipette(
 
 
 def uc5_gantry_strip(
-    gantry: Any,
+    gantry: Any,  # noqa: ANN401
     pipette: PipetteProtocol,
     source: str,
     destinations: list[str],
