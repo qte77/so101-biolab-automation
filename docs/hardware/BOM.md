@@ -72,7 +72,7 @@ PLA+, 0.4mm nozzle, 0.2mm layer, 15% infill, supports >45 degrees.
 | Part | ~Cost | Source | Notes |
 |------|-------|--------|-------|
 | [Original Prusa MK4](https://www.prusa3d.com/product/original-prusa-mk4s-3d-printer/) | ~$800 kit / ~$1,100 assembled | Prusa Research | Nextruder + input shaper. PrusaLink HTTP API + MK4 slicer profiles bundled at `app/hardware/slicer/profiles/prusa_mk4_*.ini`. See [prusa-mk4-ops.md](prusa-mk4-ops.md) for the API reference and upload / print curl examples. |
-| PLA+ filament (1 kg) | $20–25 | [Prusament PLA](https://shop.prusa3d.com/en/prusament/1208-prusament-pla-prusa-galaxy-black-1kg.html) or generic | Default material for functional parts |
+| PLA+ filament (1 kg) | $20–25 | [Prusament PLA](https://www.prusa3d.com/product/prusament-pla-prusa-galaxy-black-1kg-nfc/) or generic | Default material for functional parts |
 | TPU 95A filament (0.5 kg) | $25 | Generic | Only for `gripper_tips_tpu.stl` |
 | 0.4mm nozzle | — | included with MK4 | Default profile targets 0.4mm |
 
@@ -82,7 +82,7 @@ PLA+, 0.4mm nozzle, 0.2mm layer, 15% infill, supports >45 degrees.
 
 | Part | ~Cost | Source | Notes |
 |------|-------|--------|-------|
-| [Revopoint MINI](https://www.revopoint3d.com/products/revopoint-mini-3d-scanner) or similar | $450–800 | Revopoint | Structured-light scanner for capturing physical parts as reference geometry. Output PLY/STL at 1:1 mm. See `hardware/scans/dpette/` for the dPette+ handle scan that drove the `dpette_multi_handle` redesign. |
+| [Revopoint MINI 2](https://www.revopoint3d.com/products/industry-3d-scanner-mini) or similar | $450–900 | Revopoint | Structured-light scanner for capturing physical parts as reference geometry. Output PLY/STL at 1:1 mm. See `hardware/scans/dpette/` for the dPette+ handle scan that drove the `dpette_multi_handle` redesign. |
 
 Scanner is **optional** — most parts are purely parametric. Scan-informed design is useful for fitting custom mounts to off-the-shelf hardware with complex curved geometry (pipettes, grips, handles).
 
