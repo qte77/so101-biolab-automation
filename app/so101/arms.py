@@ -6,12 +6,12 @@ Manages two follower arms and optional leader arm for teleoperation.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import yaml
 from pydantic import BaseModel, ConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from so101.plate import parse_well_name
 
@@ -29,33 +29,22 @@ class ArmConfig(BaseModel):
     cameras: dict[str, Any] = {}
 
 
-@dataclass
-class DualArmConfig:
+class DualArmConfig(BaseSettings):
     """Configuration for the dual-arm setup."""
+
+    model_config = SettingsConfigDict(strict=True)
 
     arm_a: ArmConfig
     arm_b: ArmConfig
     leader: ArmConfig | None = None
-    positions: dict[str, list[float]] = field(default_factory=dict)
+    positions: dict[str, list[float]] = {}
 
     @classmethod
-    def from_yaml(cls, path: str | Path) -> DualArmConfig:
-        """Load configuration from YAML file.
-
-        Args:
-            path: Path to arms.yaml config file.
-
-        Returns:
-            DualArmConfig instance.
-        """
+    def from_yaml(cls, path: str | Path) -> Self:
+        """Load configuration from YAML file."""
         with open(path) as f:
             data = yaml.safe_load(f)
-
-        arm_a = ArmConfig(**data["arm_a"])
-        arm_b = ArmConfig(**data["arm_b"])
-        leader = ArmConfig(**data["leader"]) if "leader" in data else None
-        positions = data.get("positions", {})
-        return cls(arm_a=arm_a, arm_b=arm_b, leader=leader, positions=positions)
+        return cls.model_validate(data)
 
 
 class DualArmController:
