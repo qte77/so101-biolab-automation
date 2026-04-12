@@ -11,11 +11,12 @@ Use cases (UC):
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import yaml
+from pydantic import model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from so101.arms import DualArmConfig, DualArmController
 from so101.pipette import (
@@ -38,12 +39,13 @@ FRIDGE_RELEASE_JOINTS = [45.0, -20.0, -40.0, 0.0, 0.0, 0.0]
 FRIDGE_GRAB_JOINTS = [45.0, -15.0, -30.0, 0.0, 0.0, 30.0]
 
 
-@dataclass(frozen=True)
-class PlateLayout:
+class PlateLayout(BaseSettings):
     """Workspace-frame plate layout loaded from configs/plate_layout.yaml.
 
     Transforms plate-local coordinates to arm workspace frame.
     """
+
+    model_config = SettingsConfigDict(strict=True, frozen=True)
 
     origin_x_mm: float
     origin_y_mm: float
@@ -52,39 +54,42 @@ class PlateLayout:
     approach_z_mm: float
     aspirate_z_mm: float
     dispense_z_mm: float
-    trough_x_mm: float
-    trough_y_mm: float
-    trough_z_mm: float
+    trough_x_mm: float = 200.0
+    trough_y_mm: float = 0.0
+    trough_z_mm: float = 25.0
+
+    @model_validator(mode="before")
+    @classmethod
+    def _flatten_yaml(cls, data: Any) -> Any:
+        """Flatten nested YAML structure into flat fields.
+
+        YAML has plate.origin_x_mm, heights.safe_z_mm, reagent_trough.*
+        but model expects flat fields.
+        """
+        if isinstance(data, dict) and "plate" in data:
+            plate = data["plate"]
+            heights = data["heights"]
+            trough = data.get("reagent_trough", {})
+            return {
+                "origin_x_mm": plate["origin_x_mm"],
+                "origin_y_mm": plate["origin_y_mm"],
+                "origin_z_mm": plate["origin_z_mm"],
+                "safe_z_mm": heights["safe_z_mm"],
+                "approach_z_mm": heights["approach_z_mm"],
+                "aspirate_z_mm": heights["aspirate_z_mm"],
+                "dispense_z_mm": heights["dispense_z_mm"],
+                "trough_x_mm": trough.get("origin_x_mm", 200.0),
+                "trough_y_mm": trough.get("origin_y_mm", 0.0),
+                "trough_z_mm": trough.get("origin_z_mm", 25.0),
+            }
+        return data
 
     @classmethod
-    def from_yaml(cls, path: str | Path) -> PlateLayout:
-        """Load plate layout from YAML config.
-
-        Args:
-            path: Path to plate_layout.yaml.
-
-        Returns:
-            PlateLayout with workspace-frame coordinates.
-        """
+    def from_yaml(cls, path: str | Path) -> Self:
+        """Load plate layout from YAML config."""
         with open(path) as f:
             data = yaml.safe_load(f)
-
-        plate = data["plate"]
-        heights = data["heights"]
-        trough = data.get("reagent_trough", {})
-
-        return cls(
-            origin_x_mm=plate["origin_x_mm"],
-            origin_y_mm=plate["origin_y_mm"],
-            origin_z_mm=plate["origin_z_mm"],
-            safe_z_mm=heights["safe_z_mm"],
-            approach_z_mm=heights["approach_z_mm"],
-            aspirate_z_mm=heights["aspirate_z_mm"],
-            dispense_z_mm=heights["dispense_z_mm"],
-            trough_x_mm=trough.get("origin_x_mm", 200.0),
-            trough_y_mm=trough.get("origin_y_mm", 0.0),
-            trough_z_mm=trough.get("origin_z_mm", 25.0),
-        )
+        return cls.model_validate(data)
 
 
 def pipette_well(
