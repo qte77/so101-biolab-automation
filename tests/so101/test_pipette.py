@@ -5,7 +5,7 @@ never internal state like _current_fill or _volume_to_steps.
 """
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
@@ -246,3 +246,41 @@ class TestPipetteProperties:
         p.connect()
         p.aspirate(volume)
         p.dispense(volume)
+
+
+class TestMultiStepPipetteProperties:
+    """Multi-step Hypothesis property tests for pipette volume accounting."""
+
+    @given(
+        volumes=st.lists(
+            st.floats(min_value=0.1, max_value=50.0),
+            min_size=1,
+            max_size=5,
+        ),
+    )
+    @settings(max_examples=50)
+    def test_multi_aspirate_dispense_returns_to_zero(self, volumes: list[float]) -> None:
+        """Any sequence of aspirate+dispense pairs leaves fill at zero."""
+        p = DigitalPipette(PipetteConfig(serial_port="/dev/ttyUSB_MISSING", max_volume_ul=200.0))
+        p.connect()
+        for vol in volumes:
+            p.aspirate(vol)
+            p.dispense(vol)
+        # After all pairs, dispensing anything should fail (fill is 0)
+        with pytest.raises(ValueError, match="exceeds current fill"):
+            p.dispense(0.1)
+
+    @given(volume=st.floats(min_value=0.1, max_value=200.0))
+    def test_aspirate_at_exact_capacity(self, volume: float) -> None:
+        """Aspirating any valid volume up to max succeeds."""
+        p = DigitalPipette(PipetteConfig(serial_port="/dev/ttyUSB_MISSING", max_volume_ul=200.0))
+        p.connect()
+        p.aspirate(volume)  # should not raise
+
+    @given(volume=st.floats(min_value=200.01, max_value=1000.0))
+    def test_aspirate_over_capacity_always_raises(self, volume: float) -> None:
+        """Aspirating beyond max always raises, regardless of amount."""
+        p = DigitalPipette(PipetteConfig(serial_port="/dev/ttyUSB_MISSING", max_volume_ul=200.0))
+        p.connect()
+        with pytest.raises(ValueError, match="exceeds max"):
+            p.aspirate(volume)
