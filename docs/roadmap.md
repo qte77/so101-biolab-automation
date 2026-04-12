@@ -8,7 +8,7 @@ updated: 2026-04-12
 
 # Roadmap: Closed-Loop Automation & Autonomous Tool Genesis
 
-Long-term direction for so101-biolab-automation. For actionable prior art and research, see [notes.md](notes.md).
+Long-term direction for so101-biolab-automation. For actionable prior art and research, see [research.md](research.md).
 
 ## Overview
 

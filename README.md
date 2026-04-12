@@ -79,7 +79,7 @@ See [docs/architecture.md](docs/architecture.md) for module responsibilities and
 - [User Stories](docs/UserStory.md) — use case (UC1-5) acceptance criteria
 - [Demo Scenarios](docs/demo-scenarios.md) — how to run and verify each use case
 - [Hardware BOM](docs/hardware/BOM.md) — shopping list with links ($350-$3000+)
-- [Research Notes](docs/notes.md) — prior art, papers, tools, known issues
+- [Research](docs/research.md) — prior art, papers, community designs, insights
 - [Roadmap](docs/roadmap.md) — closed-loop printing, tool genesis, VLM/embodied AI vision
 
 ## Key Dependencies

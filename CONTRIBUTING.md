@@ -89,7 +89,7 @@ Each document has a specific authority. Do not duplicate information across docu
 | [docs/UserStory.md](docs/UserStory.md) | Acceptance criteria | Both | User stories US-1.1–US-5.2 with testable criteria |
 | [docs/demo-scenarios.md](docs/demo-scenarios.md) | Operations | Both | How to run and verify each use case |
 | [docs/hardware/BOM.md](docs/hardware/BOM.md) | Hardware | Both | Shopping list, vendor links, cost summary |
-| [docs/notes.md](docs/notes.md) | Research (informational) | Both | Community designs, papers, tools, known issues |
+| [docs/research.md](docs/research.md) | Research (informational) | Both | Prior art, papers, community designs, insights |
 | [docs/roadmap.md](docs/roadmap.md) | Vision (informational) | Both | Closed-loop printing, tool genesis, VLM/embodied AI phases |
 | [CHANGELOG.md](CHANGELOG.md) | Version history | Both | Keep a Changelog format |
 | [AGENT_LEARNINGS.md](AGENT_LEARNINGS.md) | Patterns | AI agents | Discovered patterns and solutions |
