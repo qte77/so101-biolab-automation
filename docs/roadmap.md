@@ -3,7 +3,7 @@ title: Roadmap & Future Vision
 purpose: Forward-looking direction — closed-loop 3D printing, autonomous tool genesis, VLM/embodied AI phases
 authority: Vision (INFORMATIONAL — not requirements)
 created: 2026-03-27
-updated: 2026-04-11
+updated: 2026-04-12
 ---
 
 # Roadmap: Closed-Loop Automation & Autonomous Tool Genesis
@@ -212,3 +212,14 @@ For unattended multi-hour runs (e.g., 96-well plate with replicates, overnight i
 - Overhead camera with ArUco workspace calibration
 - Optional: depth camera ([RealSense D405 mount](https://github.com/TheRobotStudio/SO-ARM100#5-wristmount-cameras)) for 3D tip tracking
 - Optional: wrist F/T sensor for contact-aware manipulation
+
+## Near-Term Actions (When Hardware Arrives)
+
+1. Use [AIDASLab bimanual fork](https://github.com/AIDASLab/lerobot-so101-bimanual) for dual-arm setup
+2. Apply Loctite 242 to motor 5 screws on all arms
+3. Print [reinforced trigger](https://www.printables.com/model/1323562) for leader arm
+4. Print [parallel gripper](https://makerworld.com/en/models/1549112) as pipette holder base
+5. Port Berkeley tool changer cone to SO-101 wrist dimensions
+6. Record 50 episodes per task using decomposed motion phases
+7. Train ACT via LeRobot; evaluate on AutoBio benchmark
+8. Implement USB watchdog for long-run stability
