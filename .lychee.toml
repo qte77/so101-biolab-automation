@@ -18,7 +18,9 @@ exclude = [
     # Flat repo viewers — 401 to bots
     "^https://uithub\\.com",
     "^https://gittodoc\\.com",
-    # Vendor/commerce sites — 403 bot protection
+    # Vendor/commerce sites — 403 bot protection or unstable product URLs
+    "^https://shop\\.prusa3d\\.com",
+    "^https://www\\.revopoint3d\\.com",
     "^https://www\\.alibaba\\.com",
     "^https://www\\.aliexpress\\.com",
     "^https://www\\.seeedstudio\\.com",
