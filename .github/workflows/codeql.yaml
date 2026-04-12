@@ -3,9 +3,15 @@ name: CodeQL
 
 on:
   push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   schedule:
     - cron: "27 11 * * 0"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   analyze:
@@ -17,13 +23,12 @@ jobs:
       security-events: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@0e9f55954318745b37b7933c693bc093f7336125  # v4.35.1
         with:
           languages: python
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
+        uses: github/codeql-action/autobuild@0e9f55954318745b37b7933c693bc093f7336125  # v4.35.1
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-...
+        uses: github/codeql-action/analyze@0e9f55954318745b37b7933c693bc093f7336125  # v4.35.1

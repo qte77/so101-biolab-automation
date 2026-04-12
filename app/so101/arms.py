@@ -73,6 +73,10 @@ class DualArmController:
         self._connected = False
         self._stub_mode = False
         self._robots: dict[str, Any] = {}
+        # Stub-mode action log: records every commanded action per arm so
+        # stub runs (and tests) can observe what the controller sent without
+        # touching real hardware. Latest entry == last commanded position.
+        self._stub_action_log: dict[str, list[list[float]]] = {}
 
     @property
     def arm_ids(self) -> list[str]:
@@ -84,7 +88,10 @@ class DualArmController:
     def connect(self) -> None:
         """Connect to all configured arms via LeRobot."""
         try:
-            from lerobot.robots.so_follower import SO101Follower, SO101FollowerConfig
+            from lerobot.robots.so_follower import (  # pyright: ignore[reportMissingImports]
+                SO101Follower,
+                SO101FollowerConfig,
+            )
         except ImportError:
             logger.warning("lerobot not installed — running in stub mode")
             self._stub_mode = True
@@ -112,6 +119,7 @@ class DualArmController:
             robot.disconnect()
             logger.info("Disconnected arm %s", arm_id)
         self._robots.clear()
+        self._stub_action_log.clear()
         self._connected = False
         self._stub_mode = False
 
@@ -130,7 +138,13 @@ class DualArmController:
         if self._stub_mode:
             if arm_id not in self.arm_ids:
                 raise ValueError(f"Unknown arm: {arm_id}")
-            return {"joints": [], "stub": True}
+            history = self._stub_action_log.get(arm_id, [])
+            last_joints = list(history[-1]) if history else []
+            return {
+                "joints": last_joints,
+                "stub": True,
+                "history": [list(a) for a in history],
+            }
         if arm_id not in self._robots:
             raise ValueError(f"Unknown arm: {arm_id}")
         return self._robots[arm_id].get_observation()
@@ -149,6 +163,7 @@ class DualArmController:
             if arm_id not in self.arm_ids:
                 raise ValueError(f"Unknown arm: {arm_id}")
             logger.debug("Stub send_action(%s, %s)", arm_id, action)
+            self._stub_action_log.setdefault(arm_id, []).append(list(action))
             return
         if arm_id not in self._robots:
             raise ValueError(f"Unknown arm: {arm_id}")

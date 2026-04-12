@@ -33,7 +33,6 @@ sys.path.pop()
 
 # --- Parameters (all in mm) ---
 # SO-101 wrist flange (motor 5 horn mount)
-# TODO: measure from real hardware or SO-ARM100 STEP files
 WRIST_SCREW_PATTERN_RADIUS = 9.0
 WRIST_SCREW_DIAMETER = 3.2  # M3 clearance
 

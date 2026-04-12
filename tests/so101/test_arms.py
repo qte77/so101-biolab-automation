@@ -1,7 +1,6 @@
 """Tests for dual arm controller — must work without LeRobot hardware."""
 
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 import yaml
@@ -41,7 +40,7 @@ class TestDualArmController:
     def test_disconnect_prevents_operations(self, connected_stub: DualArmController) -> None:
         """After disconnect(), arm operations raise ValueError."""
         connected_stub.disconnect()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Unknown arm"):
             connected_stub.get_observation("arm_a")
 
     def test_get_observation_stub(self, connected_stub: DualArmController) -> None:
@@ -60,7 +59,7 @@ class TestDualArmController:
 
     def test_send_to_well_invalid(self, connected_stub: DualArmController) -> None:
         """send_to_well raises ValueError for invalid well name."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Invalid well name"):
             connected_stub.send_to_well("arm_a", "Z99")
 
     def test_park_all(self, connected_stub: DualArmController) -> None:
@@ -158,44 +157,26 @@ class TestConfigDrivenOperations:
         )
 
     def test_park_all_uses_config_position(self, config_with_positions: DualArmConfig) -> None:
-        """park_all sends the config 'park' position, not the hardcoded constant."""
+        """park_all leaves every follower observably at the config 'park' position."""
         ctrl = DualArmController(config_with_positions)
         ctrl.connect()
-        sent_actions: list[tuple[str, list[float]]] = []
-        original_send = ctrl.send_action
 
-        def spy_send(arm_id: str, action: list[float]) -> None:
-            sent_actions.append((arm_id, action))
-            original_send(arm_id, action)
+        ctrl.park_all()
 
-        with patch.object(ctrl, "send_action", side_effect=spy_send):
-            ctrl.park_all()
-
-        # Both arms should receive the config park position
-        assert len(sent_actions) == 2
-        for _arm_id, action in sent_actions:
-            assert action == [5.0, -40.0, -85.0, 2.0, 1.0, 0.0]
+        expected_park = [5.0, -40.0, -85.0, 2.0, 1.0, 0.0]
+        for arm_id in ctrl.arm_ids:
+            assert ctrl.get_observation(arm_id)["joints"] == expected_park
 
     def test_send_to_well_uses_config_position(self, config_with_positions: DualArmConfig) -> None:
-        """send_to_well uses well_approach from config, not zero-filled stub."""
+        """send_to_well leaves the arm observably at the 'well_approach' position."""
         ctrl = DualArmController(config_with_positions)
         ctrl.connect()
-        sent_actions: list[tuple[str, list[float]]] = []
-        original_send = ctrl.send_action
 
-        def spy_send(arm_id: str, action: list[float]) -> None:
-            sent_actions.append((arm_id, action))
-            original_send(arm_id, action)
+        ctrl.send_to_well("arm_a", "A1")
 
-        with patch.object(ctrl, "send_action", side_effect=spy_send):
-            ctrl.send_to_well("arm_a", "A1")
-
-        assert len(sent_actions) == 1
-        _, action = sent_actions[0]
-        # Must NOT be all-zeros stub
-        assert action != [0.0] * 6
-        # Should be the well_approach position from config
-        assert action == [10.0, -30.0, -60.0, 5.0, 0.0, 0.0]
+        joints = ctrl.get_observation("arm_a")["joints"]
+        assert joints == [10.0, -30.0, -60.0, 5.0, 0.0, 0.0]
+        assert joints != [0.0] * 6  # NOT the zero-filled fallback
 
 
 class TestExecuteSequence:
@@ -216,43 +197,29 @@ class TestExecuteSequence:
         )
 
     def test_sequence_sends_positions_in_order(self, seq_config: DualArmConfig) -> None:
-        """execute_sequence sends each position to the arm in order."""
+        """execute_sequence visits each named position in order, observable via history."""
         ctrl = DualArmController(seq_config)
         ctrl.connect()
-        sent: list[list[float]] = []
-        original_send = ctrl.send_action
 
-        def spy(arm_id: str, action: list[float]) -> None:
-            sent.append(action)
-            original_send(arm_id, action)
+        ctrl.execute_sequence("arm_a", ["home", "approach", "lower"])
 
-        with patch.object(ctrl, "send_action", side_effect=spy):
-            ctrl.execute_sequence("arm_a", ["home", "approach", "lower"])
-
-        assert len(sent) == 3
-        assert sent[0] == [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        assert sent[1] == [10.0, -30.0, -60.0, 5.0, 0.0, 0.0]
-        assert sent[2] == [10.0, -30.0, -80.0, 5.0, 0.0, 0.0]
+        history = ctrl.get_observation("arm_a")["history"]
+        assert history == [
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [10.0, -30.0, -60.0, 5.0, 0.0, 0.0],
+            [10.0, -30.0, -80.0, 5.0, 0.0, 0.0],
+        ]
 
     def test_sequence_validates_all_names_before_sending(self, seq_config: DualArmConfig) -> None:
-        """execute_sequence raises KeyError if any name is invalid, sends nothing."""
+        """execute_sequence raises KeyError atomically — no partial motion on bad name."""
         ctrl = DualArmController(seq_config)
         ctrl.connect()
-        sent: list[list[float]] = []
-        original_send = ctrl.send_action
 
-        def spy(arm_id: str, action: list[float]) -> None:
-            sent.append(action)
-            original_send(arm_id, action)
-
-        with (
-            patch.object(ctrl, "send_action", side_effect=spy),
-            pytest.raises(KeyError, match="bogus"),
-        ):
+        with pytest.raises(KeyError, match="bogus"):
             ctrl.execute_sequence("arm_a", ["home", "bogus", "approach"])
 
-        # No actions should have been sent
-        assert len(sent) == 0
+        # Arm must not have moved — history is empty
+        assert ctrl.get_observation("arm_a")["history"] == []
 
     def test_sequence_empty_list_is_noop(self, seq_config: DualArmConfig) -> None:
         """execute_sequence with empty list does nothing."""
@@ -266,6 +233,36 @@ class TestExecuteSequence:
         ctrl.connect()
         with pytest.raises(ValueError, match="Unknown arm"):
             ctrl.execute_sequence("nonexistent", ["home"])
+
+
+class TestErrorRecovery:
+    """Behaviour of the controller after failures or disconnects."""
+
+    def test_disconnect_prevents_further_motion(self, connected_stub: DualArmController) -> None:
+        """After disconnect, send_action and get_observation reject every arm.
+
+        This is the safety-critical guarantee: once the controller is torn
+        down, no more actions can slip through, even for arm IDs that were
+        previously valid.
+        """
+        connected_stub.send_action("arm_a", [0.0] * 6)  # OK before disconnect
+        connected_stub.disconnect()
+
+        with pytest.raises(ValueError, match=r"Unknown arm"):
+            connected_stub.send_action("arm_a", [0.0] * 6)
+        with pytest.raises(ValueError, match=r"Unknown arm"):
+            connected_stub.get_observation("arm_a")
+
+    def test_reconnect_after_disconnect_clears_history(self, stub_config: DualArmConfig) -> None:
+        """Reconnecting after disconnect starts from a clean history."""
+        ctrl = DualArmController(stub_config)
+        ctrl.connect()
+        ctrl.park_all()
+        assert ctrl.get_observation("arm_a")["history"]  # non-empty
+        ctrl.disconnect()
+
+        ctrl.connect()
+        assert ctrl.get_observation("arm_a")["history"] == []
 
 
 class TestTeleoperation:

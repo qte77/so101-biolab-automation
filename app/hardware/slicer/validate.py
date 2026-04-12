@@ -257,9 +257,9 @@ def main() -> int:
             print(f"\n{len(failed)} STL(s) failed mesh integrity check.\n")
             return 1
         print(f"\n{len(mesh_results)}/{len(mesh_results)} STLs passed mesh integrity.\n")
-        if not slicer:
-            return 0
 
+    if slicer is None:
+        return 0
     backend, binary = slicer
     print(f"--- Validating with {backend} ({binary})")
     results = [

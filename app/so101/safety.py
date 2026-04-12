@@ -109,12 +109,20 @@ class SafetyMonitor:
             return False
         return True
 
+    def _check_watchdog(self) -> None:
+        """Run one watchdog check — park and e-stop if heartbeat is overdue.
+
+        Extracted so tests can drive the watchdog logic deterministically
+        without starting the polling thread.
+        """
+        elapsed = time.monotonic() - self._last_heartbeat
+        if elapsed > self.config.watchdog_timeout_s and not self._e_stopped:
+            logger.warning("Watchdog timeout (%.1fs) — parking arms", elapsed)
+            self._park()
+            self._e_stopped = True
+
     def _watchdog_loop(self) -> None:
         """Background thread checking for heartbeat timeout."""
         while not self._stopped:
-            elapsed = time.monotonic() - self._last_heartbeat
-            if elapsed > self.config.watchdog_timeout_s and not self._e_stopped:
-                logger.warning("Watchdog timeout (%.1fs) — parking arms", elapsed)
-                self._park()
-                self._e_stopped = True
+            self._check_watchdog()
             time.sleep(0.5)

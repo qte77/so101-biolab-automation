@@ -222,8 +222,8 @@ class ElectronicPipette:
         Falls back to stub mode if the package or hardware is unavailable.
         """
         try:
-            from dpette.config import SerialConfig
-            from dpette.driver import DPetteDriver
+            from dpette.config import SerialConfig  # pyright: ignore[reportMissingImports]
+            from dpette.driver import DPetteDriver  # pyright: ignore[reportMissingImports]
 
             cfg = SerialConfig(
                 port=self.config.serial_port,

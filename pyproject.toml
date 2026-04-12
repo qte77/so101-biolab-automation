@@ -47,7 +47,7 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 default-groups = ["dev", "test"]
-exclude-newer = "2026-04-09T00:00:00Z"
+exclude-newer = "2026-04-11T00:00:00Z"
 link-mode = "copy"
 
 [tool.ruff]
@@ -56,12 +56,11 @@ line-length = 100
 src = ["app", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP", "B", "S", "SIM", "RUF"]
+select = ["E", "F", "I", "N", "W", "UP", "B", "S", "SIM", "RUF", "PT"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S603"]   # assert is pytest; subprocess calls run project scripts
 "app/hardware/**" = ["S603"]    # subprocess calls run trusted internal scripts
-"tests/test_*" = ["S603"]      # test subprocess calls run project scripts
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -69,9 +68,12 @@ convention = "google"
 [tool.pyright]
 pythonVersion = "3.12"
 typeCheckingMode = "standard"
-include = ["app/so101", "app/dashboard"]
-exclude = ["app/hardware"]  # CAD scripts use dynamic sys.path; not runtime code
-reportMissingImports = "warning"
+include = ["app/so101", "app/dashboard", "app/hardware/render.py", "app/hardware/slicer"]
+exclude = ["app/hardware/cad", "app/hardware/scad"]  # CAD/SCAD scripts use dynamic sys.path
+reportMissingImports = "error"
+reportUnusedVariable = "error"
+reportInconsistentConstructor = "error"
+reportConstantRedefinition = "error"
 
 [tool.pytest.ini_options]
 pythonpath = ["app"]

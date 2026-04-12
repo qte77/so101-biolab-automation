@@ -7,7 +7,7 @@ All tests work without hardware (stub mode).
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch
+from typing import ClassVar
 
 import pytest
 
@@ -119,15 +119,31 @@ class TestUC1SingleWell:
         """After aspirate+dispense, pipette fill is 0."""
         pipette_well(stub_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
     def test_single_well_invalid_dest(
         self, stub_controller: DualArmController, stub_pipette: DigitalPipette, layout: PlateLayout
     ) -> None:
         """Invalid well name raises ValueError."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Invalid well name"):
             pipette_well(stub_controller, stub_pipette, layout, "arm_a", "TROUGH", "Z99", 50.0)
+
+    def test_invalid_dest_leaves_pipette_unchanged(
+        self, stub_controller: DualArmController, stub_pipette: DigitalPipette, layout: PlateLayout
+    ) -> None:
+        """A bad destination must fail atomically — no partial aspirate.
+
+        pipette_well validates the dest well BEFORE moving or aspirating.
+        If it raised after aspirating, the physical pipette would hold
+        liquid with nowhere to put it — a spill hazard.
+        """
+        with pytest.raises(ValueError, match=r"Invalid well name"):
+            pipette_well(stub_controller, stub_pipette, layout, "arm_a", "TROUGH", "Z99", 50.0)
+
+        # Pipette must still be empty — a subsequent dispense must fail
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
+            stub_pipette.dispense(0.1)
 
     def test_uc1_single_well_wrapper(
         self, stub_controller: DualArmController, stub_pipette: DigitalPipette, layout: PlateLayout
@@ -135,12 +151,23 @@ class TestUC1SingleWell:
         """uc1_single_well is a convenience wrapper over pipette_well."""
         uc1_single_well(stub_controller, stub_pipette, layout, "arm_a", "A1", 50.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
 
 class TestPipetteWellSequences:
-    """pipette_well uses execute_sequence for coordinate-based movement."""
+    """pipette_well visits the configured approach/lower positions in order."""
+
+    # Position vectors chosen so each one is distinguishable in a joint-history
+    # trace. Tests assert on these joint values, not on method spies.
+    _POSITIONS: ClassVar[dict[str, list[float]]] = {
+        "park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0],
+        "well_approach": [10.0, -30.0, -60.0, 5.0, 0.0, 0.0],
+        "well_lower": [10.0, -30.0, -80.0, 5.0, 0.0, 0.0],
+        "well_raise": [10.0, -30.0, -40.0, 5.0, 0.0, 0.0],
+        "trough_approach": [20.0, -20.0, -50.0, 0.0, 0.0, 0.0],
+        "trough_lower": [20.0, -20.0, -70.0, 0.0, 0.0, 0.0],
+    }
 
     @pytest.fixture
     def seq_controller(self) -> DualArmController:
@@ -148,88 +175,61 @@ class TestPipetteWellSequences:
         config = DualArmConfig(
             arm_a=ArmConfig(arm_id="arm_a", port="/dev/null", role="follower"),
             arm_b=ArmConfig(arm_id="arm_b", port="/dev/null", role="follower"),
-            positions={
-                "park": [0.0, -45.0, -90.0, 0.0, 0.0, 0.0],
-                "well_approach": [10.0, -30.0, -60.0, 5.0, 0.0, 0.0],
-                "well_lower": [10.0, -30.0, -80.0, 5.0, 0.0, 0.0],
-                "well_raise": [10.0, -30.0, -40.0, 5.0, 0.0, 0.0],
-                "trough_approach": [20.0, -20.0, -50.0, 0.0, 0.0, 0.0],
-                "trough_lower": [20.0, -20.0, -70.0, 0.0, 0.0, 0.0],
-            },
+            positions=dict(self._POSITIONS),
         )
         ctrl = DualArmController(config)
         ctrl.connect()
         return ctrl
 
-    def test_trough_source_uses_sequence(
+    def test_trough_source_visited(
         self,
         seq_controller: DualArmController,
         stub_pipette: DigitalPipette,
         layout: PlateLayout,
     ) -> None:
-        """pipette_well with TROUGH source uses trough position sequence, not [0.0]*6."""
-        calls: list[tuple[str, list[str]]] = []
-        original = seq_controller.execute_sequence
+        """pipette_well moves through trough_approach and trough_lower joint positions."""
+        pipette_well(seq_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
 
-        def spy(arm_id: str, names: list[str]) -> None:
-            calls.append((arm_id, names))
-            original(arm_id, names)
+        history = seq_controller.get_observation("arm_a")["history"]
+        assert self._POSITIONS["trough_approach"] in history
+        assert self._POSITIONS["trough_lower"] in history
 
-        with patch.object(seq_controller, "execute_sequence", side_effect=spy):
-            pipette_well(seq_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
-
-        # Should have called execute_sequence for trough approach
-        trough_calls = [c for c in calls if any("trough" in n for n in c[1])]
-        assert len(trough_calls) > 0, "Expected trough position sequence calls"
-
-    def test_well_dest_uses_sequence(
+    def test_well_dest_visited(
         self,
         seq_controller: DualArmController,
         stub_pipette: DigitalPipette,
         layout: PlateLayout,
     ) -> None:
-        """pipette_well uses well position sequence for destination, not raw send_to_well."""
-        calls: list[tuple[str, list[str]]] = []
-        original = seq_controller.execute_sequence
+        """pipette_well moves through well_approach and well_lower joint positions."""
+        pipette_well(seq_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
 
-        def spy(arm_id: str, names: list[str]) -> None:
-            calls.append((arm_id, names))
-            original(arm_id, names)
+        history = seq_controller.get_observation("arm_a")["history"]
+        assert self._POSITIONS["well_approach"] in history
+        assert self._POSITIONS["well_lower"] in history
 
-        with patch.object(seq_controller, "execute_sequence", side_effect=spy):
-            pipette_well(seq_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
-
-        # Should have called execute_sequence for well approach/lower
-        well_calls = [c for c in calls if any("well" in n for n in c[1])]
-        assert len(well_calls) > 0, "Expected well position sequence calls"
-
-    def test_sequence_order_approach_lower_raise(
+    def test_sequence_order_approach_before_lower(
         self,
         seq_controller: DualArmController,
         stub_pipette: DigitalPipette,
         layout: PlateLayout,
     ) -> None:
-        """pipette_well follows approach→lower→action→raise pattern."""
-        calls: list[tuple[str, list[str]]] = []
-        original = seq_controller.execute_sequence
+        """pipette_well follows approach→lower order for both source and destination.
 
-        def spy(arm_id: str, names: list[str]) -> None:
-            calls.append((arm_id, names))
-            original(arm_id, names)
+        Approach-before-lower matters physically — lowering before approaching
+        would crash the pipette into the trough wall or plate rim.
+        """
+        pipette_well(seq_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
 
-        with patch.object(seq_controller, "execute_sequence", side_effect=spy):
-            pipette_well(seq_controller, stub_pipette, layout, "arm_a", "TROUGH", "A1", 50.0)
+        history = seq_controller.get_observation("arm_a")["history"]
+        trough_approach_idx = history.index(self._POSITIONS["trough_approach"])
+        trough_lower_idx = history.index(self._POSITIONS["trough_lower"])
+        well_approach_idx = history.index(self._POSITIONS["well_approach"])
+        well_lower_idx = history.index(self._POSITIONS["well_lower"])
 
-        # Flatten all position names in order
-        all_names = [name for _, names in calls for name in names]
-        # Source: trough_approach → trough_lower, then dest: well_approach → well_lower
-        assert "trough_approach" in all_names
-        assert "trough_lower" in all_names
-        assert "well_approach" in all_names
-        assert "well_lower" in all_names
-        # Approach comes before lower for each phase
-        assert all_names.index("trough_approach") < all_names.index("trough_lower")
-        assert all_names.index("well_approach") < all_names.index("well_lower")
+        assert trough_approach_idx < trough_lower_idx
+        assert well_approach_idx < well_lower_idx
+        # Source phase completes before destination phase begins
+        assert trough_lower_idx < well_approach_idx
 
 
 class TestUC1Row:
@@ -247,14 +247,14 @@ class TestUC1Row:
         """After full row, pipette fill is 0."""
         uc1_row(stub_controller, stub_pipette, layout, "arm_a", "A", 25.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
     def test_invalid_row_raises(
         self, stub_controller: DualArmController, stub_pipette: DigitalPipette, layout: PlateLayout
     ) -> None:
         """Invalid row letter raises ValueError."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Invalid row"):
             uc1_row(stub_controller, stub_pipette, layout, "arm_a", "Z", 25.0)
 
 
@@ -267,7 +267,7 @@ class TestUC1Col:
         """Column 1 pipettes 8 wells without error."""
         uc1_col(stub_controller, stub_pipette, layout, "arm_a", 1, 20.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
 
@@ -286,7 +286,7 @@ class TestUC1FullPlate:
         """After full plate, pipette fill is 0."""
         uc1_full_plate(stub_controller, stub_pipette, layout, "arm_a", 20.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
 
@@ -362,7 +362,7 @@ class TestUC4DemoAll:
         """After demo, pipette fill is 0."""
         uc4_demo_all(stub_controller, stub_pipette, changer, layout, "arm_a")
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
 
@@ -387,14 +387,14 @@ class TestUC5GantryPipette:
         """Full cycle: trough → aspirate → plate → dispense."""
         uc5_gantry_pipette(stub_gantry, stub_pipette, "trough", "plate_a1", 50.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
     def test_gantry_fill_resets(self, stub_gantry: XZGantry, stub_pipette: DigitalPipette) -> None:
         """Pipette fill returns to 0 after dispense."""
         uc5_gantry_pipette(stub_gantry, stub_pipette, "trough", "plate_a1", 100.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
     def test_gantry_invalid_position_raises(
@@ -412,7 +412,7 @@ class TestUC5GantryPipette:
         epipette.connect()
         uc5_gantry_pipette(stub_gantry, epipette, "trough", "plate_a1", 50.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             epipette.dispense(0.1)
 
 
@@ -425,7 +425,7 @@ class TestUC5GantryStrip:
         """Pipette multiple positions in sequence."""
         uc5_gantry_strip(stub_gantry, stub_pipette, "trough", ["plate_a1", "plate_a2"], 25.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
     def test_gantry_strip_empty_list(
@@ -434,7 +434,7 @@ class TestUC5GantryStrip:
         """Empty destination list is a no-op."""
         uc5_gantry_strip(stub_gantry, stub_pipette, "trough", [], 25.0)
         # Pipette should be empty — dispensing anything raises
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"exceeds current fill"):
             stub_pipette.dispense(0.1)
 
 
