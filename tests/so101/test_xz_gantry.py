@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from so101.xz_gantry import XZGantry, XZGantryConfig
@@ -139,3 +141,24 @@ class TestXZGantryTeaching:
         gantry.save_config(str(out))
         data = yaml.safe_load(out.read_text())  # type: ignore[union-attr]
         assert "taught" in data["positions"]
+
+
+class TestXZGantryProperties:
+    """Hypothesis property tests for gantry position management."""
+
+    @given(
+        x=st.floats(min_value=0.0, max_value=200.0),
+        y=st.floats(min_value=0.0, max_value=100.0),
+    )
+    def test_teach_and_move_roundtrip(self, x: float, y: float) -> None:
+        """Any taught position can be moved to without error."""
+        config = XZGantryConfig(
+            serial_port="/dev/ttyUSB_MISSING",
+            positions={},
+        )
+        g = XZGantry(config)
+        g.connect()
+        g._current_x = x
+        g._current_z = y
+        g.teach_position("test_pos")
+        g.move_to_position("test_pos")  # should not raise
