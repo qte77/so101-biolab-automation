@@ -63,3 +63,44 @@ class TestDashboardWebSocket:
             ws.send_text(json.dumps({"command": "target_well", "well": "A1"}))
             resp = json.loads(ws.receive_text())
             assert "status" in resp
+
+
+class TestWebSocketErrors:
+    """WebSocket error handling paths."""
+
+    def test_malformed_json_returns_error(self) -> None:
+        """Sending non-JSON text returns an error, doesn't crash."""
+        with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+            ws.send_text("not valid json {{{")
+            resp = json.loads(ws.receive_text())
+            assert "error" in resp
+            assert "invalid JSON" in resp["error"]
+
+    def test_unknown_command_succeeds(self) -> None:
+        """Unknown commands don't crash — they just return status."""
+        with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+            ws.send_text(json.dumps({"command": "nonexistent_command"}))
+            resp = json.loads(ws.receive_text())
+            assert "status" in resp
+
+    def test_empty_command_succeeds(self) -> None:
+        """Missing command key returns status without error."""
+        with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+            ws.send_text(json.dumps({"no_command_key": True}))
+            resp = json.loads(ws.receive_text())
+            assert "status" in resp
+
+
+class TestStatusEndpoint:
+    """REST status endpoint."""
+
+    def test_get_status_returns_expected_keys(self) -> None:
+        """GET /api/status returns mode, e_stopped, connected, arm_ids."""
+        with TestClient(app) as client:
+            resp = client.get("/api/status")
+            assert resp.status_code == 200
+            data = resp.json()
+            assert "mode" in data
+            assert "e_stopped" in data
+            assert "connected" in data
+            assert "arm_ids" in data
