@@ -220,6 +220,7 @@ def print_report(results: list[dict]) -> int:
 
 
 def main() -> int:
+    """CLI entry point for STL validation."""
     parser = argparse.ArgumentParser(description="Validate STL printability via slicer")
     parser.add_argument("files", nargs="*", help="STL files to validate")
     parser.add_argument("--all", action="store_true", help="Validate all STLs in hardware/stl/")

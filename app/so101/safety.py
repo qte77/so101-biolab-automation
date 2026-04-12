@@ -8,8 +8,12 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from collections.abc import Callable
-from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+from pydantic import BaseModel, ConfigDict, Field
 
 logger = logging.getLogger(__name__)
 
@@ -27,13 +31,14 @@ JOINT_LIMITS = {
 PARK_POSITION = [0.0, -45.0, -90.0, 0.0, 0.0, 0.0]
 
 
-@dataclass
-class SafetyConfig:
+class SafetyConfig(BaseModel):
     """Safety system configuration."""
+
+    model_config = ConfigDict(strict=True)
 
     watchdog_timeout_s: float = 5.0
     heartbeat_interval_s: float = 1.0
-    joint_limits: dict[str, tuple[float, float]] = field(default_factory=lambda: dict(JOINT_LIMITS))
+    joint_limits: dict[str, tuple[float, float]] = Field(default_factory=lambda: dict(JOINT_LIMITS))
 
 
 class SafetyMonitor:
@@ -47,6 +52,7 @@ class SafetyMonitor:
     """
 
     def __init__(self, config: SafetyConfig, park_callback: Callable[[], None]) -> None:
+        """Initialize with safety config and park callback."""
         self.config = config
         self._park = park_callback
         self._last_heartbeat = time.monotonic()

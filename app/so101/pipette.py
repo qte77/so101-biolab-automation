@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import logging
 import time
-from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
+
+from pydantic import BaseModel, ConfigDict
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +22,25 @@ logger = logging.getLogger(__name__)
 class PipetteProtocol(Protocol):
     """Interface that all pipette backends must satisfy."""
 
-    def connect(self) -> None: ...
-    def disconnect(self) -> None: ...
-    def aspirate(self, volume_ul: float) -> None: ...
-    def dispense(self, volume_ul: float) -> None: ...
-    def eject_tip(self) -> None: ...
+    def connect(self) -> None:
+        """Connect to the pipette."""
+        ...
+
+    def disconnect(self) -> None:
+        """Disconnect from the pipette."""
+        ...
+
+    def aspirate(self, volume_ul: float) -> None:
+        """Aspirate the given volume in microliters."""
+        ...
+
+    def dispense(self, volume_ul: float) -> None:
+        """Dispense the given volume in microliters."""
+        ...
+
+    def eject_tip(self) -> None:
+        """Eject the current tip."""
+        ...
 
 
 # Actuator positions (0-1023 range for 5cm stroke linear actuator)
@@ -33,11 +48,37 @@ ACTUATOR_MIN = 0  # Fully retracted (max suction)
 ACTUATOR_MAX = 1023  # Fully extended (no suction)
 DEFAULT_ASPIRATE_SPEED = 200  # ms delay between steps
 DEFAULT_DISPENSE_SPEED = 150  # ms delay between steps
+SERIAL_TIMEOUT_S = 2  # Serial port read/write timeout
+ARDUINO_RESET_DELAY_S = 2  # Wait for Arduino bootloader after serial open
 
 
-@dataclass
-class PipetteConfig:
+def _validate_aspirate(volume_ul: float, current_fill: float, max_volume: float) -> None:
+    """Validate an aspirate volume. Shared by both pipette backends."""
+    if volume_ul <= 0:
+        raise ValueError("Volume must be positive")
+    if volume_ul > max_volume:
+        raise ValueError(f"Volume {volume_ul} µL exceeds max {max_volume} µL")
+    if current_fill + volume_ul > max_volume:
+        raise ValueError(
+            f"Cannot aspirate {volume_ul} µL: would exceed capacity "
+            f"(current fill {current_fill} µL, max {max_volume} µL)"
+        )
+
+
+def _validate_dispense(volume_ul: float, current_fill: float) -> None:
+    """Validate a dispense volume. Shared by both pipette backends."""
+    if volume_ul <= 0:
+        raise ValueError("Volume must be positive")
+    if volume_ul > current_fill:
+        raise ValueError(
+            f"Cannot dispense {volume_ul} µL: exceeds current fill of {current_fill} µL"
+        )
+
+
+class PipetteConfig(BaseModel):
     """Configuration for the digital pipette."""
+
+    model_config = ConfigDict(strict=True)
 
     serial_port: str = "/dev/ttyUSB0"
     baud_rate: int = 9600
@@ -57,6 +98,7 @@ class DigitalPipette:
     """
 
     def __init__(self, config: PipetteConfig) -> None:
+        """Initialize with pipette configuration."""
         self.config = config
         self._serial = None
         self._current_position = ACTUATOR_MAX  # Start fully extended (empty)
@@ -70,9 +112,9 @@ class DigitalPipette:
             self._serial = serial.Serial(
                 self.config.serial_port,
                 self.config.baud_rate,
-                timeout=2,
+                timeout=SERIAL_TIMEOUT_S,
             )
-            time.sleep(2)  # Wait for Arduino reset
+            time.sleep(ARDUINO_RESET_DELAY_S)  # Wait for Arduino reset
             logger.info("Pipette connected on %s", self.config.serial_port)
         except ImportError:
             logger.warning("pyserial not installed — running in stub mode")
@@ -107,15 +149,7 @@ class DigitalPipette:
         Raises:
             ValueError: If volume exceeds capacity.
         """
-        if volume_ul <= 0:
-            raise ValueError("Volume must be positive")
-        if volume_ul > self.config.max_volume_ul:
-            raise ValueError(f"Volume {volume_ul} µL exceeds max {self.config.max_volume_ul} µL")
-        if self._current_fill + volume_ul > self.config.max_volume_ul:
-            raise ValueError(
-                f"Cannot aspirate {volume_ul} µL: would exceed capacity "
-                f"(current fill {self._current_fill} µL, max {self.config.max_volume_ul} µL)"
-            )
+        _validate_aspirate(volume_ul, self._current_fill, self.config.max_volume_ul)
 
         steps = self._volume_to_steps(volume_ul)
         target = max(self._current_position - steps, ACTUATOR_MIN)
@@ -132,12 +166,7 @@ class DigitalPipette:
         Raises:
             ValueError: If volume exceeds current contents.
         """
-        if volume_ul <= 0:
-            raise ValueError("Volume must be positive")
-        if volume_ul > self._current_fill:
-            raise ValueError(
-                f"Cannot dispense {volume_ul} µL: exceeds current fill of {self._current_fill} µL"
-            )
+        _validate_dispense(volume_ul, self._current_fill)
 
         steps = self._volume_to_steps(volume_ul)
         target = min(self._current_position + steps, ACTUATOR_MAX)
@@ -175,13 +204,14 @@ ELECTRONIC_MODELS: dict[str, dict[str, Any]] = {
 }
 
 
-@dataclass
-class ElectronicPipetteConfig:
+class ElectronicPipetteConfig(BaseModel):
     """Configuration for a commercial electronic pipette.
 
     USB protocol is undocumented — the serial_port is a placeholder for
     future reverse-engineering via USBREVue / pyserial.
     """
+
+    model_config = ConfigDict(strict=True)
 
     serial_port: str = "/dev/ttyACM0"
     baud_rate: int = 9600
@@ -210,6 +240,7 @@ class ElectronicPipette:
     """
 
     def __init__(self, config: ElectronicPipetteConfig) -> None:
+        """Initialize with electronic pipette configuration."""
         self.config = config
         self._driver: Any = None  # dpette.DPetteDriver when available
         self._stub_mode = False
@@ -222,15 +253,20 @@ class ElectronicPipette:
         Falls back to stub mode if the package or hardware is unavailable.
         """
         try:
-            from dpette.config import SerialConfig  # pyright: ignore[reportMissingImports]
-            from dpette.driver import DPetteDriver  # pyright: ignore[reportMissingImports]
+            from dpette.config import (  # pyright: ignore[reportMissingImports]
+                SerialConfig,  # pyright: ignore[reportUnknownVariableType]
+            )
+            from dpette.driver import (  # pyright: ignore[reportMissingImports]
+                DPetteDriver,  # pyright: ignore[reportUnknownVariableType]
+            )
 
-            cfg = SerialConfig(
+            cfg: Any = SerialConfig(  # pyright: ignore[reportUnknownVariableType]
                 port=self.config.serial_port,
                 baudrate=self.config.baud_rate,
             )
-            self._driver = DPetteDriver(cfg)
-            self._driver.connect()
+            driver: Any = DPetteDriver(cfg)  # pyright: ignore[reportUnknownVariableType]
+            driver.connect()  # pyright: ignore[reportUnknownMemberType]
+            self._driver = driver
             logger.info(
                 "Electronic pipette (%s) connected via dpette driver on %s",
                 self.config.model,
@@ -258,15 +294,7 @@ class ElectronicPipette:
         Raises:
             ValueError: If volume exceeds capacity.
         """
-        if volume_ul <= 0:
-            raise ValueError("Volume must be positive")
-        if volume_ul > self.config.max_volume_ul:
-            raise ValueError(f"Volume {volume_ul} µL exceeds max {self.config.max_volume_ul} µL")
-        if self._current_fill + volume_ul > self.config.max_volume_ul:
-            raise ValueError(
-                f"Cannot aspirate {volume_ul} µL: would exceed capacity "
-                f"(current fill {self._current_fill} µL, max {self.config.max_volume_ul} µL)"
-            )
+        _validate_aspirate(volume_ul, self._current_fill, self.config.max_volume_ul)
 
         if self._driver:
             self._driver.set_volume(volume_ul)
@@ -286,12 +314,7 @@ class ElectronicPipette:
         Raises:
             ValueError: If volume exceeds current contents.
         """
-        if volume_ul <= 0:
-            raise ValueError("Volume must be positive")
-        if volume_ul > self._current_fill:
-            raise ValueError(
-                f"Cannot dispense {volume_ul} µL: exceeds current fill of {self._current_fill} µL"
-            )
+        _validate_dispense(volume_ul, self._current_fill)
 
         if self._driver:
             self._driver.set_volume(volume_ul)

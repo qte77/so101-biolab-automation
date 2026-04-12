@@ -6,54 +6,47 @@ Manages two follower arms and optional leader arm for teleoperation.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, Self
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import yaml
+from pydantic import BaseModel, ConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from so101.plate import parse_well_name
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class ArmConfig:
+class ArmConfig(BaseModel):
     """Configuration for a single SO-101 arm."""
+
+    model_config = ConfigDict(strict=True)
 
     arm_id: str
     port: str
     role: str  # "follower" or "leader"
-    cameras: dict[str, Any] = field(default_factory=dict)
+    cameras: dict[str, Any] = {}
 
 
-@dataclass
-class DualArmConfig:
+class DualArmConfig(BaseSettings):
     """Configuration for the dual-arm setup."""
+
+    model_config = SettingsConfigDict(strict=True)
 
     arm_a: ArmConfig
     arm_b: ArmConfig
     leader: ArmConfig | None = None
-    positions: dict[str, list[float]] = field(default_factory=dict)
+    positions: dict[str, list[float]] = {}
 
     @classmethod
-    def from_yaml(cls, path: str | Path) -> DualArmConfig:
-        """Load configuration from YAML file.
-
-        Args:
-            path: Path to arms.yaml config file.
-
-        Returns:
-            DualArmConfig instance.
-        """
+    def from_yaml(cls, path: str | Path) -> Self:
+        """Load configuration from YAML file."""
         with open(path) as f:
             data = yaml.safe_load(f)
-
-        arm_a = ArmConfig(**data["arm_a"])
-        arm_b = ArmConfig(**data["arm_b"])
-        leader = ArmConfig(**data["leader"]) if "leader" in data else None
-        positions = data.get("positions", {})
-        return cls(arm_a=arm_a, arm_b=arm_b, leader=leader, positions=positions)
+        return cls.model_validate(data)
 
 
 class DualArmController:
@@ -69,6 +62,7 @@ class DualArmController:
     """
 
     def __init__(self, config: DualArmConfig) -> None:
+        """Initialize with dual-arm configuration."""
         self.config = config
         self._connected = False
         self._stub_mode = False
@@ -77,6 +71,16 @@ class DualArmController:
         # stub runs (and tests) can observe what the controller sent without
         # touching real hardware. Latest entry == last commanded position.
         self._stub_action_log: dict[str, list[list[float]]] = {}
+
+    @property
+    def is_connected(self) -> bool:
+        """Whether arms are currently connected."""
+        return self._connected
+
+    @property
+    def is_stub_mode(self) -> bool:
+        """Whether the controller is running in stub mode."""
+        return self._stub_mode
 
     @property
     def arm_ids(self) -> list[str]:
@@ -89,8 +93,8 @@ class DualArmController:
         """Connect to all configured arms via LeRobot."""
         try:
             from lerobot.robots.so_follower import (  # pyright: ignore[reportMissingImports]
-                SO101Follower,
-                SO101FollowerConfig,
+                SO101Follower,  # pyright: ignore[reportUnknownVariableType]
+                SO101FollowerConfig,  # pyright: ignore[reportUnknownVariableType]
             )
         except ImportError:
             logger.warning("lerobot not installed — running in stub mode")
@@ -101,13 +105,13 @@ class DualArmController:
         for arm_cfg in [self.config.arm_a, self.config.arm_b]:
             if arm_cfg.role != "follower":
                 continue
-            robot_config = SO101FollowerConfig(
+            robot_config: Any = SO101FollowerConfig(  # pyright: ignore[reportUnknownVariableType]
                 port=arm_cfg.port,
                 id=arm_cfg.arm_id,
                 cameras=arm_cfg.cameras,
             )
-            robot = SO101Follower(robot_config)
-            robot.connect()
+            robot: Any = SO101Follower(robot_config)  # pyright: ignore[reportUnknownVariableType]
+            robot.connect()  # pyright: ignore[reportUnknownMemberType]
             self._robots[arm_cfg.arm_id] = robot
             logger.info("Connected arm %s on %s", arm_cfg.arm_id, arm_cfg.port)
 
@@ -149,7 +153,7 @@ class DualArmController:
             raise ValueError(f"Unknown arm: {arm_id}")
         return self._robots[arm_id].get_observation()
 
-    def send_action(self, arm_id: str, action: Any) -> None:
+    def send_action(self, arm_id: str, action: Any) -> None:  # noqa: ANN401
         """Send a joint-space action to an arm.
 
         Args:

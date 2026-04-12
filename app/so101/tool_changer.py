@@ -11,11 +11,15 @@ Reference: Berkeley passive modular tool changer (3D-printed, magnetic).
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any, Self
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import yaml
+from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
 
@@ -29,44 +33,38 @@ class Tool(Enum):
     FRIDGE_HOOK = "fridge_hook"
 
 
-@dataclass
-class DockStation:
+class DockStation(BaseModel):
     """A single station on the tool dock."""
+
+    model_config = ConfigDict(strict=True)
 
     tool: Tool
     approach_joints: list[float]  # Joint positions to approach the station
     engage_joints: list[float]  # Joint positions to engage/disengage
     dock_joints: list[float]  # Joint positions when docked
 
+    @field_validator("tool", mode="before")
+    @classmethod
+    def _coerce_tool_str(cls, v: Any) -> Any:  # noqa: ANN401
+        """YAML loads enum values as strings — coerce to Tool enum."""
+        if isinstance(v, str):
+            return Tool(v)
+        return v
 
-@dataclass
-class ToolDockConfig:
+
+class ToolDockConfig(BaseSettings):
     """Configuration for the 3-station tool dock."""
+
+    model_config = SettingsConfigDict(strict=True)
 
     stations: dict[str, DockStation]
 
     @classmethod
-    def from_yaml(cls, path: str) -> ToolDockConfig:
-        """Load dock configuration from YAML.
-
-        Args:
-            path: Path to tool_dock.yaml.
-
-        Returns:
-            ToolDockConfig instance.
-        """
+    def from_yaml(cls, path: str | Path) -> Self:
+        """Load dock configuration from YAML."""
         with open(path) as f:
             data = yaml.safe_load(f)
-
-        stations = {}
-        for name, station_data in data["stations"].items():
-            stations[name] = DockStation(
-                tool=Tool(station_data["tool"]),
-                approach_joints=station_data["approach_joints"],
-                engage_joints=station_data["engage_joints"],
-                dock_joints=station_data["dock_joints"],
-            )
-        return cls(stations=stations)
+        return cls.model_validate(data)
 
 
 class ToolChanger:
@@ -79,7 +77,8 @@ class ToolChanger:
         changer.change_tool(Tool.GRIPPER)
     """
 
-    def __init__(self, config: ToolDockConfig, arm_controller: Any, arm_id: str) -> None:
+    def __init__(self, config: ToolDockConfig, arm_controller: Any, arm_id: str) -> None:  # noqa: ANN401
+        """Initialize with dock config, arm controller, and arm ID."""
         self.config = config
         self.arm = arm_controller
         self.arm_id = arm_id

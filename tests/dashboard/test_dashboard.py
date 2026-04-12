@@ -51,7 +51,7 @@ class TestDashboardWebSocket:
             assert resp["status"]["mode"] == "e_stopped"
 
     def test_heartbeat_websocket(self) -> None:
-        """heartbeat command succeeds without error."""
+        """Heartbeat command succeeds without error."""
         with TestClient(app) as client, client.websocket_connect("/ws") as ws:
             ws.send_text(json.dumps({"command": "heartbeat"}))
             resp = json.loads(ws.receive_text())

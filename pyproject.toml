@@ -12,6 +12,8 @@ dependencies = [
     "websockets>=13.0",
     "opencv-python>=4.10",
     "pyserial>=3.5",
+    "pydantic>=2.10",
+    "pydantic-settings[yaml]>=2.7",
     "pyyaml>=6.0",
     "numpy>=1.26",
 ]
@@ -21,6 +23,7 @@ dev = [
     "ruff>=0.8",
     "pyright>=1.1",
     "complexipy>=0.8",
+    "types-PyYAML>=6.0",
 ]
 test = [
     "pytest>=8.0",
@@ -56,10 +59,14 @@ line-length = 100
 src = ["app", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP", "B", "S", "SIM", "RUF", "PT"]
+select = ["E", "F", "I", "N", "W", "UP", "B", "S", "SIM", "RUF", "PT", "ANN", "TCH", "PGH", "C90", "D"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S603"]   # assert is pytest; subprocess calls run project scripts
+"tests/**" = ["S101", "S603", "ANN001", "ANN201", "D100", "D101", "D102", "D103", "D104", "D107"]
+"app/hardware/cad/**" = ["S603", "ANN"]   # CAD scripts excluded from pyright; annotations deferred
 "app/hardware/**" = ["S603"]    # subprocess calls run trusted internal scripts
 
 [tool.ruff.lint.pydocstyle]
@@ -67,13 +74,11 @@ convention = "google"
 
 [tool.pyright]
 pythonVersion = "3.12"
-typeCheckingMode = "standard"
-include = ["app/so101", "app/dashboard", "app/hardware/render.py", "app/hardware/slicer"]
-exclude = ["app/hardware/cad", "app/hardware/scad"]  # CAD/SCAD scripts use dynamic sys.path
+typeCheckingMode = "strict"
+extraPaths = ["app"]
+include = ["app/so101", "app/dashboard"]
+exclude = ["app/hardware"]  # CAD/render/slicer use dynamic imports without type stubs
 reportMissingImports = "error"
-reportUnusedVariable = "error"
-reportInconsistentConstructor = "error"
-reportConstantRedefinition = "error"
 
 [tool.pytest.ini_options]
 pythonpath = ["app"]

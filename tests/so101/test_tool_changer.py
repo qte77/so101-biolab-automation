@@ -1,6 +1,7 @@
 """Tests for tool changer logic."""
 
 import pytest
+from pydantic import ValidationError
 
 from so101.tool_changer import DockStation, Tool, ToolChanger, ToolDockConfig
 
@@ -26,6 +27,38 @@ def dock_config() -> ToolDockConfig:
     )
 
 
+class TestDockStationModel:
+    """Strict pydantic validation for DockStation."""
+
+    def test_construction_valid(self) -> None:
+        ds = DockStation(
+            tool=Tool.PIPETTE,
+            approach_joints=[0.0] * 6,
+            engage_joints=[1.0] * 6,
+            dock_joints=[2.0] * 6,
+        )
+        assert ds.tool == Tool.PIPETTE
+
+    def test_strict_rejects_str_for_list(self) -> None:
+        with pytest.raises(ValidationError):
+            DockStation(
+                tool=Tool.PIPETTE,
+                approach_joints="bad",  # type: ignore[arg-type]
+                engage_joints=[0.0] * 6,
+                dock_joints=[0.0] * 6,
+            )
+
+    def test_enum_from_value(self) -> None:
+        """Tool enum accepted directly — no string coercion in strict mode."""
+        ds = DockStation(
+            tool=Tool.GRIPPER,
+            approach_joints=[0.0] * 6,
+            engage_joints=[0.0] * 6,
+            dock_joints=[0.0] * 6,
+        )
+        assert ds.tool == Tool.GRIPPER
+
+
 class StubArmController:
     """Records actions sent to the arm."""
 
@@ -34,6 +67,20 @@ class StubArmController:
 
     def send_action(self, arm_id: str, action: list[float]) -> None:
         self.actions.append((arm_id, action))
+
+
+class TestToolDockConfigModel:
+    """Strict pydantic-settings validation for ToolDockConfig."""
+
+    @pytest.mark.integration
+    def test_from_yaml(self) -> None:
+        cfg = ToolDockConfig.from_yaml("configs/tool_dock.yaml")
+        assert "pipette" in cfg.stations
+        assert cfg.stations["pipette"].tool == Tool.PIPETTE
+
+    def test_strict_rejects_wrong_station_type(self) -> None:
+        with pytest.raises(ValidationError):
+            ToolDockConfig(stations={"bad": "not_a_station"})  # type: ignore[dict-item]
 
 
 class TestToolChanger:

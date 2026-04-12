@@ -3,8 +3,39 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
 from so101.xz_gantry import XZGantry, XZGantryConfig
+
+
+class TestXZGantryConfigModel:
+    """Strict pydantic-settings validation for XZGantryConfig."""
+
+    def test_defaults(self) -> None:
+        """Default construction uses field defaults (no auto-YAML)."""
+        cfg = XZGantryConfig()
+        assert cfg.serial_port == "/dev/ttyUSB1"
+        assert cfg.positions == {}
+
+    def test_strict_rejects_str_for_int(self) -> None:
+        with pytest.raises(ValidationError):
+            XZGantryConfig(baud_rate="115200")  # type: ignore[arg-type]
+
+    def test_positions_tuples(self) -> None:
+        cfg = XZGantryConfig(positions={"a": (1.0, 2.0)})
+        assert cfg.positions["a"] == (1.0, 2.0)
+
+    def test_positions_lists_coerced_to_tuples(self) -> None:
+        """YAML loads positions as lists — before-validator coerces to tuples."""
+        cfg = XZGantryConfig.model_validate({"positions": {"a": [1.0, 2.0]}})
+        assert cfg.positions["a"] == (1.0, 2.0)
+
+    @pytest.mark.integration
+    def test_from_yaml(self) -> None:
+        cfg = XZGantryConfig.from_yaml("configs/xz_gantry.yaml")
+        assert cfg.serial_port == "/dev/ttyUSB1"
+        assert "trough" in cfg.positions
+        assert isinstance(cfg.positions["trough"], tuple)
 
 
 @pytest.fixture

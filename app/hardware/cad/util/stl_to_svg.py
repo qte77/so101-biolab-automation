@@ -32,6 +32,7 @@ def stl_to_svg(stl_path: Path, svg_path: Path) -> None:
 
 
 def main() -> int:
+    """CLI entry point for STL to SVG conversion."""
     parser = argparse.ArgumentParser(description="STL → wireframe SVG via build123d")
     parser.add_argument("stl", nargs="?", help="Input STL file")
     parser.add_argument("svg", nargs="?", help="Output SVG file")

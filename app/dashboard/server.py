@@ -7,12 +7,15 @@ Provides:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import threading
-from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
@@ -26,6 +29,7 @@ from so101.workflow import PlateLayout, uc4_demo_all
 logger = logging.getLogger(__name__)
 
 _mode = "idle"
+_mode_lock = threading.Lock()
 
 
 @asynccontextmanager
@@ -88,10 +92,42 @@ function sendCmd(cmd) { ws.send(JSON.stringify({command: cmd})); }
 </html>"""
 
 
+def _dispatch_command(
+    msg: dict[str, Any],
+    controller: DualArmController,
+    monitor: SafetyMonitor,
+    app_ref: FastAPI,
+) -> None:
+    """Execute a single WebSocket command (called from the async handler)."""
+    global _mode
+    command = msg.get("command", "")
+
+    if command == "e_stop":
+        monitor.e_stop()
+        with _mode_lock:
+            _mode = "e_stopped"
+    elif command == "heartbeat":
+        monitor.heartbeat()
+    elif command == "pause":
+        with _mode_lock:
+            _mode = "paused"
+    elif command == "resume":
+        with _mode_lock:
+            _mode = "autonomous"
+        monitor.reset_e_stop()
+    elif command == "target_well":
+        well = msg.get("well", "A1")
+        controller.send_to_well("arm_a", well)
+    elif command == "run_workflow":
+        with _mode_lock:
+            _mode = "running"
+        loop = asyncio.get_running_loop()
+        loop.run_in_executor(None, _run_workflow, app_ref)
+
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket) -> None:
     """WebSocket command channel for remote operator."""
-    global _mode
     await websocket.accept()
     logger.info("Remote operator connected")
 
@@ -101,25 +137,20 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
     try:
         while True:
             data = await websocket.receive_text()
-            msg = json.loads(data)
-            command = msg.get("command", "")
 
-            if command == "e_stop":
-                monitor.e_stop()
-                _mode = "e_stopped"
-            elif command == "heartbeat":
-                monitor.heartbeat()
-            elif command == "pause":
-                _mode = "paused"
-            elif command == "resume":
-                _mode = "autonomous"
-                monitor.reset_e_stop()
-            elif command == "target_well":
-                well = msg.get("well", "A1")
-                controller.send_to_well("arm_a", well)
-            elif command == "run_workflow":
-                _mode = "running"
-                threading.Thread(target=_run_workflow, args=(websocket.app,), daemon=True).start()
+            try:
+                msg: dict[str, Any] = json.loads(data)
+            except json.JSONDecodeError:
+                await websocket.send_text(json.dumps({"error": "invalid JSON"}))
+                continue
+
+            try:
+                _dispatch_command(msg, controller, monitor, websocket.app)
+            except Exception:
+                cmd = msg.get("command", "")
+                logger.exception("Command %r failed", cmd)
+                await websocket.send_text(json.dumps({"error": f"command {cmd!r} failed"}))
+                continue
 
             await websocket.send_text(json.dumps({"status": _get_status(controller, monitor)}))
     except WebSocketDisconnect:
@@ -134,16 +165,18 @@ async def get_status() -> dict[str, Any]:
 
 def _get_status(controller: DualArmController, monitor: SafetyMonitor) -> dict[str, Any]:
     """Build status dict from real controller and monitor state."""
+    with _mode_lock:
+        mode = _mode
     return {
-        "mode": _mode,
+        "mode": mode,
         "e_stopped": monitor.is_e_stopped,
-        "connected": controller._connected,
+        "connected": controller.is_connected,
         "arm_ids": controller.arm_ids,
     }
 
 
 def _run_workflow(app: FastAPI) -> None:
-    """Run full demo workflow in background thread."""
+    """Run full demo workflow in a thread-pool executor."""
     global _mode
     try:
         uc4_demo_all(
@@ -153,7 +186,9 @@ def _run_workflow(app: FastAPI) -> None:
             app.state.layout,
             "arm_a",
         )
-        _mode = "idle"
+        with _mode_lock:
+            _mode = "idle"
     except Exception:
         logger.exception("Workflow failed")
-        _mode = "error"
+        with _mode_lock:
+            _mode = "error"

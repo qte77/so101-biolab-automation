@@ -3,6 +3,7 @@
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+from pydantic import ValidationError
 
 from so101 import safety
 from so101.safety import JOINT_LIMITS, SafetyConfig, SafetyMonitor
@@ -128,6 +129,37 @@ class TestSafetyMonitor:
         monitor = SafetyMonitor(SafetyConfig(), park_callback=lambda: None)
         assert monitor.check_joint_limits("shoulder_pan", -150.1) is False
         assert monitor.check_joint_limits("shoulder_pan", 150.1) is False
+
+
+class TestSafetyConfigModel:
+    """Strict pydantic validation for SafetyConfig."""
+
+    def test_defaults(self) -> None:
+        """Default construction produces expected joint limits."""
+        config = SafetyConfig()
+        assert config.watchdog_timeout_s == 5.0
+        assert config.heartbeat_interval_s == 1.0
+        assert "shoulder_pan" in config.joint_limits
+        assert config.joint_limits["shoulder_pan"] == (-150.0, 150.0)
+
+    def test_custom_values(self) -> None:
+        """Custom values accepted when types match."""
+        config = SafetyConfig(
+            watchdog_timeout_s=2.0,
+            joint_limits={"custom": (-10.0, 10.0)},
+        )
+        assert config.watchdog_timeout_s == 2.0
+        assert "custom" in config.joint_limits
+
+    def test_strict_rejects_str_for_float(self) -> None:
+        """Strict mode rejects string where float expected."""
+        with pytest.raises(ValidationError):
+            SafetyConfig(watchdog_timeout_s="5.0")  # type: ignore[arg-type]
+
+    def test_strict_rejects_list_for_tuple(self) -> None:
+        """Strict mode rejects list where tuple expected."""
+        with pytest.raises(ValidationError):
+            SafetyConfig(joint_limits={"pan": [1.0, 2.0]})  # type: ignore[arg-type]
 
 
 class TestJointLimitProperties:

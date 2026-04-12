@@ -9,7 +9,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_rtk setup_lychee setup_mdlint setup_diagramforge \
+	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
 	calibrate_arms start_teleop record_episodes train_policy \
@@ -30,6 +30,10 @@ PYTEST_QUIET :=
 PYRIGHT_QUIET :=
 endif
 
+NODE_VERSION ?= 22.11.0
+NODE_DIR     := $(HOME)/.local/share/node
+NODE_BIN     := $(NODE_DIR)/bin
+
 LEADER_PORT ?= /dev/ttyACM0
 FOLLOWER_A_PORT ?= /dev/ttyACM1
 FOLLOWER_B_PORT ?= /dev/ttyACM2
@@ -48,7 +52,7 @@ setup_uv: ## Install uv package manager (if missing)
 		echo "uv already installed: $$(uv --version)"
 	else
 		echo "Installing uv ..."
-		curl -LsSf https://astral.sh/uv/install.sh | sh
+		curl --proto '=https' --tlsv1.2 -LsSf https://astral.sh/uv/install.sh | sh
 		echo ""
 		echo "NOTE: restart your shell or run 'source $$HOME/.local/bin/env' to add uv to PATH"
 	fi
@@ -102,33 +106,53 @@ setup_slicer: ## Install CuraEngine (preferred) or PrusaSlicer (fallback) for pr
 		fi
 	fi
 
+setup_node: ## Install Node.js user-locally to ~/.local/share/node (no sudo)
+	if [ -x "$(NODE_BIN)/node" ]; then
+		echo "node already installed: $$($(NODE_BIN)/node --version) (at $(NODE_DIR))"
+	elif command -v node > /dev/null 2>&1; then
+		echo "node already installed on PATH: $$(node --version)"
+	else
+		echo "Installing Node.js $(NODE_VERSION) to $(NODE_DIR) ..."
+		mkdir -p $(NODE_DIR)
+		curl --proto '=https' --tlsv1.2 -sSfL https://nodejs.org/dist/v$(NODE_VERSION)/node-v$(NODE_VERSION)-linux-x64.tar.xz \
+			| tar -xJ --strip-components=1 -C $(NODE_DIR) \
+			&& echo "node installed — add to PATH: export PATH=$(NODE_BIN):\$$PATH" \
+			|| echo "Install failed — download manually from https://nodejs.org/dist/v$(NODE_VERSION)/"
+	fi
+
 setup_rtk: ## Install RTK CLI for token-optimized LLM output
 	if command -v rtk > /dev/null 2>&1; then
 		echo "rtk already installed: $$(rtk --version)"
 	else
-		curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+		curl --proto '=https' --tlsv1.2 -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
 	fi
 	rtk init -g
 
-setup_lychee: ## Install lychee link checker
+setup_lychee: ## Install lychee link checker user-locally to ~/.local/bin (no sudo)
 	if command -v lychee > /dev/null 2>&1; then
 		echo "lychee already installed: $$(lychee --version)"
 	else
-		curl -sSfL https://github.com/lycheeverse/lychee/releases/latest/download/lychee-x86_64-unknown-linux-gnu.tar.gz \
-			| sudo tar xz -C /usr/local/bin 2>/dev/null \
-			|| (mkdir -p ~/.local/bin && curl -sSfL https://github.com/lycheeverse/lychee/releases/latest/download/lychee-x86_64-unknown-linux-gnu.tar.gz \
-				| tar xz -C ~/.local/bin \
-				&& echo "lychee installed to ~/.local/bin — ensure it is on PATH") \
+		mkdir -p ~/.local/bin
+		curl --proto '=https' --tlsv1.2 -sSfL https://github.com/lycheeverse/lychee/releases/latest/download/lychee-x86_64-unknown-linux-gnu.tar.gz \
+			| tar xz -C ~/.local/bin \
+			&& echo "lychee installed to ~/.local/bin — ensure it is on PATH" \
 			|| echo "Install failed — download manually from https://github.com/lycheeverse/lychee/releases"
 	fi
 
-setup_mdlint: ## Install markdownlint-cli2 (requires npm)
-	if command -v markdownlint-cli2 > /dev/null 2>&1; then
-		echo "markdownlint-cli2 already installed"
-	elif command -v npm > /dev/null 2>&1; then
-		npm install -g markdownlint-cli2
+setup_mdlint: setup_node ## Install markdownlint-cli2 via user-local npm (no sudo)
+	export PATH="$(NODE_BIN):$$PATH"
+	if [ -x "$(NODE_BIN)/markdownlint-cli2" ]; then
+		echo "markdownlint-cli2 already installed: $$(markdownlint-cli2 --version 2>&1 | head -1)"
+	elif command -v markdownlint-cli2 > /dev/null 2>&1; then
+		echo "markdownlint-cli2 already installed (system PATH): $$(markdownlint-cli2 --version 2>&1 | head -1)"
 	else
-		echo "npm not found — install Node.js first"
+		echo "Installing markdownlint-cli2 into $(NODE_DIR) ..."
+		if [ -x "$(NODE_BIN)/npm" ] || command -v npm > /dev/null 2>&1; then
+			npm install -g markdownlint-cli2
+		else
+			echo "ERROR: npm not found after setup_node — check Node install"
+			exit 1
+		fi
 	fi
 
 setup_diagramforge: ## Clone diagramforge from URL in .gitmodules if missing (not a tracked submodule)
@@ -203,6 +227,10 @@ train_policy: ## Train policy on recorded data
 
 autofix: ## Auto-format and fix lint issues (use before committing)
 	uv run ruff format . $(RUFF_QUIET) && uv run ruff check . --fix $(RUFF_QUIET)
+	export PATH="$(NODE_BIN):$$PATH"
+	if command -v markdownlint-cli2 > /dev/null 2>&1; then
+		markdownlint-cli2 --fix "README.md" "CHANGELOG.md" "CONTRIBUTING.md" "AGENTS.md" "docs/**/*.md"
+	fi
 
 lint: ## Check formatting + lint (fails on issues, does not fix)
 	uv run ruff format --check . $(RUFF_QUIET) && uv run ruff check . $(RUFF_QUIET)
@@ -215,6 +243,7 @@ check_links: ## Check links with lychee
 	fi
 
 check_docs: ## Lint markdown files (reads .markdownlint.json)
+	export PATH="$(NODE_BIN):$$PATH"
 	if command -v markdownlint-cli2 > /dev/null 2>&1; then
 		markdownlint-cli2 "README.md" "CHANGELOG.md" "CONTRIBUTING.md" "AGENTS.md" "docs/**/*.md"
 	else

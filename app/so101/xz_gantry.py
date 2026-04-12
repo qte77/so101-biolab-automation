@@ -11,15 +11,24 @@ from __future__ import annotations
 
 import logging
 import struct
-from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any, Self, cast
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+import yaml
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
 
+SERIAL_TIMEOUT_S = 2  # Serial port read/write timeout
 
-@dataclass
-class XZGantryConfig:
+
+class XZGantryConfig(BaseSettings):
     """Configuration for the XZ gantry."""
+
+    model_config = SettingsConfigDict(strict=True)
 
     serial_port: str = "/dev/ttyUSB1"
     baud_rate: int = 115200
@@ -28,26 +37,30 @@ class XZGantryConfig:
     z_range_mm: float = 100.0
     safe_z_mm: float = 80.0
     approach_z_mm: float = 20.0
-    positions: dict[str, tuple[float, float]] = field(default_factory=dict)
+    positions: dict[str, tuple[float, float]] = {}
+
+    @field_validator("positions", mode="before")
+    @classmethod
+    def _coerce_position_lists(cls, v: Any) -> Any:  # noqa: ANN401
+        """YAML loads positions as lists — coerce to tuples."""
+        if isinstance(v, dict):
+            typed: dict[str, Any] = cast("dict[str, Any]", v)
+            result: dict[str, tuple[float, float]] = {}
+            for k, val in typed.items():
+                if isinstance(val, list):
+                    nums: list[float] = cast("list[float]", val)
+                    result[k] = (nums[0], nums[1])
+                else:
+                    result[k] = val
+            return result
+        return v
 
     @classmethod
-    def from_yaml(cls, path: str) -> XZGantryConfig:
-        """Load configuration from a YAML file."""
-        import yaml
-
+    def from_yaml(cls, path: str | Path) -> Self:
+        """Load from a YAML file."""
         with open(path) as fh:
             data = yaml.safe_load(fh)
-        positions = {k: tuple(v) for k, v in data.get("positions", {}).items()}
-        return cls(
-            serial_port=data.get("serial_port", "/dev/ttyUSB1"),
-            baud_rate=data.get("baud_rate", 115200),
-            controller=data.get("controller", "pololu_maestro"),
-            x_range_mm=data.get("x_range_mm", 200.0),
-            z_range_mm=data.get("z_range_mm", 100.0),
-            safe_z_mm=data.get("safe_z_mm", 80.0),
-            approach_z_mm=data.get("approach_z_mm", 20.0),
-            positions=positions,
-        )
+        return cls.model_validate(data)
 
 
 class XZGantry:
@@ -65,6 +78,7 @@ class XZGantry:
     """
 
     def __init__(self, config: XZGantryConfig) -> None:
+        """Initialize with gantry configuration."""
         self.config = config
         self._serial: Any = None
         self._stub_mode = False
@@ -79,7 +93,7 @@ class XZGantry:
             self._serial = serial.Serial(
                 self.config.serial_port,
                 self.config.baud_rate,
-                timeout=2,
+                timeout=SERIAL_TIMEOUT_S,
             )
             logger.info("XZ gantry connected on %s", self.config.serial_port)
         except ImportError:
@@ -141,16 +155,9 @@ class XZGantry:
         """
         import yaml
 
-        data = {
-            "serial_port": self.config.serial_port,
-            "baud_rate": self.config.baud_rate,
-            "controller": self.config.controller,
-            "x_range_mm": self.config.x_range_mm,
-            "z_range_mm": self.config.z_range_mm,
-            "safe_z_mm": self.config.safe_z_mm,
-            "approach_z_mm": self.config.approach_z_mm,
-            "positions": {k: list(v) for k, v in self.config.positions.items()},
-        }
+        data = self.config.model_dump()
+        # YAML has no tuple type — convert to lists for clean serialization
+        data["positions"] = {k: list(v) for k, v in data["positions"].items()}
         with open(path, "w") as fh:
             yaml.safe_dump(data, fh, default_flow_style=False)
         logger.info("Config saved to %s", path)

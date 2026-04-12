@@ -6,8 +6,10 @@ All tests work without hardware (stub mode).
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import pytest
 

@@ -10,15 +10,19 @@ Reference: https://www.bento.bio/
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 from typing import Any
+
+from pydantic import BaseModel, ConfigDict
 
 logger = logging.getLogger(__name__)
 
+SERIAL_TIMEOUT_S = 2  # Serial port read/write timeout
 
-@dataclass
-class BentoLabConfig:
+
+class BentoLabConfig(BaseModel):
     """Configuration for the Bento Lab."""
+
+    model_config = ConfigDict(strict=True)
 
     serial_port: str = "/dev/ttyACM0"
     baud_rate: int = 9600
@@ -38,6 +42,7 @@ class BentoLab:
     """
 
     def __init__(self, config: BentoLabConfig) -> None:
+        """Initialize with Bento Lab configuration."""
         self.config = config
         self._serial: Any = None
         self._stub_mode = False
@@ -53,7 +58,7 @@ class BentoLab:
             self._serial = serial.Serial(
                 self.config.serial_port,
                 self.config.baud_rate,
-                timeout=2,
+                timeout=SERIAL_TIMEOUT_S,
             )
             logger.info("Bento Lab connected on %s", self.config.serial_port)
         except ImportError:

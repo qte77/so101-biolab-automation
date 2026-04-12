@@ -11,11 +11,14 @@ Use cases (UC):
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, Self, cast
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import yaml
+from pydantic import model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from so101.arms import DualArmConfig, DualArmController
 from so101.pipette import (
@@ -38,12 +41,13 @@ FRIDGE_RELEASE_JOINTS = [45.0, -20.0, -40.0, 0.0, 0.0, 0.0]
 FRIDGE_GRAB_JOINTS = [45.0, -15.0, -30.0, 0.0, 0.0, 30.0]
 
 
-@dataclass(frozen=True)
-class PlateLayout:
+class PlateLayout(BaseSettings):
     """Workspace-frame plate layout loaded from configs/plate_layout.yaml.
 
     Transforms plate-local coordinates to arm workspace frame.
     """
+
+    model_config = SettingsConfigDict(strict=True, frozen=True)
 
     origin_x_mm: float
     origin_y_mm: float
@@ -52,39 +56,43 @@ class PlateLayout:
     approach_z_mm: float
     aspirate_z_mm: float
     dispense_z_mm: float
-    trough_x_mm: float
-    trough_y_mm: float
-    trough_z_mm: float
+    trough_x_mm: float = 200.0
+    trough_y_mm: float = 0.0
+    trough_z_mm: float = 25.0
+
+    @model_validator(mode="before")
+    @classmethod
+    def _flatten_yaml(cls, data: Any) -> Any:  # noqa: ANN401
+        """Flatten nested YAML structure into flat fields.
+
+        YAML has plate.origin_x_mm, heights.safe_z_mm, reagent_trough.*
+        but model expects flat fields.
+        """
+        if isinstance(data, dict) and "plate" in data:
+            d: dict[str, Any] = cast("dict[str, Any]", data)
+            plate: dict[str, Any] = d["plate"]
+            heights: dict[str, Any] = d["heights"]
+            trough: dict[str, Any] = d.get("reagent_trough", {})
+            return {
+                "origin_x_mm": plate["origin_x_mm"],
+                "origin_y_mm": plate["origin_y_mm"],
+                "origin_z_mm": plate["origin_z_mm"],
+                "safe_z_mm": heights["safe_z_mm"],
+                "approach_z_mm": heights["approach_z_mm"],
+                "aspirate_z_mm": heights["aspirate_z_mm"],
+                "dispense_z_mm": heights["dispense_z_mm"],
+                "trough_x_mm": trough.get("origin_x_mm", 200.0),
+                "trough_y_mm": trough.get("origin_y_mm", 0.0),
+                "trough_z_mm": trough.get("origin_z_mm", 25.0),
+            }
+        return cast("dict[str, Any]", data) if isinstance(data, dict) else data
 
     @classmethod
-    def from_yaml(cls, path: str | Path) -> PlateLayout:
-        """Load plate layout from YAML config.
-
-        Args:
-            path: Path to plate_layout.yaml.
-
-        Returns:
-            PlateLayout with workspace-frame coordinates.
-        """
+    def from_yaml(cls, path: str | Path) -> Self:
+        """Load plate layout from YAML config."""
         with open(path) as f:
             data = yaml.safe_load(f)
-
-        plate = data["plate"]
-        heights = data["heights"]
-        trough = data.get("reagent_trough", {})
-
-        return cls(
-            origin_x_mm=plate["origin_x_mm"],
-            origin_y_mm=plate["origin_y_mm"],
-            origin_z_mm=plate["origin_z_mm"],
-            safe_z_mm=heights["safe_z_mm"],
-            approach_z_mm=heights["approach_z_mm"],
-            aspirate_z_mm=heights["aspirate_z_mm"],
-            dispense_z_mm=heights["dispense_z_mm"],
-            trough_x_mm=trough.get("origin_x_mm", 200.0),
-            trough_y_mm=trough.get("origin_y_mm", 0.0),
-            trough_z_mm=trough.get("origin_z_mm", 25.0),
-        )
+        return cls.model_validate(data)
 
 
 def pipette_well(
@@ -355,7 +363,7 @@ def uc4_demo_all(
 
 
 def uc5_gantry_pipette(
-    gantry: Any,
+    gantry: Any,  # noqa: ANN401
     pipette: PipetteProtocol,
     source: str,
     dest: str,
@@ -389,7 +397,7 @@ def uc5_gantry_pipette(
 
 
 def uc5_gantry_strip(
-    gantry: Any,
+    gantry: Any,  # noqa: ANN401
     pipette: PipetteProtocol,
     source: str,
     destinations: list[str],
@@ -425,33 +433,34 @@ def _create_pipette(pipette_config_path: str = "configs/pipette.yaml") -> Pipett
     Returns:
         A connected pipette satisfying PipetteProtocol.
     """
+    data: dict[str, Any]
     try:
         with open(pipette_config_path) as f:
             data = yaml.safe_load(f)
-        backend = data.get("backend", "digital_pipette_v2")
+        backend: str = data.get("backend", "digital_pipette_v2")
     except FileNotFoundError:
         backend = "digital_pipette_v2"
         data = {}
 
     if backend.startswith("electronic_"):
-        section = data.get(backend, {})
+        section: dict[str, Any] = data.get(backend, {})
         pipette: PipetteProtocol = ElectronicPipette(
             ElectronicPipetteConfig(
-                serial_port=section.get("serial_port", "/dev/ttyACM0"),
-                baud_rate=section.get("baud_rate", 9600),
-                max_volume_ul=section.get("max_volume_ul", 1000.0),
-                channels=section.get("channels", 1),
-                model=section.get("model", "aelab_dpette_7016"),
+                serial_port=str(section.get("serial_port", "/dev/ttyACM0")),
+                baud_rate=int(section.get("baud_rate", 9600)),
+                max_volume_ul=float(section.get("max_volume_ul", 1000.0)),
+                channels=int(section.get("channels", 1)),
+                model=str(section.get("model", "aelab_dpette_7016")),
             )
         )
     else:
         section = data.get("digital_pipette_v2", {})
         pipette = DigitalPipette(
             PipetteConfig(
-                serial_port=section.get("serial_port", "/dev/ttyUSB0"),
-                baud_rate=section.get("baud_rate", 9600),
-                max_volume_ul=section.get("max_volume_ul", 200.0),
-                actuator_stroke_mm=section.get("actuator_stroke_mm", 50.0),
+                serial_port=str(section.get("serial_port", "/dev/ttyUSB0")),
+                baud_rate=int(section.get("baud_rate", 9600)),
+                max_volume_ul=float(section.get("max_volume_ul", 200.0)),
+                actuator_stroke_mm=float(section.get("actuator_stroke_mm", 50.0)),
             )
         )
 
@@ -491,5 +500,5 @@ def create_workflow_context(
     dock_config = ToolDockConfig.from_yaml(dock_config_path)
     changer = ToolChanger(dock_config, arm, arm_id)
 
-    logger.info("Workflow context created (stub=%s)", arm._stub_mode)
+    logger.info("Workflow context created (stub=%s)", arm.is_stub_mode)
     return arm, pipette, changer, layout

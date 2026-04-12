@@ -4,8 +4,59 @@ from pathlib import Path
 
 import pytest
 import yaml
+from pydantic import ValidationError
 
 from so101.arms import ArmConfig, DualArmConfig, DualArmController
+
+
+class TestArmConfigModel:
+    """Strict pydantic validation for ArmConfig."""
+
+    def test_construction_valid(self) -> None:
+        cfg = ArmConfig(arm_id="arm_a", port="/dev/null", role="follower")
+        assert cfg.arm_id == "arm_a"
+        assert cfg.cameras == {}
+
+    def test_strict_rejects_int_for_str(self) -> None:
+        with pytest.raises(ValidationError):
+            ArmConfig(arm_id=1, port="/dev/null", role="follower")  # type: ignore[arg-type]
+
+    def test_cameras_default_empty(self) -> None:
+        cfg = ArmConfig(arm_id="a", port="/dev/null", role="leader")
+        assert cfg.cameras == {}
+
+    def test_cameras_custom(self) -> None:
+        cameras = {"wrist": {"index": 2}}
+        cfg = ArmConfig(arm_id="a", port="/dev/null", role="leader", cameras=cameras)
+        assert "wrist" in cfg.cameras
+
+
+class TestDualArmConfigModel:
+    """Strict pydantic-settings validation for DualArmConfig."""
+
+    def test_nested_validation(self) -> None:
+        cfg = DualArmConfig(
+            arm_a=ArmConfig(arm_id="a", port="/dev/null", role="follower"),
+            arm_b=ArmConfig(arm_id="b", port="/dev/null", role="follower"),
+        )
+        assert cfg.arm_a.arm_id == "a"
+        assert cfg.leader is None
+        assert cfg.positions == {}
+
+    def test_strict_rejects_wrong_nested_type(self) -> None:
+        """Strict mode rejects non-dict/non-ArmConfig values for nested fields."""
+        with pytest.raises(ValidationError):
+            DualArmConfig(
+                arm_a="not_a_config",  # type: ignore[arg-type]
+                arm_b=ArmConfig(arm_id="b", port="/dev/null", role="follower"),
+            )
+
+    @pytest.mark.integration
+    def test_from_yaml(self) -> None:
+        cfg = DualArmConfig.from_yaml("configs/arms.yaml")
+        assert cfg.arm_a.arm_id == "arm_a"
+        assert cfg.leader is not None
+        assert "park" in cfg.positions
 
 
 @pytest.fixture
