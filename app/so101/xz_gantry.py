@@ -22,6 +22,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
 
+SERIAL_TIMEOUT_S = 2  # Serial port read/write timeout
+
 
 class XZGantryConfig(BaseSettings):
     """Configuration for the XZ gantry."""
@@ -91,7 +93,7 @@ class XZGantry:
             self._serial = serial.Serial(
                 self.config.serial_port,
                 self.config.baud_rate,
-                timeout=2,
+                timeout=SERIAL_TIMEOUT_S,
             )
             logger.info("XZ gantry connected on %s", self.config.serial_port)
         except ImportError:

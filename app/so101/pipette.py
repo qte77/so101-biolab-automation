@@ -48,6 +48,31 @@ ACTUATOR_MIN = 0  # Fully retracted (max suction)
 ACTUATOR_MAX = 1023  # Fully extended (no suction)
 DEFAULT_ASPIRATE_SPEED = 200  # ms delay between steps
 DEFAULT_DISPENSE_SPEED = 150  # ms delay between steps
+SERIAL_TIMEOUT_S = 2  # Serial port read/write timeout
+ARDUINO_RESET_DELAY_S = 2  # Wait for Arduino bootloader after serial open
+
+
+def _validate_aspirate(volume_ul: float, current_fill: float, max_volume: float) -> None:
+    """Validate an aspirate volume. Shared by both pipette backends."""
+    if volume_ul <= 0:
+        raise ValueError("Volume must be positive")
+    if volume_ul > max_volume:
+        raise ValueError(f"Volume {volume_ul} µL exceeds max {max_volume} µL")
+    if current_fill + volume_ul > max_volume:
+        raise ValueError(
+            f"Cannot aspirate {volume_ul} µL: would exceed capacity "
+            f"(current fill {current_fill} µL, max {max_volume} µL)"
+        )
+
+
+def _validate_dispense(volume_ul: float, current_fill: float) -> None:
+    """Validate a dispense volume. Shared by both pipette backends."""
+    if volume_ul <= 0:
+        raise ValueError("Volume must be positive")
+    if volume_ul > current_fill:
+        raise ValueError(
+            f"Cannot dispense {volume_ul} µL: exceeds current fill of {current_fill} µL"
+        )
 
 
 class PipetteConfig(BaseModel):
@@ -87,9 +112,9 @@ class DigitalPipette:
             self._serial = serial.Serial(
                 self.config.serial_port,
                 self.config.baud_rate,
-                timeout=2,
+                timeout=SERIAL_TIMEOUT_S,
             )
-            time.sleep(2)  # Wait for Arduino reset
+            time.sleep(ARDUINO_RESET_DELAY_S)  # Wait for Arduino reset
             logger.info("Pipette connected on %s", self.config.serial_port)
         except ImportError:
             logger.warning("pyserial not installed — running in stub mode")
@@ -124,15 +149,7 @@ class DigitalPipette:
         Raises:
             ValueError: If volume exceeds capacity.
         """
-        if volume_ul <= 0:
-            raise ValueError("Volume must be positive")
-        if volume_ul > self.config.max_volume_ul:
-            raise ValueError(f"Volume {volume_ul} µL exceeds max {self.config.max_volume_ul} µL")
-        if self._current_fill + volume_ul > self.config.max_volume_ul:
-            raise ValueError(
-                f"Cannot aspirate {volume_ul} µL: would exceed capacity "
-                f"(current fill {self._current_fill} µL, max {self.config.max_volume_ul} µL)"
-            )
+        _validate_aspirate(volume_ul, self._current_fill, self.config.max_volume_ul)
 
         steps = self._volume_to_steps(volume_ul)
         target = max(self._current_position - steps, ACTUATOR_MIN)
@@ -149,12 +166,7 @@ class DigitalPipette:
         Raises:
             ValueError: If volume exceeds current contents.
         """
-        if volume_ul <= 0:
-            raise ValueError("Volume must be positive")
-        if volume_ul > self._current_fill:
-            raise ValueError(
-                f"Cannot dispense {volume_ul} µL: exceeds current fill of {self._current_fill} µL"
-            )
+        _validate_dispense(volume_ul, self._current_fill)
 
         steps = self._volume_to_steps(volume_ul)
         target = min(self._current_position + steps, ACTUATOR_MAX)
@@ -282,15 +294,7 @@ class ElectronicPipette:
         Raises:
             ValueError: If volume exceeds capacity.
         """
-        if volume_ul <= 0:
-            raise ValueError("Volume must be positive")
-        if volume_ul > self.config.max_volume_ul:
-            raise ValueError(f"Volume {volume_ul} µL exceeds max {self.config.max_volume_ul} µL")
-        if self._current_fill + volume_ul > self.config.max_volume_ul:
-            raise ValueError(
-                f"Cannot aspirate {volume_ul} µL: would exceed capacity "
-                f"(current fill {self._current_fill} µL, max {self.config.max_volume_ul} µL)"
-            )
+        _validate_aspirate(volume_ul, self._current_fill, self.config.max_volume_ul)
 
         if self._driver:
             self._driver.set_volume(volume_ul)
@@ -310,12 +314,7 @@ class ElectronicPipette:
         Raises:
             ValueError: If volume exceeds current contents.
         """
-        if volume_ul <= 0:
-            raise ValueError("Volume must be positive")
-        if volume_ul > self._current_fill:
-            raise ValueError(
-                f"Cannot dispense {volume_ul} µL: exceeds current fill of {self._current_fill} µL"
-            )
+        _validate_dispense(volume_ul, self._current_fill)
 
         if self._driver:
             self._driver.set_volume(volume_ul)

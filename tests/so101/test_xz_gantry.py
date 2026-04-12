@@ -27,9 +27,7 @@ class TestXZGantryConfigModel:
 
     def test_positions_lists_coerced_to_tuples(self) -> None:
         """YAML loads positions as lists — before-validator coerces to tuples."""
-        cfg = XZGantryConfig.model_validate(
-            {"positions": {"a": [1.0, 2.0]}}
-        )
+        cfg = XZGantryConfig.model_validate({"positions": {"a": [1.0, 2.0]}})
         assert cfg.positions["a"] == (1.0, 2.0)
 
     @pytest.mark.integration

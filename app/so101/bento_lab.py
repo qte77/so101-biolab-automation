@@ -16,6 +16,8 @@ from pydantic import BaseModel, ConfigDict
 
 logger = logging.getLogger(__name__)
 
+SERIAL_TIMEOUT_S = 2  # Serial port read/write timeout
+
 
 class BentoLabConfig(BaseModel):
     """Configuration for the Bento Lab."""
@@ -56,7 +58,7 @@ class BentoLab:
             self._serial = serial.Serial(
                 self.config.serial_port,
                 self.config.baud_rate,
-                timeout=2,
+                timeout=SERIAL_TIMEOUT_S,
             )
             logger.info("Bento Lab connected on %s", self.config.serial_port)
         except ImportError:

@@ -5,6 +5,8 @@ Well spacing: 9.0 mm center-to-center.
 A1 origin: top-left corner (14.38 mm from left edge, 11.24 mm from top edge).
 """
 
+from functools import lru_cache
+
 from pydantic import BaseModel, ConfigDict
 
 # SBS standard dimensions (mm)
@@ -62,9 +64,14 @@ def get_well(row: str, col: int) -> WellPosition:
     return WellPosition(row=row.upper(), col=col, x_mm=x, y_mm=y)
 
 
-def all_wells() -> list[WellPosition]:
-    """Get all 96 well positions in row-major order (A1, A2, ..., H12)."""
-    return [get_well(row, col) for row in ROWS for col in COLS]
+@lru_cache(maxsize=1)
+def all_wells() -> tuple[WellPosition, ...]:
+    """Get all 96 well positions in row-major order (A1, A2, ..., H12).
+
+    Cached — WellPosition is frozen/hashable, grid never changes.
+    Returns tuple (immutable) for cache safety.
+    """
+    return tuple(get_well(row, col) for row in ROWS for col in COLS)
 
 
 def parse_well_name(name: str) -> WellPosition:
