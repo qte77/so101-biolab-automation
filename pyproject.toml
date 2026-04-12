@@ -12,6 +12,8 @@ dependencies = [
     "websockets>=13.0",
     "opencv-python>=4.10",
     "pyserial>=3.5",
+    "pydantic>=2.10",
+    "pydantic-settings[yaml]>=2.7",
     "pyyaml>=6.0",
     "numpy>=1.26",
 ]
@@ -21,6 +23,7 @@ dev = [
     "ruff>=0.8",
     "pyright>=1.1",
     "complexipy>=0.8",
+    "types-PyYAML>=6.0",
 ]
 test = [
     "pytest>=8.0",
