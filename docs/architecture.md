@@ -122,5 +122,5 @@ See [app/hardware/README.md](../app/hardware/README.md) for the full parts table
 
 ## Prior Art & Vision
 
-- [docs/notes.md](notes.md) — academic papers, community designs, tools, known hardware issues informing these decisions
+- [docs/research.md](research.md) — prior art, papers, community designs, insights informing these decisions
 - [docs/roadmap.md](roadmap.md) — forward-looking direction (closed-loop printing, tool genesis, VLM/embodied AI phases)

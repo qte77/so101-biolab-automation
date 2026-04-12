@@ -61,7 +61,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - `AGENT_LEARNINGS.md` entries: `make test` excludes hardware/network tests by default via `pyproject.toml:79` `addopts`; git log direction hazard — always use explicit `A..B` ranges instead of one-sided `git log B -N`
 - Test suite: Hypothesis property tests (well coords, parse_well roundtrip, aspirate/dispense, joint limits)
 - Quality gates: pytest coverage, pyright type checking, ruff lint (N/UP rules), cognitive complexity (max 15/function) via complexipy
-- Docs: `docs/architecture.md`, `docs/UserStory.md`, `docs/demo-scenarios.md`, `docs/hardware/BOM.md`, `docs/notes.md`, `docs/roadmap.md`
+- Docs: `docs/architecture.md`, `docs/UserStory.md`, `docs/demo-scenarios.md`, `docs/hardware/BOM.md`, `docs/research.md`, `docs/roadmap.md`
 - Documentation hierarchy declared in `CONTRIBUTING.md` with authority table; YAML frontmatter on all docs
 - `.github/` infrastructure: issue templates, PR template, dependabot, CI workflows (ruff, pytest, CodeQL, link checker)
 - `.devcontainer/devcontainer.json` for Codespace dev environment
