@@ -5,7 +5,7 @@ Well spacing: 9.0 mm center-to-center.
 A1 origin: top-left corner (14.38 mm from left edge, 11.24 mm from top edge).
 """
 
-from dataclasses import dataclass
+from pydantic import BaseModel, ConfigDict
 
 # SBS standard dimensions (mm)
 WELL_SPACING = 9.0
@@ -15,9 +15,10 @@ ROWS = "ABCDEFGH"
 COLS = range(1, 13)
 
 
-@dataclass(frozen=True)
-class WellPosition:
+class WellPosition(BaseModel):
     """A single well position on a 96-well plate."""
+
+    model_config = ConfigDict(strict=True, frozen=True)
 
     row: str  # A-H
     col: int  # 1-12

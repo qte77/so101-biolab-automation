@@ -3,11 +3,13 @@
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+from pydantic import ValidationError
 
 from so101.plate import (
     A1_OFFSET_X,
     A1_OFFSET_Y,
     WELL_SPACING,
+    WellPosition,
     all_wells,
     get_well,
     parse_well_name,
@@ -118,6 +120,32 @@ class TestParseWellName:
     def test_empty(self) -> None:
         with pytest.raises(ValueError, match=r"Invalid well name"):
             parse_well_name("")
+
+
+class TestWellPositionModel:
+    """Test WellPosition pydantic model behaviour."""
+
+    def test_construction_valid(self) -> None:
+        wp = WellPosition(row="A", col=1, x_mm=0.0, y_mm=0.0)
+        assert wp.row == "A"
+        assert wp.col == 1
+
+    def test_strict_rejects_wrong_types(self) -> None:
+        with pytest.raises(ValidationError):
+            WellPosition(row=1, col="1", x_mm=0, y_mm=0)  # type: ignore[arg-type]
+
+    def test_frozen_immutable(self) -> None:
+        wp = WellPosition(row="A", col=1, x_mm=0.0, y_mm=0.0)
+        with pytest.raises(ValidationError):
+            wp.row = "B"  # type: ignore[misc]
+
+    def test_name_property(self) -> None:
+        wp = WellPosition(row="A", col=1, x_mm=0.0, y_mm=0.0)
+        assert wp.name == "A1"
+
+    def test_model_dump_roundtrip(self) -> None:
+        wp = WellPosition(row="A", col=1, x_mm=0.0, y_mm=0.0)
+        assert WellPosition.model_validate(wp.model_dump()) == wp
 
 
 class TestWellProperties:
