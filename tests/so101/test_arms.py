@@ -4,8 +4,31 @@ from pathlib import Path
 
 import pytest
 import yaml
+from pydantic import ValidationError
 
 from so101.arms import ArmConfig, DualArmConfig, DualArmController
+
+
+class TestArmConfigModel:
+    """Strict pydantic validation for ArmConfig."""
+
+    def test_construction_valid(self) -> None:
+        cfg = ArmConfig(arm_id="arm_a", port="/dev/null", role="follower")
+        assert cfg.arm_id == "arm_a"
+        assert cfg.cameras == {}
+
+    def test_strict_rejects_int_for_str(self) -> None:
+        with pytest.raises(ValidationError):
+            ArmConfig(arm_id=1, port="/dev/null", role="follower")  # type: ignore[arg-type]
+
+    def test_cameras_default_empty(self) -> None:
+        cfg = ArmConfig(arm_id="a", port="/dev/null", role="leader")
+        assert cfg.cameras == {}
+
+    def test_cameras_custom(self) -> None:
+        cameras = {"wrist": {"index": 2}}
+        cfg = ArmConfig(arm_id="a", port="/dev/null", role="leader", cameras=cameras)
+        assert "wrist" in cfg.cameras
 
 
 @pytest.fixture

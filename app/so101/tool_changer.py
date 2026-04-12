@@ -16,6 +16,7 @@ from enum import Enum
 from typing import Any
 
 import yaml
+from pydantic import BaseModel, ConfigDict
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +30,10 @@ class Tool(Enum):
     FRIDGE_HOOK = "fridge_hook"
 
 
-@dataclass
-class DockStation:
+class DockStation(BaseModel):
     """A single station on the tool dock."""
+
+    model_config = ConfigDict(strict=True)
 
     tool: Tool
     approach_joints: list[float]  # Joint positions to approach the station

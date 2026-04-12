@@ -11,20 +11,22 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from pydantic import BaseModel, ConfigDict
 
 from so101.plate import parse_well_name
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class ArmConfig:
+class ArmConfig(BaseModel):
     """Configuration for a single SO-101 arm."""
+
+    model_config = ConfigDict(strict=True)
 
     arm_id: str
     port: str
     role: str  # "follower" or "leader"
-    cameras: dict[str, Any] = field(default_factory=dict)
+    cameras: dict[str, Any] = {}
 
 
 @dataclass

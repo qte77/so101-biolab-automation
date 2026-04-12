@@ -1,6 +1,7 @@
 """Tests for tool changer logic."""
 
 import pytest
+from pydantic import ValidationError
 
 from so101.tool_changer import DockStation, Tool, ToolChanger, ToolDockConfig
 
@@ -24,6 +25,38 @@ def dock_config() -> ToolDockConfig:
             ),
         }
     )
+
+
+class TestDockStationModel:
+    """Strict pydantic validation for DockStation."""
+
+    def test_construction_valid(self) -> None:
+        ds = DockStation(
+            tool=Tool.PIPETTE,
+            approach_joints=[0.0] * 6,
+            engage_joints=[1.0] * 6,
+            dock_joints=[2.0] * 6,
+        )
+        assert ds.tool == Tool.PIPETTE
+
+    def test_strict_rejects_str_for_list(self) -> None:
+        with pytest.raises(ValidationError):
+            DockStation(
+                tool=Tool.PIPETTE,
+                approach_joints="bad",  # type: ignore[arg-type]
+                engage_joints=[0.0] * 6,
+                dock_joints=[0.0] * 6,
+            )
+
+    def test_enum_from_value(self) -> None:
+        """Tool enum accepted directly — no string coercion in strict mode."""
+        ds = DockStation(
+            tool=Tool.GRIPPER,
+            approach_joints=[0.0] * 6,
+            engage_joints=[0.0] * 6,
+            dock_joints=[0.0] * 6,
+        )
+        assert ds.tool == Tool.GRIPPER
 
 
 class StubArmController:
