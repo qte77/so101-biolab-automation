@@ -40,6 +40,12 @@ test = [
 cad = [
     "build123d>=0.10",
 ]
+eln = [
+    "elabapi-python>=0.4",
+]
+pylabrobot = [
+    "pylabrobot>=0.2",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["app/so101", "app/dashboard"]
