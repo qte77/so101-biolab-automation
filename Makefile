@@ -107,8 +107,6 @@ setup_slicer: ## Install CuraEngine (preferred) or PrusaSlicer (fallback) for pr
 	fi
 
 setup_node: ## Install Node.js user-locally to ~/.local/share/node (no sudo)
-# After install, add to PATH permanently:
-#   echo 'export PATH="$$HOME/.local/share/node/bin:$$PATH"' >> ~/.bashrc
 	if [ -x "$(NODE_BIN)/node" ]; then
 		echo "node already installed: $$($(NODE_BIN)/node --version) (at $(NODE_DIR))"
 	elif command -v node > /dev/null 2>&1; then
@@ -118,9 +116,15 @@ setup_node: ## Install Node.js user-locally to ~/.local/share/node (no sudo)
 		mkdir -p $(NODE_DIR)
 		curl --proto '=https' --tlsv1.2 -sSfL https://nodejs.org/dist/v$(NODE_VERSION)/node-v$(NODE_VERSION)-linux-x64.tar.xz \
 			| tar -xJ --strip-components=1 -C $(NODE_DIR) \
-			&& echo "node installed — add to PATH: export PATH=$(NODE_BIN):\$$PATH" \
-			|| echo "Install failed — download manually from https://nodejs.org/dist/v$(NODE_VERSION)/"
+			|| { echo "Install failed — download manually from https://nodejs.org/dist/v$(NODE_VERSION)/"; exit 1; }
 	fi
+	mkdir -p $(HOME)/.local/bin
+	for bin in node npm npx; do \
+		if [ -x "$(NODE_BIN)/$$bin" ] && [ ! -e "$(HOME)/.local/bin/$$bin" ]; then \
+			ln -s "$(NODE_BIN)/$$bin" "$(HOME)/.local/bin/$$bin"; \
+			echo "symlinked $$bin -> $(HOME)/.local/bin/$$bin"; \
+		fi; \
+	done
 
 setup_rtk: ## Install RTK CLI for token-optimized LLM output
 	if command -v rtk > /dev/null 2>&1; then
