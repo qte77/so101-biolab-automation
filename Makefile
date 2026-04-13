@@ -9,7 +9,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_lerobot_deps setup_lerobot \
+	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_hardware_deps setup_hardware \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
 	calibrate_arms start_teleop start_foxglove fetch_urdf record_episodes train_policy \
@@ -201,7 +201,7 @@ setup_diagramforge: ## Clone diagramforge from URL in .gitmodules if missing (no
 		fi
 	fi
 
-setup_lerobot_deps: ## Install system deps for lerobot (kernel headers, cmake, libav)
+setup_hardware_deps: ## Install system deps for lerobot (kernel headers, cmake, libav)
 	$(DETECT_PKG_MGR)
 	echo "Installing lerobot build dependencies ($$PKG_MGR on $$HOST_OS) ..."
 	case "$$PKG_MGR" in
@@ -219,7 +219,7 @@ setup_lerobot_deps: ## Install system deps for lerobot (kernel headers, cmake, l
 		*) echo "ERROR: unsupported package manager — install kernel headers, cmake, and libav dev packages manually"; exit 1 ;;
 	esac
 
-setup_lerobot: setup_uv setup_lerobot_deps ## Install LeRobot + Feetech SDK + Foxglove
+setup_hardware: setup_uv setup_hardware_deps ## Install all hardware deps (LeRobot, Feetech, Foxglove, system libs)
 	uv sync --group lerobot --group foxglove
 
 
