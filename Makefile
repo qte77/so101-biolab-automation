@@ -12,7 +12,7 @@ endif
 	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
-	calibrate_arms start_teleop record_episodes train_policy \
+	calibrate_arms start_teleop start_foxglove record_episodes train_policy \
 	eval_policy serve_dashboard run_demo \
 	help
 .DEFAULT_GOAL := help
@@ -43,6 +43,8 @@ TASK ?= "Pick up pipette tip and aspirate from well A1"
 NUM_EPISODES ?= 10
 POLICY ?= act
 WANDB ?= 0
+WRIST_CAM ?= 2
+ENV_CAM ?= 0
 
 
 # MARK: SETUP
@@ -203,6 +205,15 @@ start_teleop: ## Start teleoperation (leader → follower)
 		--teleop.port=$(LEADER_PORT) \
 		--teleop.id=leader \
 		--display_data=true
+
+start_foxglove: ## Live 3D arm viz + cameras via Foxglove (ws://localhost:8765)
+	@echo "Requires: uv sync --group foxglove --group lerobot"
+	@echo "URDF/STL assets: github.com/foxglove/foxglove-sdk → python/foxglove-sdk-examples/so101-visualization/"
+	uv run --group foxglove --group lerobot python -m so101.foxglove_viz \
+		--robot.port=$(FOLLOWER_A_PORT) \
+		--robot.id=arm_a \
+		--robot.wrist_cam_id=$(WRIST_CAM) \
+		--robot.env_cam_id=$(ENV_CAM)
 
 record_episodes: ## Record teleoperation episodes
 	lerobot-record \

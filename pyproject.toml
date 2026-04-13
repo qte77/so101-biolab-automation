@@ -82,6 +82,7 @@ max-complexity = 10
 "tests/**" = ["S101", "S603", "ANN001", "ANN201", "D100", "D101", "D102", "D103", "D104", "D107"]
 "app/hardware/cad/**" = ["S603", "ANN"]   # CAD scripts excluded from pyright; annotations deferred
 "app/hardware/**" = ["S603"]    # subprocess calls run trusted internal scripts
+"app/so101/foxglove_viz.py" = ["ANN401"]  # hardware CLI — untyped deps return Any
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -91,7 +92,10 @@ pythonVersion = "3.12"
 typeCheckingMode = "strict"
 extraPaths = ["app"]
 include = ["app/so101", "app/dashboard"]
-exclude = ["app/hardware"]  # CAD/render/slicer use dynamic imports without type stubs
+exclude = [
+    "app/hardware",           # CAD/render/slicer use dynamic imports without type stubs
+    "app/so101/foxglove_viz.py",  # hardware CLI — foxglove/lerobot/scipy/yourdfpy all untyped
+]
 reportMissingImports = "error"
 
 [tool.pytest.ini_options]
