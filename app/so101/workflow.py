@@ -6,6 +6,8 @@ Use cases (UC):
 - UC3: Tool interchange cycle
 - UC4: Demo mode (all use cases in sequence)
 - UC5: Gantry-based pipetting (XZ gantry + any PipetteProtocol backend)
+- UC6: ELN-logged experiment (wraps any UC with eLabFTW recording)
+- UC7: Cartesian-platform pipetting (Voron/Moonraker + any PipetteProtocol)
 """
 
 from __future__ import annotations
@@ -422,6 +424,72 @@ def uc5_gantry_strip(
     )
     for dest in destinations:
         uc5_gantry_pipette(gantry, pipette, source, dest, volume_ul)
+
+
+def uc6_eln_logged_experiment(
+    eln: Any,  # noqa: ANN401
+    title: str,
+    run_fn: Any,  # noqa: ANN401
+    *args: Any,  # noqa: ANN401
+    **kwargs: Any,  # noqa: ANN401
+) -> int:
+    """UC6: Wrap any use case with eLabFTW experiment recording.
+
+    Creates an experiment before running, updates status on completion or
+    failure, and returns the experiment ID.
+
+    Args:
+        eln: ElnClient instance (or None to skip recording).
+        title: Experiment title.
+        run_fn: Callable to execute (any UC function).
+        *args: Positional arguments forwarded to run_fn.
+        **kwargs: Keyword arguments forwarded to run_fn.
+
+    Returns:
+        Experiment ID, or ``-1`` if eln is None or in stub mode.
+    """
+    exp_id = -1
+    if eln is not None:
+        exp_id = eln.create_experiment(title)
+        logger.info("[UC6] ELN experiment %d: %s", exp_id, title)
+    try:
+        run_fn(*args, **kwargs)
+        if eln is not None:
+            eln.update_experiment(exp_id, status="completed")
+    except Exception:
+        if eln is not None:
+            eln.update_experiment(exp_id, status="failed")
+        raise
+    return exp_id
+
+
+def uc7_cartesian_pipette(
+    platform: Any,  # noqa: ANN401
+    pipette: PipetteProtocol,
+    source: str,
+    dest: str,
+    volume_ul: float,
+) -> None:
+    """UC7: Pipette between named positions using a Cartesian platform.
+
+    Moves via the Cartesian platform (Moonraker/Klipper) instead of a robotic
+    arm.  Same aspirate→dispense cycle as UC5 but on a 3-axis Cartesian system.
+
+    Args:
+        platform: CartesianPlatform instance.
+        pipette: Any PipetteProtocol backend.
+        source: Source position name in platform config.
+        dest: Destination position name in platform config.
+        volume_ul: Volume to transfer in microliters.
+    """
+    logger.info("[UC7] Cartesian: %s → %s (%.1f µL)", source, dest, volume_ul)
+    platform.raise_to_safe()
+    platform.move_to_position(source)
+    pipette.aspirate(volume_ul)
+    platform.raise_to_safe()
+    platform.move_to_position(dest)
+    pipette.dispense(volume_ul)
+    platform.raise_to_safe()
 
 
 def _create_pipette(pipette_config_path: str = "configs/pipette.yaml") -> PipetteProtocol:
