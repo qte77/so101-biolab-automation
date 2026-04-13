@@ -1,0 +1,14 @@
+# Cartesian motion platform configuration (Voron/Moonraker).
+# Uses Klipper/Moonraker HTTP API for G-code-based pipetting.
+
+moonraker_url: "http://localhost:7125"
+timeout_s: 10.0
+safe_z_mm: 50.0
+approach_z_mm: 5.0
+feedrate: 3000
+
+positions:
+  home: [0.0, 0.0, 0.0]
+  plate_a1: [150.0, -50.0, 20.0]
+  plate_h12: [213.0, 13.0, 20.0]
+  reagent_trough: [100.0, -80.0, 30.0]
