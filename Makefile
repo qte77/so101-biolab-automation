@@ -185,9 +185,13 @@ setup_kernel_headers: ## Install kernel headers (needed by lerobot â†’ pynput â†
 	else
 		echo "Installing kernel headers (evdev build dependency) ..."
 		if command -v dnf > /dev/null 2>&1; then
-			sudo dnf install -y kernel-headers-$$(uname -r)
+			sudo dnf install -y kernel-devel \
+				|| sudo dnf install -y kernel-headers \
+				|| { echo "ERROR: install kernel-devel manually"; exit 1; }
 		elif command -v apt-get > /dev/null 2>&1; then
-			sudo apt-get update -qq && sudo apt-get install -y -qq linux-headers-$$(uname -r)
+			sudo apt-get update -qq && sudo apt-get install -y -qq linux-headers-$$(uname -r) \
+				|| sudo apt-get install -y -qq linux-libc-dev \
+				|| { echo "ERROR: install linux-headers manually"; exit 1; }
 		elif command -v pacman > /dev/null 2>&1; then
 			sudo pacman -S --noconfirm linux-headers
 		else
