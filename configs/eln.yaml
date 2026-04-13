@@ -1,0 +1,7 @@
+# eLabFTW Electronic Lab Notebook configuration.
+# See https://www.elabftw.net/ for server setup.
+
+base_url: "https://elab.example.com/api/v2"
+api_key: ""
+verify_ssl: true
+timeout_s: 30.0
