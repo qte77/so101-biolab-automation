@@ -9,7 +9,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_kernel_headers setup_lerobot setup_foxglove \
+	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_lerobot_deps setup_lerobot setup_foxglove \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
 	calibrate_arms start_teleop start_foxglove fetch_urdf record_episodes train_policy \
@@ -179,28 +179,39 @@ setup_diagramforge: ## Clone diagramforge from URL in .gitmodules if missing (no
 		fi
 	fi
 
-setup_kernel_headers: ## Install kernel headers (needed by lerobot → pynput → evdev)
-	if [ -d "/usr/include/linux" ] && [ -f "/usr/include/linux/input.h" ]; then
-		echo "kernel headers already installed"
-	else
-		echo "Installing kernel headers (evdev build dependency) ..."
-		if command -v dnf > /dev/null 2>&1; then
-			sudo dnf install -y kernel-devel \
-				|| sudo dnf install -y kernel-headers \
-				|| { echo "ERROR: install kernel-devel manually"; exit 1; }
-		elif command -v apt-get > /dev/null 2>&1; then
-			sudo apt-get update -qq && sudo apt-get install -y -qq linux-headers-$$(uname -r) \
-				|| sudo apt-get install -y -qq linux-libc-dev \
-				|| { echo "ERROR: install linux-headers manually"; exit 1; }
-		elif command -v pacman > /dev/null 2>&1; then
-			sudo pacman -S --noconfirm linux-headers
-		else
-			echo "ERROR: Install kernel headers manually for evdev to build"
-			exit 1
-		fi
-	fi
+setup_lerobot_deps: ## Install system deps for lerobot (Linux only: kernel headers, cmake, libav)
+	case "$$(uname -s)" in \
+	Linux) \
+		if command -v dnf > /dev/null 2>&1; then \
+			sudo dnf install -y kernel-devel cmake gcc g++ \
+				libavformat-free-devel libavcodec-free-devel libavdevice-free-devel \
+				libavutil-free-devel libswscale-free-devel libswresample-free-devel \
+				libavfilter-free-devel pkg-config; \
+		elif command -v apt-get > /dev/null 2>&1; then \
+			sudo apt-get update -qq && sudo apt-get install -y -qq \
+				linux-headers-$$(uname -r) cmake build-essential pkg-config \
+				libavformat-dev libavcodec-dev libavdevice-dev \
+				libavutil-dev libswscale-dev libswresample-dev libavfilter-dev; \
+		elif command -v pacman > /dev/null 2>&1; then \
+			sudo pacman -S --noconfirm linux-headers cmake base-devel ffmpeg; \
+		else \
+			echo "ERROR: unsupported package manager — install kernel headers, cmake, and libav dev packages manually"; \
+			exit 1; \
+		fi ;; \
+	Darwin) \
+		echo "macOS: evdev not needed (pynput uses Quartz). Installing cmake + ffmpeg ..." ; \
+		if command -v brew > /dev/null 2>&1; then \
+			brew install cmake ffmpeg pkg-config; \
+		else \
+			echo "ERROR: install Homebrew first — https://brew.sh"; \
+			exit 1; \
+		fi ;; \
+	*) \
+		echo "ERROR: unsupported OS — lerobot requires Linux for hardware control"; \
+		exit 1 ;; \
+	esac
 
-setup_lerobot: setup_uv setup_kernel_headers ## Install LeRobot + Feetech SDK
+setup_lerobot: setup_uv setup_lerobot_deps ## Install LeRobot + Feetech SDK
 	uv sync --group lerobot
 
 setup_foxglove: setup_uv ## Install Foxglove SDK for live visualization
