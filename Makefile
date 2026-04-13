@@ -12,7 +12,7 @@ endif
 	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
-	calibrate_arms start_teleop start_foxglove record_episodes train_policy \
+	calibrate_arms start_teleop start_foxglove fetch_urdf record_episodes train_policy \
 	eval_policy serve_dashboard run_demo \
 	help
 .DEFAULT_GOAL := help
@@ -206,9 +206,22 @@ start_teleop: ## Start teleoperation (leader → follower)
 		--teleop.id=leader \
 		--display_data=true
 
-start_foxglove: ## Live 3D arm viz + cameras via Foxglove (ws://localhost:8765)
+fetch_urdf: ## Download SO-101 URDF + STL assets from foxglove-sdk
+	if [ -d "SO101" ]; then
+		echo "SO101/ already exists — skipping"
+	else
+		echo "Fetching SO-101 URDF + STL from foxglove-sdk..."
+		git clone --depth 1 --filter=blob:none --sparse \
+			https://github.com/foxglove/foxglove-sdk.git /tmp/foxglove-sdk-sparse
+		cd /tmp/foxglove-sdk-sparse && \
+			git sparse-checkout set python/foxglove-sdk-examples/so101-visualization/SO101
+		cp -r /tmp/foxglove-sdk-sparse/python/foxglove-sdk-examples/so101-visualization/SO101 SO101
+		rm -rf /tmp/foxglove-sdk-sparse
+		echo "SO101/ URDF + STL assets ready"
+	fi
+
+start_foxglove: fetch_urdf ## Live 3D arm viz + cameras via Foxglove (ws://localhost:8765)
 	@echo "Requires: uv sync --group foxglove --group lerobot"
-	@echo "URDF/STL assets: github.com/foxglove/foxglove-sdk → python/foxglove-sdk-examples/so101-visualization/"
 	uv run --group foxglove --group lerobot python -m so101.foxglove_viz \
 		--robot.port=$(FOLLOWER_A_PORT) \
 		--robot.id=arm_a \
