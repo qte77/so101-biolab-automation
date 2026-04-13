@@ -9,7 +9,7 @@ graceful stub-mode fallback when the printer is unreachable.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, cast
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -38,7 +38,11 @@ class CartesianConfig(BaseSettings):
     def _coerce_positions(cls, v: Any) -> Any:  # noqa: ANN401
         """Coerce YAML lists to tuples for strict mode."""
         if isinstance(v, dict):
-            return {k: tuple(val) if isinstance(val, list) else val for k, val in v.items()}
+            data = cast("dict[str, Any]", v)
+            return {  # pyright: ignore[reportUnknownVariableType]
+                k: tuple(val) if isinstance(val, list) else val  # pyright: ignore[reportUnknownArgumentType]
+                for k, val in data.items()
+            }
         return v
 
     @classmethod

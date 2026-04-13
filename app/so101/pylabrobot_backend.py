@@ -31,14 +31,19 @@ class SO101BackendConfig(BaseModel):
 def _get_base_class() -> type:
     """Return MachineBackend if pylabrobot is installed, else object."""
     try:
-        from pylabrobot.machine import MachineBackend  # pyright: ignore[reportMissingImports]
+        from pylabrobot.machine import (
+            MachineBackend,  # pyright: ignore[reportMissingImports,reportUnknownVariableType]
+        )
 
-        return MachineBackend  # pyright: ignore[reportReturnType]
+        return MachineBackend  # pyright: ignore[reportReturnType,reportUnknownVariableType]
     except ImportError:
         return object
 
 
-class SO101Backend(_get_base_class()):
+_Base: type = _get_base_class()
+
+
+class SO101Backend(_Base):  # pyright: ignore[reportUntypedBaseClass]
     """PyLabRobot backend for SO-101 dual robotic arms.
 
     When pylabrobot is installed, inherits from MachineBackend.
