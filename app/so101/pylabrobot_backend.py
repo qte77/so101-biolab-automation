@@ -31,8 +31,8 @@ class SO101BackendConfig(BaseModel):
 def _get_base_class() -> type:
     """Return MachineBackend if pylabrobot is installed, else object."""
     try:
-        from pylabrobot.machine import (
-            MachineBackend,  # pyright: ignore[reportMissingImports,reportUnknownVariableType]
+        from pylabrobot.machine import (  # pyright: ignore[reportMissingImports]
+            MachineBackend,  # pyright: ignore[reportUnknownVariableType]
         )
 
         return MachineBackend  # pyright: ignore[reportReturnType,reportUnknownVariableType]
