@@ -9,7 +9,6 @@ from pydantic import ValidationError
 from so101.arms import ArmConfig, DualArmConfig, DualArmController
 
 
-
 class TestArmConfigModel:
     """Strict pydantic validation for ArmConfig."""
 

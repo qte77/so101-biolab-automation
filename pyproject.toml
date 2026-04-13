@@ -104,6 +104,9 @@ reportMissingTypeStubs = "none"  # lerobot, pyserial — installed but untyped
 pythonpath = ["app"]
 testpaths = ["tests"]
 addopts = "--strict-markers -m 'not hardware and not network'"
+
+[tool.coverage.run]
+omit = ["app/so101/foxglove_viz.py"]  # hardware CLI — requires real arms + cameras
 asyncio_mode = "auto"
 markers = [
     "integration: tests loading real config files",

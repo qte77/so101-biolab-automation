@@ -1,7 +1,5 @@
 """Shared fixtures for so101 tests — force stub mode via environment variable."""
 
-import os
-
 import pytest
 
 

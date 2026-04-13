@@ -38,7 +38,6 @@ from so101.workflow import (
 from so101.xz_gantry import XZGantry, XZGantryConfig
 
 
-
 @pytest.fixture
 def stub_controller() -> DualArmController:
     """Connected controller in stub mode (no hardware)."""

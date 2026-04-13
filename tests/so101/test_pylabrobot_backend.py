@@ -11,7 +11,6 @@ from so101.arms import ArmConfig, DualArmConfig, DualArmController
 from so101.pipette import DigitalPipette, PipetteConfig
 from so101.pylabrobot_backend import SO101Backend, SO101BackendConfig
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
