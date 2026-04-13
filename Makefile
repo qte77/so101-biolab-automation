@@ -42,6 +42,7 @@ DATASET ?= $(HF_USER)/so101-biolab-pipetting
 TASK ?= "Pick up pipette tip and aspirate from well A1"
 NUM_EPISODES ?= 10
 POLICY ?= act
+WANDB ?= 0
 
 
 # MARK: SETUP
@@ -218,14 +219,14 @@ record_episodes: ## Record teleoperation episodes
 		--dataset.streaming_encoding=true \
 		--display_data=true
 
-train_policy: ## Train policy on recorded data
+train_policy: ## Train policy on recorded data (WANDB=1 to enable wandb)
 	lerobot-train \
 		--dataset.repo_id=$(DATASET) \
 		--policy.type=$(POLICY) \
 		--output_dir=outputs/train/$(POLICY)_biolab \
 		--job_name=$(POLICY)_biolab \
 		--policy.device=cuda \
-		--wandb.enable=true
+		--wandb.enable=$(if $(filter 1,$(WANDB)),true,false)
 
 
 # MARK: DEV
