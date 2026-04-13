@@ -61,4 +61,6 @@ exclude = [
     "^https://www\\.hardware-x\\.com",
     # Reddit — 403 to bots
     "^https://www\\.reddit\\.com",
+    # Yaskawa/Motoman — 403 bot protection
+    "^https://knowledge\\.motoman\\.com",
 ]
