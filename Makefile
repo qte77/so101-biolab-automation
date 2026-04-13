@@ -9,7 +9,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge \
+	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_kernel_headers setup_lerobot setup_foxglove \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
 	calibrate_arms start_teleop start_foxglove fetch_urdf record_episodes train_policy \
@@ -178,6 +178,30 @@ setup_diagramforge: ## Clone diagramforge from URL in .gitmodules if missing (no
 			git clone "$$url" diagramforge
 		fi
 	fi
+
+setup_kernel_headers: ## Install kernel headers (needed by lerobot → pynput → evdev)
+	if [ -d "/usr/include/linux" ] && [ -f "/usr/include/linux/input.h" ]; then
+		echo "kernel headers already installed"
+	else
+		echo "Installing kernel headers (evdev build dependency) ..."
+		if command -v dnf > /dev/null 2>&1; then
+			sudo dnf install -y kernel-headers-$$(uname -r)
+		elif command -v apt-get > /dev/null 2>&1; then
+			sudo apt-get update -qq && sudo apt-get install -y -qq linux-headers-$$(uname -r)
+		elif command -v pacman > /dev/null 2>&1; then
+			sudo pacman -S --noconfirm linux-headers
+		else
+			echo "ERROR: Install kernel headers manually for evdev to build"
+			exit 1
+		fi
+	fi
+
+setup_lerobot: setup_uv setup_kernel_headers ## Install LeRobot + Feetech SDK
+	uv sync --group lerobot
+
+setup_foxglove: setup_uv ## Install Foxglove SDK for live visualization
+	uv sync --group foxglove
+
 
 # MARK: HARDWARE
 
