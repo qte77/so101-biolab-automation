@@ -9,7 +9,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_lerobot_deps setup_lerobot setup_foxglove \
+	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_lerobot_deps setup_lerobot \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
 	calibrate_arms start_teleop start_foxglove fetch_urdf record_episodes train_policy \
@@ -46,6 +46,19 @@ WANDB ?= 0
 WRIST_CAM ?= 2
 ENV_CAM ?= 0
 
+# Detect OS and package manager — use in recipes via $(DETECT_PKG_MGR)
+# Sets: PKG_MGR (dnf|apt|pacman|brew), HOST_OS (linux|darwin), HOST_ARCH (x86_64|aarch64|arm64)
+define DETECT_PKG_MGR
+HOST_OS=$$(uname -s | tr '[:upper:]' '[:lower:]')
+HOST_ARCH=$$(uname -m)
+if command -v dnf > /dev/null 2>&1; then PKG_MGR=dnf
+elif command -v apt-get > /dev/null 2>&1; then PKG_MGR=apt
+elif command -v pacman > /dev/null 2>&1; then PKG_MGR=pacman
+elif command -v brew > /dev/null 2>&1; then PKG_MGR=brew
+else PKG_MGR=unknown
+fi
+endef
+
 
 # MARK: SETUP
 
@@ -76,17 +89,15 @@ setup_scad: ## Install OpenSCAD for parametric STL generation
 	if command -v openscad > /dev/null 2>&1; then
 		echo "openscad already installed: $$(openscad --version 2>&1 | head -1)"
 	else
+		$(DETECT_PKG_MGR)
 		echo "Installing OpenSCAD ..."
-		if command -v apt-get > /dev/null 2>&1; then
-			sudo apt-get update -qq && sudo apt-get install -y -qq openscad
-		elif command -v brew > /dev/null 2>&1; then
-			brew install openscad
-		elif command -v snap > /dev/null 2>&1; then
-			sudo snap install openscad
-		else
-			echo "ERROR: No supported package manager found. Install manually: https://openscad.org/downloads"
-			exit 1
-		fi
+		case "$$PKG_MGR" in
+			dnf) sudo dnf install -y openscad ;;
+			apt) sudo apt-get update -qq && sudo apt-get install -y -qq openscad ;;
+			pacman) sudo pacman -S --noconfirm openscad ;;
+			brew) brew install openscad ;;
+			*) echo "ERROR: Install manually: https://openscad.org/downloads"; exit 1 ;;
+		esac
 	fi
 
 setup_slicer: ## Install CuraEngine (preferred) or PrusaSlicer (fallback) for printability validation
@@ -95,18 +106,18 @@ setup_slicer: ## Install CuraEngine (preferred) or PrusaSlicer (fallback) for pr
 	elif command -v prusa-slicer > /dev/null 2>&1; then
 		echo "PrusaSlicer already installed: $$(prusa-slicer --version 2>&1 | head -1)"
 	else
+		$(DETECT_PKG_MGR)
 		echo "Installing CuraEngine (headless slicer) ..."
-		if command -v dnf > /dev/null 2>&1; then
-			sudo dnf install -y curaengine \
-				|| { echo "CuraEngine unavailable, trying PrusaSlicer ..."; sudo dnf install -y prusa-slicer; }
-		elif command -v apt-get > /dev/null 2>&1; then
-			sudo apt-get update -qq && sudo apt-get install -y -qq curaengine \
-				|| { echo "CuraEngine unavailable, trying PrusaSlicer ..."; sudo apt-get install -y -qq prusa-slicer; }
-		elif command -v brew > /dev/null 2>&1; then
-			brew install --cask prusaslicer
-		else
-			echo "WARN: Install manually — https://github.com/Ultimaker/CuraEngine or https://github.com/prusa3d/PrusaSlicer/releases"
-		fi
+		case "$$PKG_MGR" in
+			dnf) sudo dnf install -y curaengine \
+				|| { echo "CuraEngine unavailable, trying PrusaSlicer ..."; sudo dnf install -y prusa-slicer; } ;;
+			apt) sudo apt-get update -qq && sudo apt-get install -y -qq curaengine \
+				|| { echo "CuraEngine unavailable, trying PrusaSlicer ..."; sudo apt-get install -y -qq prusa-slicer; } ;;
+			pacman) sudo pacman -S --noconfirm cura-engine \
+				|| { echo "CuraEngine unavailable, trying PrusaSlicer ..."; sudo pacman -S --noconfirm prusa-slicer; } ;;
+			brew) brew install --cask prusaslicer ;;
+			*) echo "WARN: Install manually — https://github.com/Ultimaker/CuraEngine or https://github.com/prusa3d/PrusaSlicer/releases" ;;
+		esac
 	fi
 
 setup_node: ## Install Node.js user-locally to ~/.local/share/node (no sudo)
@@ -115,9 +126,13 @@ setup_node: ## Install Node.js user-locally to ~/.local/share/node (no sudo)
 	elif command -v node > /dev/null 2>&1; then
 		echo "node already installed on PATH: $$(node --version)"
 	else
-		echo "Installing Node.js $(NODE_VERSION) to $(NODE_DIR) ..."
+		$(DETECT_PKG_MGR)
+		NODE_ARCH=$$HOST_ARCH
+		case "$$NODE_ARCH" in x86_64) NODE_ARCH=x64 ;; aarch64|arm64) NODE_ARCH=arm64 ;; esac
+		echo "Installing Node.js $(NODE_VERSION) ($$HOST_OS-$$NODE_ARCH) to $(NODE_DIR) ..."
 		mkdir -p $(NODE_DIR)
-		curl --proto '=https' --tlsv1.2 -sSfL https://nodejs.org/dist/v$(NODE_VERSION)/node-v$(NODE_VERSION)-linux-x64.tar.xz \
+		curl --proto '=https' --tlsv1.2 -sSfL \
+			"https://nodejs.org/dist/v$(NODE_VERSION)/node-v$(NODE_VERSION)-$$HOST_OS-$$NODE_ARCH.tar.xz" \
 			| tar -xJ --strip-components=1 -C $(NODE_DIR) \
 			|| { echo "Install failed — download manually from https://nodejs.org/dist/v$(NODE_VERSION)/"; exit 1; }
 	fi
@@ -141,8 +156,15 @@ setup_lychee: ## Install lychee link checker user-locally to ~/.local/bin (no su
 	if command -v lychee > /dev/null 2>&1; then
 		echo "lychee already installed: $$(lychee --version)"
 	else
+		$(DETECT_PKG_MGR)
+		case "$$HOST_OS" in \
+		linux) LYCHEE_TARGET="$$HOST_ARCH-unknown-linux-gnu" ;; \
+		darwin) LYCHEE_TARGET="$$HOST_ARCH-apple-darwin" ;; \
+		*) echo "ERROR: unsupported OS — download manually from https://github.com/lycheeverse/lychee/releases"; exit 1 ;; \
+		esac
 		mkdir -p ~/.local/bin
-		curl --proto '=https' --tlsv1.2 -sSfL https://github.com/lycheeverse/lychee/releases/latest/download/lychee-x86_64-unknown-linux-gnu.tar.gz \
+		curl --proto '=https' --tlsv1.2 -sSfL \
+			"https://github.com/lycheeverse/lychee/releases/latest/download/lychee-$$LYCHEE_TARGET.tar.gz" \
 			| tar xz -C ~/.local/bin \
 			&& echo "lychee installed to ~/.local/bin — ensure it is on PATH" \
 			|| echo "Install failed — download manually from https://github.com/lycheeverse/lychee/releases"
@@ -179,43 +201,26 @@ setup_diagramforge: ## Clone diagramforge from URL in .gitmodules if missing (no
 		fi
 	fi
 
-setup_lerobot_deps: ## Install system deps for lerobot (Linux only: kernel headers, cmake, libav)
-	case "$$(uname -s)" in \
-	Linux) \
-		if command -v dnf > /dev/null 2>&1; then \
-			sudo dnf install -y kernel-devel cmake gcc g++ \
-				libavformat-free-devel libavcodec-free-devel libavdevice-free-devel \
-				libavutil-free-devel libswscale-free-devel libswresample-free-devel \
-				libavfilter-free-devel pkg-config; \
-		elif command -v apt-get > /dev/null 2>&1; then \
-			sudo apt-get update -qq && sudo apt-get install -y -qq \
-				linux-headers-$$(uname -r) cmake build-essential pkg-config \
-				libavformat-dev libavcodec-dev libavdevice-dev \
-				libavutil-dev libswscale-dev libswresample-dev libavfilter-dev; \
-		elif command -v pacman > /dev/null 2>&1; then \
-			sudo pacman -S --noconfirm linux-headers cmake base-devel ffmpeg; \
-		else \
-			echo "ERROR: unsupported package manager — install kernel headers, cmake, and libav dev packages manually"; \
-			exit 1; \
-		fi ;; \
-	Darwin) \
-		echo "macOS: evdev not needed (pynput uses Quartz). Installing cmake + ffmpeg ..." ; \
-		if command -v brew > /dev/null 2>&1; then \
-			brew install cmake ffmpeg pkg-config; \
-		else \
-			echo "ERROR: install Homebrew first — https://brew.sh"; \
-			exit 1; \
-		fi ;; \
-	*) \
-		echo "ERROR: unsupported OS — lerobot requires Linux for hardware control"; \
-		exit 1 ;; \
+setup_lerobot_deps: ## Install system deps for lerobot (kernel headers, cmake, libav)
+	$(DETECT_PKG_MGR)
+	echo "Installing lerobot build dependencies ($$PKG_MGR on $$HOST_OS) ..."
+	case "$$PKG_MGR" in
+		dnf) sudo dnf install -y kernel-devel cmake gcc g++ pkg-config \
+			libavformat-free-devel libavcodec-free-devel libavdevice-free-devel \
+			libavutil-free-devel libswscale-free-devel libswresample-free-devel \
+			libavfilter-free-devel ;;
+		apt) sudo apt-get update -qq && sudo apt-get install -y -qq \
+			linux-headers-$$(uname -r) cmake build-essential pkg-config \
+			libavformat-dev libavcodec-dev libavdevice-dev \
+			libavutil-dev libswscale-dev libswresample-dev libavfilter-dev ;;
+		pacman) sudo pacman -S --noconfirm linux-headers cmake base-devel ffmpeg ;;
+		brew) echo "macOS: evdev not needed (pynput uses Quartz)" && \
+			brew install cmake ffmpeg pkg-config ;;
+		*) echo "ERROR: unsupported package manager — install kernel headers, cmake, and libav dev packages manually"; exit 1 ;;
 	esac
 
-setup_lerobot: setup_uv setup_lerobot_deps ## Install LeRobot + Feetech SDK
-	uv sync --group lerobot
-
-setup_foxglove: setup_uv ## Install Foxglove SDK for live visualization
-	uv sync --group foxglove
+setup_lerobot: setup_uv setup_lerobot_deps ## Install LeRobot + Feetech SDK + Foxglove
+	uv sync --group lerobot --group foxglove
 
 
 # MARK: HARDWARE
