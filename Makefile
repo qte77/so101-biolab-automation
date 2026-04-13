@@ -107,6 +107,8 @@ setup_slicer: ## Install CuraEngine (preferred) or PrusaSlicer (fallback) for pr
 	fi
 
 setup_node: ## Install Node.js user-locally to ~/.local/share/node (no sudo)
+# After install, add to PATH permanently:
+#   echo 'export PATH="$$HOME/.local/share/node/bin:$$PATH"' >> ~/.bashrc
 	if [ -x "$(NODE_BIN)/node" ]; then
 		echo "node already installed: $$($(NODE_BIN)/node --version) (at $(NODE_DIR))"
 	elif command -v node > /dev/null 2>&1; then
