@@ -91,6 +91,13 @@ class DualArmController:
 
     def connect(self) -> None:
         """Connect to all configured arms via LeRobot."""
+        import os
+
+        if os.environ.get("SO101_STUB_MODE") == "1":
+            logger.warning("SO101_STUB_MODE=1 — running in stub mode")
+            self._stub_mode = True
+            self._connected = True
+            return
         try:
             from lerobot.robots.so_follower import (  # pyright: ignore[reportMissingImports]
                 SO101Follower,  # pyright: ignore[reportUnknownVariableType]

@@ -24,6 +24,7 @@ dev = [
     "pyright>=1.1",
     "complexipy>=0.8",
     "types-PyYAML>=6.0",
+    "opencv-stubs>=0.1.3",
 ]
 test = [
     "pytest>=8.0",
@@ -33,10 +34,18 @@ test = [
     "inline-snapshot>=0.18",
     "httpx>=0.27",
 ]
-# train = [  # ACT policy training — uncomment when GPU available
-#     "torch>=2.4",
-#     "wandb>=0.18",
-# ]
+lerobot = [  # SO-101 teleoperation, recording, training (pulls torch)
+    "lerobot[feetech]",
+]
+train = [  # ACT policy training — requires GPU; wandb opt-in via WANDB=1
+    "lerobot[feetech]",
+    "wandb>=0.18",
+]
+foxglove = [  # Live visualization + MCAP recording
+    "foxglove-sdk>=0.4",
+    "scipy>=1.0",
+    "yourdfpy",
+]
 cad = [
     "build123d>=0.10",
 ]
@@ -74,6 +83,7 @@ max-complexity = 10
 "tests/**" = ["S101", "S603", "ANN001", "ANN201", "D100", "D101", "D102", "D103", "D104", "D107"]
 "app/hardware/cad/**" = ["S603", "ANN"]   # CAD scripts excluded from pyright; annotations deferred
 "app/hardware/**" = ["S603"]    # subprocess calls run trusted internal scripts
+"app/so101/foxglove_viz.py" = ["ANN401"]  # hardware CLI — untyped deps return Any
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -83,8 +93,12 @@ pythonVersion = "3.12"
 typeCheckingMode = "strict"
 extraPaths = ["app"]
 include = ["app/so101", "app/dashboard"]
-exclude = ["app/hardware"]  # CAD/render/slicer use dynamic imports without type stubs
+exclude = [
+    "app/hardware",           # CAD/render/slicer use dynamic imports without type stubs
+    "app/so101/foxglove_viz.py",  # hardware CLI — foxglove/lerobot/scipy/yourdfpy all untyped
+]
 reportMissingImports = "error"
+reportMissingTypeStubs = "none"  # lerobot, pyserial — installed but untyped
 
 [tool.pytest.ini_options]
 pythonpath = ["app"]
@@ -96,3 +110,6 @@ markers = [
     "network: tests requiring network access",
     "hardware: tests requiring physical SO-101 arms or cameras",
 ]
+
+[tool.coverage.run]
+omit = ["app/so101/foxglove_viz.py"]  # hardware CLI — requires real arms + cameras

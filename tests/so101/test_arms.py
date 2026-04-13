@@ -72,7 +72,7 @@ def stub_config() -> DualArmConfig:
 
 @pytest.fixture
 def connected_stub(stub_config: DualArmConfig) -> DualArmController:
-    """Create a connected stub controller."""
+    """Create a connected stub controller (forces stub mode even if lerobot installed)."""
     ctrl = DualArmController(stub_config)
     ctrl.connect()
     return ctrl

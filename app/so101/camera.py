@@ -56,9 +56,9 @@ class CameraPipeline:
 
         for name, cfg in self.cameras.items():
             cap = cv2.VideoCapture(cfg.device_index)
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.width)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.height)
-            cap.set(cv2.CAP_PROP_FPS, cfg.fps)
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.width)  # pyright: ignore[reportUnknownMemberType]
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.height)  # pyright: ignore[reportUnknownMemberType]
+            cap.set(cv2.CAP_PROP_FPS, cfg.fps)  # pyright: ignore[reportUnknownMemberType]
 
             if not cap.isOpened():
                 logger.warning("Failed to open camera %s (device %d)", name, cfg.device_index)
