@@ -234,6 +234,9 @@ check_prints: ## Run slicer printability checks on STLs (CuraEngine or PrusaSlic
 
 render_all: render_parts check_prints ## Generate parts + validate printability
 
+find_port: ## Identify serial port for a single board (unplug USB when prompted)
+	lerobot-find-port
+
 calibrate_arms: ## Calibrate all arms (leader + followers)
 	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_A_PORT) --robot.id=arm_a
 	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_B_PORT) --robot.id=arm_b

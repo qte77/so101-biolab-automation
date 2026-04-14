@@ -47,7 +47,7 @@ Run this for **every connected arm** at the start of each session.
 ### Find ports
 
 ```bash
-uv run lerobot-find-port
+uv run lerobot-find-port   # or: make find_port
 ```
 
 Interactive: lists ports, asks you to **unplug** the USB cable, press Enter, then detects which port disappeared.
