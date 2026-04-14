@@ -54,5 +54,6 @@ ralph/worktrees/
 /.ripgreprc
 /.claude/agents
 /.claude/commands
+/.claude/worktrees/
 /.idea
 /.vscode
