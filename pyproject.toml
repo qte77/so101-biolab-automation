@@ -61,6 +61,7 @@ packages = ["app/so101", "app/dashboard"]
 
 [project.scripts]
 so101-patch-lerobot = "so101.patch_lerobot:main"
+so101-scan-servos = "so101.scan_servos:main"
 so101-demo = "so101.run_demo:main"
 so101-coord = "so101.coordinate_cmd:main"
 

@@ -35,12 +35,13 @@ sudo chmod 666 /dev/ttyACM0 /dev/ttyACM1 /dev/ttyACM2
 
 Run this for **every connected arm** at the start of each session.
 
-> **Note:** Resets on unplug/replug. For persistence, use a udev rule:
+> **Note:** Resets on unplug/replug. For persistence, install a udev rule:
 >
 > ```bash
-> sudo sh -c 'echo "SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"1a86\", MODE=\"0666\"" > /etc/udev/rules.d/99-waveshare.rules'
-> sudo udevadm control --reload-rules && sudo udevadm trigger
+> make install_udev
 > ```
+>
+> (writes `/etc/udev/rules.d/99-waveshare.rules` making Waveshare boards world-rw).
 
 ## 2. USB Enumeration
 
@@ -54,23 +55,13 @@ Interactive: lists ports, asks you to **unplug** the USB cable, press Enter, the
 
 ### Verify with servo scan
 
-```python
-from scservo_sdk import PortHandler, PacketHandler
-
-port = PortHandler("/dev/ttyACM0")
-port.openPort()
-port.setBaudRate(1000000)
-ph = PacketHandler(0)
-
-for sid in range(21):
-    model, result, error = ph.ping(port, sid)
-    if result == 0:
-        print(f"ID {sid}: model={model} err={error}")
-
-port.closePort()
+```bash
+uv run so101-scan-servos --port=/dev/ttyACM0   # or: make scan_servos PORT=/dev/ttyACM0
 ```
 
-Expected output for one arm: 6 servos (IDs 1-6), model 777 (STS3215).
+Expected output for one arm: 6 servos (IDs 1-6), model 777 (STS3215),
+with firmware versions listed. A warning is emitted if firmware versions
+differ — run `make patch_lerobot` in that case.
 
 ### Port assignments
 
