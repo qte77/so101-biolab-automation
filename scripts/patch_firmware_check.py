@@ -191,6 +191,7 @@ def _apply_patch(path: Path, original: str, patched: str, name: str, *, revert: 
 
 
 def main() -> None:
+    """Apply or revert lerobot patches based on CLI flags."""
     revert = "--revert" in sys.argv
     action = "Reverting" if revert else "Applying"
     print(f"{action} lerobot patches for mixed firmware workaround...")

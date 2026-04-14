@@ -84,6 +84,7 @@ max-complexity = 10
 "app/hardware/cad/**" = ["S603", "ANN"]   # CAD scripts excluded from pyright; annotations deferred
 "app/hardware/**" = ["S603"]    # subprocess calls run trusted internal scripts
 "app/so101/foxglove_viz.py" = ["ANN401"]  # hardware CLI — untyped deps return Any
+"scripts/patch_firmware_check.py" = ["E501"]  # triple-quoted strings mirror lerobot source verbatim
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
