@@ -46,6 +46,14 @@ uv run pytest -m "not hardware"
 - Run explicitly: `uv run pytest -m hardware`
 - Require physical arms connected and calibrated
 
+### LeRobot Compatibility Tests (opt-in)
+
+- Tag with `@pytest.mark.lerobot` — excluded from `make test` by default
+- Run explicitly: `uv run --group lerobot pytest -m lerobot`
+- Guards the monkey-patches in `app/so101/patch_lerobot.py` against
+  upstream lerobot drift — runs when lerobot is upgraded or before
+  release, not on every CI pass (lerobot's dep tree is heavy: torch/CUDA)
+
 ### TDD Red-Green-Refactor
 
 - **RED**: Write a failing test that defines the expected behavior

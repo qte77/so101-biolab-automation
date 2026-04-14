@@ -110,12 +110,13 @@ reportMissingTypeStubs = "none"  # lerobot, pyserial — installed but untyped
 [tool.pytest.ini_options]
 pythonpath = ["app"]
 testpaths = ["tests"]
-addopts = "--strict-markers -m 'not hardware and not network'"
+addopts = "--strict-markers -m 'not hardware and not network and not lerobot'"
 asyncio_mode = "auto"
 markers = [
     "integration: tests loading real config files",
     "network: tests requiring network access",
     "hardware: tests requiring physical SO-101 arms or cameras",
+    "lerobot: tests requiring lerobot package installed (uv sync --group lerobot)",
 ]
 
 [tool.coverage.run]

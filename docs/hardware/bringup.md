@@ -130,6 +130,19 @@ What it does:
 This patches the **installed** lerobot package in-place (under `.venv/`).
 The patch is overwritten by `uv sync` — re-run the script after reinstalling.
 
+### Verifying patch compatibility after lerobot upgrade
+
+The patches use exact-string replacement against lerobot source. When
+bumping the lerobot version, run the compatibility guard tests to catch
+upstream drift before it silently breaks calibration:
+
+```bash
+uv run --group lerobot pytest -m lerobot
+```
+
+If they fail, update the `ORIGINAL` / `PATCHED` constants in
+`app/so101/patch_lerobot.py` to match the new lerobot source.
+
 > **Warning:** Sequential reads are slower than sync reads. This is acceptable
 > for calibration and prototyping but may add latency during teleoperation.
 > For production use, flash all servos to the same firmware version (Option A).
