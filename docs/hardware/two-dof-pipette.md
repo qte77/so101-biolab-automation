@@ -49,7 +49,7 @@ pipette mode, leader-follower teleop doesn't make much sense anyway).
 
 ### Option B — Patch `SOFollower` to use only 2 motors
 
-Add a 4th patch to `scripts/patch_firmware_check.py` that rewrites the motor
+Add a 4th patch to `app/so101/patch_lerobot.py` that rewrites the motor
 dict in `SOFollower.__init__` to only `shoulder_pan` and `shoulder_lift`.
 
 **Pros:** Reuse `lerobot-calibrate`, `lerobot-teleoperate`, etc.

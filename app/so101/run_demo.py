@@ -1,13 +1,13 @@
 """End-to-end demo orchestrator for so101-biolab-automation.
 
 Usage:
-    python scripts/run_demo.py                          # full demo (all use cases)
-    python scripts/run_demo.py --use-case uc1_single --well A1 --volume 50
-    python scripts/run_demo.py --use-case uc1_row --row A
-    python scripts/run_demo.py --use-case uc1_col --col 1
-    python scripts/run_demo.py --use-case uc1_full
-    python scripts/run_demo.py --use-case uc2
-    python scripts/run_demo.py --use-case uc3
+    uv run so101-demo                                   # full demo (all use cases)
+    uv run so101-demo --use-case uc1_single --well A1 --volume 50
+    uv run so101-demo --use-case uc1_row --row A
+    uv run so101-demo --use-case uc1_col --col 1
+    uv run so101-demo --use-case uc1_full
+    uv run so101-demo --use-case uc2
+    uv run so101-demo --use-case uc3
 """
 
 from __future__ import annotations

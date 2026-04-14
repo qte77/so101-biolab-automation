@@ -15,8 +15,8 @@ This script patches the installed lerobot package in-place:
 Re-run after `uv sync` reinstalls lerobot.
 
 Usage:
-    python scripts/patch_firmware_check.py          # apply both patches
-    python scripts/patch_firmware_check.py --revert  # restore originals
+    uv run so101-patch-lerobot           # apply both patches
+    uv run so101-patch-lerobot --revert  # restore originals
 """
 
 from __future__ import annotations

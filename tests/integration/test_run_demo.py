@@ -11,7 +11,7 @@ class TestRunDemo:
 
     def _run(self, *args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
-            [sys.executable, "scripts/run_demo.py", *args],
+            [sys.executable, "-m", "so101.run_demo", *args],
             capture_output=True,
             text=True,
             timeout=10,

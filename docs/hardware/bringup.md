@@ -120,9 +120,11 @@ The issue is only with sync (batch) reads across the shared bus.
 The patch script fixes both:
 
 ```bash
-uv run python scripts/patch_firmware_check.py          # apply
-uv run python scripts/patch_firmware_check.py --revert  # restore
+uv run so101-patch-lerobot           # apply
+uv run so101-patch-lerobot --revert  # restore
 ```
+
+Or via Makefile: `make patch_lerobot` / `make patch_lerobot_revert`.
 
 What it does:
 
@@ -146,7 +148,7 @@ The patch is overwritten by `uv sync` — re-run the script after reinstalling.
 Before calibrating any arm:
 
 1. **Permissions:** `sudo chmod 666 /dev/ttyACM*` (or udev rule)
-2. **Patches:** `uv run python scripts/patch_firmware_check.py` (if mixed firmware)
+2. **Patches:** `uv run so101-patch-lerobot` (if mixed firmware)
 3. **Power:** 5V 4A supply connected and on for each Waveshare board
 4. **Verify servos:** Run the servo scan script (section 2) to confirm 6 servos respond
 
@@ -257,7 +259,7 @@ After grippers are working:
 | `lerobot-find-port` finds nothing | Didn't unplug cable during prompt | Unplug USB, press Enter, replug when told |
 | `lerobot-find-port` multiple ports | Multiple boards plugged in | Use `ls /dev/ttyACM*` instead |
 | `invalid choice: 'so101_leader'` for `--robot.type` | Leader uses `--teleop.type`, not `--robot.type` | Use `--teleop.type=so101_leader` |
-| Firmware version mismatch | Servos on different FW versions | `uv run python scripts/patch_firmware_check.py` or flash with FD |
+| Firmware version mismatch | Servos on different FW versions | `uv run so101-patch-lerobot` or flash with FD |
 | `Incorrect status packet!` on sync_read | FW 3.9 corrupts batch responses | Patch script adds sequential fallback |
 | `Negative values are not allowed` | Glitchy read → negative via sign-magnitude decode | Patch script adds calibration clamp |
 | `Input voltage error!` | Transient servo error during rapid reads | Patch script suppresses; check power if persistent |

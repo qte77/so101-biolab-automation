@@ -349,13 +349,19 @@ validate: lint check_types test_cov check_complexity ## Full gate (lint + types 
 
 
 eval_policy: ## Evaluate trained policy
-	uv run python scripts/run_demo.py --mode=eval --arm-port=$(FOLLOWER_A_PORT)
+	uv run so101-demo --mode=eval --arm-port=$(FOLLOWER_A_PORT)
 
 serve_dashboard: ## Start remote dashboard
 	uv run uvicorn app.dashboard.server:app --host 0.0.0.0 --port 8080 --reload
 
 run_demo: ## Run full demo pipeline
-	uv run python scripts/run_demo.py --mode=full
+	uv run so101-demo --mode=full
+
+patch_lerobot: ## Apply lerobot patches for mixed STS3215 firmware (prototyping only)
+	uv run so101-patch-lerobot
+
+patch_lerobot_revert: ## Revert lerobot patches
+	uv run so101-patch-lerobot --revert
 
 
 # MARK: HELP

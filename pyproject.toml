@@ -59,6 +59,11 @@ pylabrobot = [
 [tool.hatch.build.targets.wheel]
 packages = ["app/so101", "app/dashboard"]
 
+[project.scripts]
+so101-patch-lerobot = "so101.patch_lerobot:main"
+so101-demo = "so101.run_demo:main"
+so101-coord = "so101.coordinate_cmd:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -84,7 +89,7 @@ max-complexity = 10
 "app/hardware/cad/**" = ["S603", "ANN"]   # CAD scripts excluded from pyright; annotations deferred
 "app/hardware/**" = ["S603"]    # subprocess calls run trusted internal scripts
 "app/so101/foxglove_viz.py" = ["ANN401"]  # hardware CLI — untyped deps return Any
-"scripts/patch_firmware_check.py" = ["E501"]  # triple-quoted strings mirror lerobot source verbatim
+"app/so101/patch_lerobot.py" = ["E501"]  # triple-quoted strings mirror lerobot source verbatim
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

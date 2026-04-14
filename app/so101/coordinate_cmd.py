@@ -1,9 +1,9 @@
 """Send coordinate-based commands to an SO-101 arm.
 
 Usage:
-    python scripts/coordinate_cmd.py --well A1 --action aspirate
-    python scripts/coordinate_cmd.py --well B3 --action dispense
-    python scripts/coordinate_cmd.py --park
+    uv run so101-coord --well A1 --action aspirate
+    uv run so101-coord --well B3 --action dispense
+    uv run so101-coord --park
 """
 
 from __future__ import annotations

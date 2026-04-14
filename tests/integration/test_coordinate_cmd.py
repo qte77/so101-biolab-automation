@@ -11,7 +11,7 @@ class TestCoordinateCmd:
 
     def _run(self, *args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
-            [sys.executable, "scripts/coordinate_cmd.py", *args],
+            [sys.executable, "-m", "so101.coordinate_cmd", *args],
             capture_output=True,
             text=True,
             timeout=10,
