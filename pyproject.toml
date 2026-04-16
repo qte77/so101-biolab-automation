@@ -120,5 +120,37 @@ markers = [
     "lerobot: tests requiring lerobot package installed (uv sync --group lerobot)",
 ]
 
+[tool.bumpversion]
+current_version = "0.1.0"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+commit = true
+tag = true
+allow_dirty = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+message = "Bump version: {current_version} → {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "README.md"
+search = "version-{current_version}--alpha-58f4c2"
+replace = "version-{new_version}-58f4c2"
+
+[[tool.bumpversion.files]]
+filename = "CHANGELOG.md"
+search = """
+## [Unreleased]
+"""
+replace = """
+## [Unreleased]
+
+## [{new_version}] - {now:%Y-%m-%d}
+"""
+
 [tool.coverage.run]
 omit = ["app/so101/foxglove_viz.py"]  # hardware CLI — requires real arms + cameras
