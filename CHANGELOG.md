@@ -6,6 +6,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ### Added
 
+- **Hardware bringup guide** (`docs/hardware/bringup.md`): step-by-step SO-101 calibration, teleoperation, firmware troubleshooting with 13-row diagnostic table
+- **2-DOF pipette variant** (`docs/hardware/two-dof-pipette.md`): analysis of using SO-101 as 2-axis positioner with fixed electronic pipette mount
+- **Mixed-firmware patch tool** (`app/so101/patch_lerobot.py`): monkey-patches lerobot 0.4.4 to tolerate STS3215 servos with mixed firmware (3.9 + 3.10). Entry point: `so101-patch-lerobot`
+- **Servo scan tool** (`app/so101/scan_servos.py`): pre-calibration sanity check reporting servo IDs and firmware versions. Entry point: `so101-scan-servos`
+- **`[project.scripts]` entry points**: `so101-demo`, `so101-coord`, `so101-scan-servos`, `so101-patch-lerobot` — replaces loose `scripts/` directory
+- **Makefile targets**: `find_port`, `scan_servos`, `install_udev`, `bringup`, `patch_lerobot`, `patch_lerobot_revert`
+- **Opt-in `lerobot` pytest marker** for patch compatibility guard tests (`tests/integration/test_patch_lerobot_compat.py`)
+- **9 orphaned docs** added to CONTRIBUTING.md documentation hierarchy table
+
 - **Prusa MK4 slicer profiles** (4 new `.ini` files under `app/hardware/slicer/profiles/`): `prusa_mk4_pla_02mm` (production PLA/PLA+), `prusa_mk4_pla_prototype` (fast 0.3mm fit-check), `prusa_mk4_pla_prototype_supports` (with auto-supports), `prusa_mk4_tpu_02mm` (TPU 95A)
 - **PrusaLink API operations reference** (`docs/hardware/prusa-mk4-ops.md`): endpoint catalog, digest auth, upload + print-after-upload curl examples, CAD-to-print pipeline
 - **dPette+ 3D scan reference data**: `hardware/scans/dpette/0410_02_mesh.{ply,stl}` (1:1 mm Revopoint scan) + `hardware/scans/dpette/README.md` (provenance, scale, intended use)
@@ -32,6 +41,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ### Changed
 
+- **Scripts moved** from `scripts/` to `app/so101/` as proper package entry points via hatchling
+- **Integration tests refactored** to call `main()` directly (not subprocess) — coverage: 75% → 80%
+- **ELN client** (`app/so101/eln_client.py`): 10 inline pyright ignores replaced with single `Any` cast on untyped `elabapi_python` import
+- **Coverage gate** enforced at 80% in CI (`--cov-fail-under=80`)
 - **Code / assets split**: generated STL + SVG outputs moved from `app/hardware/{stl,svg}/` to top-level `hardware/{stl,svg}/`. Code (CAD scripts, `render.py`, `slicer/`, `parts.json`) stays under `app/hardware/`. New top-level `hardware/scans/` for reference 3D scan data. `render.py`, `slicer/validate.py`, `cad/util/export.py`, `tests/_paths.py` all updated to resolve asset paths via a new `ASSETS_DIR` anchor.
 - `app/hardware/README.md` restructured: removed duplicated Parts Table (→ points at `parts.json` as single source of truth + `jq` query examples) and duplicated layout description (→ points at `docs/architecture.md`). Added dPette+ 8-ch Mount + dPette single-channel Mount + Scan Reference Data assembly sections, Prusa MK4 slicer profile catalog.
 - `parts.json` `notes` fields trimmed to short descriptive labels — provenance prose moved to commit history per DRY.
@@ -50,6 +63,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ### Fixed
 
+- Fenced code blocks missing language specifier (MD040) in bringup.md and prusa-mk4-ops.md
+- Hardcoded `/tmp` paths in test_eln_client.py replaced with `tmp_path` fixture (Bandit B108)
+- `feetechrc.com` excluded from lychee link checker (TLS handshake failure in CI)
 - `app/hardware/cad/util/export.py` (`export_part`): handles `ShapeList` results from build123d boolean operations via a `_to_compound` coercion helper (disconnected shapes no longer fail with `AttributeError: ShapeList has no wrapped`)
 - `tests/so101/test_arms.py`: pre-existing ruff drift — B007 (unused loop var `arm_id` → `_arm_id`) + RUF043 (non-raw regex `"[Ll]eader"` → `r"[Ll]eader"` in `pytest.raises(match=...)`)
 - `arms.py`: stub-safe `get_observation` / `send_action` when LeRobot unavailable
