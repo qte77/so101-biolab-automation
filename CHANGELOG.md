@@ -4,6 +4,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-16
+
 ### Added
 
 - **Hardware bringup guide** (`docs/hardware/bringup.md`): step-by-step SO-101 calibration, teleoperation, firmware troubleshooting with 13-row diagnostic table
