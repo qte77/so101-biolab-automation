@@ -18,6 +18,11 @@ Toward general-purpose voice/agent-to-print. This repo is the first showcase.
 
 **Agent loop** — goal spec → agent generates CAD → slicer validates → printer API → camera + VLM inspects → agent fixes → reprints autonomously
 
+**Hardware bringup:** See [hardware/bringup.md](hardware/bringup.md) for the
+standard 6-DOF SO-101 calibration + teleoperation procedure, and
+[hardware/two-dof-pipette.md](hardware/two-dof-pipette.md) for the simplified
+2-axis pipetting variant.
+
 **Milestones:**
 
 1. **Done** — build123d + CuraEngine CLI pipeline (`make render_parts`, `make check_prints`)

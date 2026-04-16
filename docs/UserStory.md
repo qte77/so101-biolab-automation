@@ -29,7 +29,7 @@ Each use case (UC) groups one or more user stories (US) with acceptance criteria
 - [ ] Pipette fill returns to 0 after dispense
 - [ ] Invalid well name raises clear error
 
-**Command:** `python scripts/run_demo.py --use-case uc1_single --well A1 --volume 50`
+**Command:** `uv run so101-demo --use-case uc1_single --well A1 --volume 50`
 
 ### US-1.2: Row/Column Pipetting
 
@@ -44,8 +44,8 @@ Each use case (UC) groups one or more user stories (US) with acceptance criteria
 
 **Commands:**
 
-- `python scripts/run_demo.py --use-case uc1_row --row A --volume 25`
-- `python scripts/run_demo.py --use-case uc1_col --col 1 --volume 20`
+- `uv run so101-demo --use-case uc1_row --row A --volume 25`
+- `uv run so101-demo --use-case uc1_col --col 1 --volume 20`
 
 ### US-1.3: Full Plate Pipetting
 
@@ -57,7 +57,7 @@ Each use case (UC) groups one or more user stories (US) with acceptance criteria
 - [ ] Pipette never overflows (each well is an independent aspirate→dispense)
 - [ ] Sequence follows row-major order (A1, A2, ..., H12)
 
-**Command:** `python scripts/run_demo.py --use-case uc1_full --volume 20`
+**Command:** `uv run so101-demo --use-case uc1_full --volume 20`
 
 ## Fridge Operations (UC2)
 
@@ -73,7 +73,7 @@ Each use case (UC) groups one or more user stories (US) with acceptance criteria
 - [ ] Gripper grabs item from fridge shelf
 - [ ] Arm moves item to park (safe workspace) position
 
-**Command:** `python scripts/run_demo.py --use-case uc2`
+**Command:** `uv run so101-demo --use-case uc2`
 
 ## Tool Interchange (UC3)
 
@@ -88,7 +88,7 @@ Each use case (UC) groups one or more user stories (US) with acceptance criteria
 - [ ] Supports 3 tools: pipette, gripper, fridge hook
 - [ ] Changing to the already-equipped tool is a no-op
 
-**Command:** `python scripts/run_demo.py --use-case uc3`
+**Command:** `uv run so101-demo --use-case uc3`
 
 ## Remote Oversight (UC4)
 
@@ -132,7 +132,7 @@ Each use case (UC) groups one or more user stories (US) with acceptance criteria
 
 **Commands:**
 
-- `python scripts/run_demo.py --use-case uc5_gantry --volume 50`
+- `uv run so101-demo --use-case uc5_gantry --volume 50`
 
 ## Developer Stories
 

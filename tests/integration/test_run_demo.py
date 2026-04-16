@@ -1,30 +1,37 @@
-"""Tests for run_demo.py script."""
+"""Tests for run_demo.py — calls main() directly for coverage instrumentation."""
 
 from __future__ import annotations
 
-import subprocess
-import sys
+import logging
+from typing import TYPE_CHECKING
+
+from so101.run_demo import main
+
+if TYPE_CHECKING:
+    import pytest
 
 
 class TestRunDemo:
-    """Test demo orchestrator script via subprocess."""
+    """Test demo orchestrator by invoking main() in-process."""
 
-    def _run(self, *args: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
-            [sys.executable, "scripts/run_demo.py", *args],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-
-    def test_demo_full_mode(self) -> None:
+    def test_demo_full_mode(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
         """--mode full exits 0 in stub mode."""
-        result = self._run("--mode", "full")
-        assert result.returncode == 0
-        assert "Demo complete" in result.stderr
+        monkeypatch.setattr("sys.argv", ["so101-demo", "--mode", "full"])
+        with caplog.at_level(logging.INFO):
+            main()
+        assert "Demo complete" in caplog.text
 
-    def test_demo_eval_mode(self) -> None:
+    def test_demo_eval_mode(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
         """--mode eval exits 0 in stub mode."""
-        result = self._run("--mode", "eval")
-        assert result.returncode == 0
-        assert "Demo complete" in result.stderr
+        monkeypatch.setattr("sys.argv", ["so101-demo", "--mode", "eval"])
+        with caplog.at_level(logging.INFO):
+            main()
+        assert "Demo complete" in caplog.text

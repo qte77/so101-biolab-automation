@@ -234,6 +234,26 @@ check_prints: ## Run slicer printability checks on STLs (CuraEngine or PrusaSlic
 
 render_all: render_parts check_prints ## Generate parts + validate printability
 
+find_port: ## Identify serial port for a single board (unplug USB when prompted)
+	lerobot-find-port
+
+scan_servos: ## Scan a port for STS3215 servos (override: PORT=/dev/ttyACM1)
+	uv run so101-scan-servos --port=$(or $(PORT),/dev/ttyACM0)
+
+install_udev: ## Install udev rule for Waveshare boards (makes ttyACM* world-rw)
+	echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", MODE="0666"' | \
+		sudo tee /etc/udev/rules.d/99-waveshare.rules
+	sudo udevadm control --reload-rules
+	sudo udevadm trigger
+	echo "udev rule installed. Replug the Waveshare board(s)."
+
+bringup: patch_lerobot scan_servos ## Guided first-bringup: patch lerobot + scan servos
+	echo ""
+	echo "Next steps:"
+	echo "  1. If scan shows mixed firmware, patches are already applied."
+	echo "  2. Run 'make calibrate_arms' (or calibrate individually)."
+	echo "  3. Run 'make start_teleop' to verify leader → follower."
+
 calibrate_arms: ## Calibrate all arms (leader + followers)
 	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_A_PORT) --robot.id=arm_a
 	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_B_PORT) --robot.id=arm_b
@@ -349,13 +369,19 @@ validate: lint check_types test_cov check_complexity ## Full gate (lint + types 
 
 
 eval_policy: ## Evaluate trained policy
-	uv run python scripts/run_demo.py --mode=eval --arm-port=$(FOLLOWER_A_PORT)
+	uv run so101-demo --mode=eval --arm-port=$(FOLLOWER_A_PORT)
 
 serve_dashboard: ## Start remote dashboard
 	uv run uvicorn app.dashboard.server:app --host 0.0.0.0 --port 8080 --reload
 
 run_demo: ## Run full demo pipeline
-	uv run python scripts/run_demo.py --mode=full
+	uv run so101-demo --mode=full
+
+patch_lerobot: ## Apply lerobot patches for mixed STS3215 firmware (prototyping only)
+	uv run so101-patch-lerobot
+
+patch_lerobot_revert: ## Revert lerobot patches
+	uv run so101-patch-lerobot --revert
 
 
 # MARK: HELP

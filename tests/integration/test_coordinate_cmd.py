@@ -1,40 +1,54 @@
-"""Tests for coordinate_cmd.py script."""
+"""Tests for coordinate_cmd.py — direct main() invocation for coverage."""
 
 from __future__ import annotations
 
-import subprocess
-import sys
+import logging
+
+import pytest
+
+from so101.coordinate_cmd import main
 
 
 class TestCoordinateCmd:
-    """Test coordinate command script via subprocess."""
+    """Test coordinate command script via direct main() call."""
 
-    def _run(self, *args: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
-            [sys.executable, "scripts/coordinate_cmd.py", *args],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-
-    def test_well_command(self) -> None:
+    def test_well_command(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
         """--well A1 exits 0 and logs coordinates."""
-        result = self._run("--well", "A1")
-        assert result.returncode == 0
-        assert "A1" in result.stderr  # logging goes to stderr
+        monkeypatch.setattr("sys.argv", ["so101-coord", "--well", "A1"])
+        with caplog.at_level(logging.INFO):
+            main()
+        assert "A1" in caplog.text
 
-    def test_park_command(self) -> None:
+    def test_park_command(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
         """--park exits 0."""
-        result = self._run("--park")
-        assert result.returncode == 0
-        assert "Parking" in result.stderr
+        monkeypatch.setattr("sys.argv", ["so101-coord", "--park"])
+        with caplog.at_level(logging.INFO):
+            main()
+        assert "Parking" in caplog.text
 
-    def test_missing_well_and_park(self) -> None:
+    def test_missing_well_and_park(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
         """No --well and no --park exits non-zero."""
-        result = self._run()
-        assert result.returncode != 0
+        monkeypatch.setattr("sys.argv", ["so101-coord"])
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+        assert exc_info.value.code != 0
 
-    def test_invalid_well(self) -> None:
+    def test_invalid_well(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
         """--well Z99 exits non-zero (invalid well name)."""
-        result = self._run("--well", "Z99")
-        assert result.returncode != 0
+        monkeypatch.setattr("sys.argv", ["so101-coord", "--well", "Z99"])
+        with pytest.raises(ValueError, match="Invalid well name"):
+            main()

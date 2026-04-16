@@ -46,6 +46,14 @@ uv run pytest -m "not hardware"
 - Run explicitly: `uv run pytest -m hardware`
 - Require physical arms connected and calibrated
 
+### LeRobot Compatibility Tests (opt-in)
+
+- Tag with `@pytest.mark.lerobot` — excluded from `make test` by default
+- Run explicitly: `uv run --group lerobot pytest -m lerobot`
+- Guards the monkey-patches in `app/so101/patch_lerobot.py` against
+  upstream lerobot drift — runs when lerobot is upgraded or before
+  release, not on every CI pass (lerobot's dep tree is heavy: torch/CUDA)
+
 ### TDD Red-Green-Refactor
 
 - **RED**: Write a failing test that defines the expected behavior
@@ -89,7 +97,15 @@ Each document has a specific authority. Do not duplicate information across docu
 | [docs/UserStory.md](docs/UserStory.md) | Acceptance criteria | Both | User stories US-1.1–US-5.2 with testable criteria |
 | [docs/demo-scenarios.md](docs/demo-scenarios.md) | Operations | Both | How to run and verify each use case |
 | [docs/hardware/BOM.md](docs/hardware/BOM.md) | Hardware | Both | Shopping list, vendor links, cost summary |
+| [docs/hardware/bringup.md](docs/hardware/bringup.md) | Hardware — bringup | Both | SO-101 calibration, teleop, firmware patches, troubleshooting |
+| [docs/hardware/two-dof-pipette.md](docs/hardware/two-dof-pipette.md) | Hardware — variant | Both | 2-DOF pipette mode analysis, lerobot integration options |
+| [docs/hardware/cad-tooling.md](docs/hardware/cad-tooling.md) | Hardware — tooling | Both | CAD toolchain (build123d, OpenSCAD, slicer profiles) |
+| [docs/hardware/prusa-mk4-ops.md](docs/hardware/prusa-mk4-ops.md) | Hardware — printer | Both | PrusaLink API, slicer profiles, CAD-to-print pipeline |
+| [app/hardware/README.md](app/hardware/README.md) | Hardware — 3D parts | Both | Printed parts index, assembly instructions, print settings |
 | [docs/research.md](docs/research.md) | Research (informational) | Both | Prior art, papers, community designs, insights |
+| [docs/outlook-printer-platforms.md](docs/outlook-printer-platforms.md) | Vision (informational) | Both | Printer platform comparison (Prusa, Bambu, Creality) |
+| [docs/outlook-integrations.md](docs/outlook-integrations.md) | Vision (informational) | Both | External system integration outlook (ELN, scanner, VLM) |
+| [docs/outlook-ceiling-rail.md](docs/outlook-ceiling-rail.md) | Vision (informational) | Both | Ceiling rail / gantry mounting exploration |
 | [docs/roadmap.md](docs/roadmap.md) | Vision (informational) | Both | Closed-loop printing, tool genesis, VLM/embodied AI phases |
 | [CHANGELOG.md](CHANGELOG.md) | Version history | Both | Keep a Changelog format |
 | [AGENT_LEARNINGS.md](AGENT_LEARNINGS.md) | Patterns | AI agents | Discovered patterns and solutions |

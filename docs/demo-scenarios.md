@@ -26,7 +26,7 @@ make serve          # (optional) start dashboard on :8080
 Aspirate 50 µL from trough, dispense to well A1.
 
 ```bash
-python scripts/run_demo.py --use-case uc1_single --well A1 --volume 50
+uv run so101-demo --use-case uc1_single --well A1 --volume 50
 ```
 
 Expected output:
@@ -44,7 +44,7 @@ Demo complete.
 Pipette all 12 wells in row A at 25 µL each.
 
 ```bash
-python scripts/run_demo.py --use-case uc1_row --row A --volume 25
+uv run so101-demo --use-case uc1_row --row A --volume 25
 ```
 
 Expected: 12 aspirate/dispense cycles (A1 through A12).
@@ -54,7 +54,7 @@ Expected: 12 aspirate/dispense cycles (A1 through A12).
 Pipette all 8 wells in column 1 at 20 µL each.
 
 ```bash
-python scripts/run_demo.py --use-case uc1_col --col 1 --volume 20
+uv run so101-demo --use-case uc1_col --col 1 --volume 20
 ```
 
 Expected: 8 aspirate/dispense cycles (A1 through H1).
@@ -64,7 +64,7 @@ Expected: 8 aspirate/dispense cycles (A1 through H1).
 Pipette all 96 wells at 20 µL each.
 
 ```bash
-python scripts/run_demo.py --use-case uc1_full --volume 20
+uv run so101-demo --use-case uc1_full --volume 20
 ```
 
 Expected: 96 aspirate/dispense cycles. Each well gets an independent aspirate→dispense so the pipette never overflows its 200 µL capacity.
@@ -74,7 +74,7 @@ Expected: 96 aspirate/dispense cycles. Each well gets an independent aspirate→
 Open fridge with hook tool, swap to gripper, grab item, move to park.
 
 ```bash
-python scripts/run_demo.py --use-case uc2
+uv run so101-demo --use-case uc2
 ```
 
 Expected output:
@@ -97,7 +97,7 @@ Parking arm arm_b
 Cycle through all tools: pipette → gripper → fridge hook → gripper.
 
 ```bash
-python scripts/run_demo.py --use-case uc3
+uv run so101-demo --use-case uc3
 ```
 
 Expected output:
@@ -115,13 +115,13 @@ Expected output:
 Runs UC1.1 + UC1.2 (row A) + UC1.2 (column 1) + UC2 + UC3 in sequence.
 
 ```bash
-python scripts/run_demo.py
+uv run so101-demo
 ```
 
 Or equivalently:
 
 ```bash
-python scripts/run_demo.py --use-case all
+uv run so101-demo --use-case all
 ```
 
 ## Dashboard Demo
