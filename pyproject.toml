@@ -103,6 +103,7 @@ include = ["app/so101", "app/dashboard"]
 exclude = [
     "app/hardware",           # CAD/render/slicer use dynamic imports without type stubs
     "app/so101/foxglove_viz.py",  # hardware CLI — foxglove/lerobot/scipy/yourdfpy all untyped
+    "app/so101/scan_servos.py",   # hardware CLI — scservo_sdk is untyped
 ]
 reportMissingImports = "error"
 reportMissingTypeStubs = "none"  # lerobot, pyserial — installed but untyped
