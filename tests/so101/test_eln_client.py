@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+if TYPE_CHECKING:
+    from pathlib import Path
 from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
@@ -85,8 +88,8 @@ class TestElnClientOperations:
     def test_update_experiment_stub(self, stub_client: ElnClient) -> None:
         stub_client.update_experiment(1, body="updated")  # must not raise
 
-    def test_upload_attachment_stub(self, stub_client: ElnClient) -> None:
-        assert stub_client.upload_attachment(1, Path("/tmp/test.csv")) == -1  # noqa: S108
+    def test_upload_attachment_stub(self, stub_client: ElnClient, tmp_path: Path) -> None:
+        assert stub_client.upload_attachment(1, tmp_path / "test.csv") == -1
 
     def test_get_item_stub(self, stub_client: ElnClient) -> None:
         assert stub_client.get_item(1) == {}
@@ -119,11 +122,11 @@ class TestElnClientWithMock:
         client.update_experiment(42, body="new body", status="running")
         mock_api.patch_experiment.assert_called_once()
 
-    def test_upload_attachment_calls_api(self) -> None:
+    def test_upload_attachment_calls_api(self, tmp_path: Path) -> None:
         client, _ = self._make_connected_client()
         mock_uploads = client._uploads_api
         mock_uploads.post_upload.return_value = MagicMock(id=99)
-        result = client.upload_attachment(42, Path("/tmp/test.csv"))  # noqa: S108
+        result = client.upload_attachment(42, tmp_path / "test.csv")
         mock_uploads.post_upload.assert_called_once()
         assert result == 99
 
