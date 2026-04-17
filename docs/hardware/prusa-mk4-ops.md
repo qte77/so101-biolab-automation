@@ -109,7 +109,7 @@ curl -s --digest -u "maker:$PRUSA_PW" http://192.168.1.86/api/v1/files/usb
 
 ## CAD-to-Print Pipeline
 
-```
+```text
 build123d (.py) → STL → PrusaSlicer → .gcode → PrusaLink PUT → print
 ```
 

@@ -79,7 +79,7 @@ differ — run `make patch_lerobot` in that case.
 
 LeRobot requires all servos on the same firmware version. If versions differ, `lerobot-calibrate` will fail:
 
-```
+```text
 RuntimeError: Some Motors use different firmware versions:
 {1: '3.10', 2: '3.9', 3: '3.10', 4: '3.10', 5: '3.10', 6: '3.10'}
 ```
@@ -218,7 +218,7 @@ After calibration, test leader-follower teleoperation.
 
 `lerobot-find-port` fails with multiple boards plugged in:
 
-```
+```text
 OSError: Could not detect the port. More than one port was found (['/dev/ttyACM1', '/dev/ttyACM0'])
 ```
 
