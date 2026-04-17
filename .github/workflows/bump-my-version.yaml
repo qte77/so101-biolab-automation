@@ -1,0 +1,85 @@
+---
+name: bump-my-version
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: '[major|minor|patch]'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - 'major'
+        - 'minor'
+        - 'patch'
+
+env:
+  BRANCH_NEW: "bump-${{ github.run_number }}-${{ github.ref_name }}"
+  SKIP_PR_HINT: "[skip ci bump]"
+  SCRIPT_PATH: ".github/scripts"
+
+jobs:
+  bump_my_version:
+    if: >
+        github.event_name == 'workflow_dispatch' ||
+        ( github.event.pull_request.merged == true &&
+        github.event.pull_request.closed_by != 'github-actions' )
+    runs-on: ubuntu-latest
+    outputs:
+      branch_new: ${{ steps.create_branch.outputs.branch_new }}
+    permissions:
+      actions: read
+      checks: write
+      contents: write
+      pull-requests: write
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set git cfg and create branch
+        id: create_branch
+        run: |
+          git config user.email "bumped@qte77.gha"
+          git config user.name "bump-my-version"
+          git checkout -b "${{ env.BRANCH_NEW }}"
+          echo "branch_new=${{ env.BRANCH_NEW }}" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump
+        uses: callowayproject/bump-my-version@0.29.0
+        env:
+          BUMPVERSION_TAG: "true"
+        with:
+          args: ${{ inputs.bump_type }}
+          branch: ${{ env.BRANCH_NEW }}
+
+      - name: Regenerate uv.lock
+        if: steps.bump.outputs.bumped == 'true'
+        uses: astral-sh/setup-uv@v5
+      - if: steps.bump.outputs.bumped == 'true'
+        run: |
+          uv lock
+          git add uv.lock
+          git commit --amend --no-edit
+
+      - name: "Create PR '${{ env.BRANCH_NEW }}'"
+        if: steps.bump.outputs.bumped == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          src="${{ env.SCRIPT_PATH }}/create_pr.sh"
+          chmod +x "$src"
+          $src "${{ github.ref_name }}" "${{ env.BRANCH_NEW }}" "${{ env.SKIP_PR_HINT }}" "${{ steps.bump.outputs.previous-version }}" "${{ steps.bump.outputs.current-version }}"
+
+      - name: Delete branch, PR and tag in case of failure or cancel
+        if: failure() || cancelled()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          src="${{ env.SCRIPT_PATH }}/delete_branch_pr_tag.sh"
+          chmod +x "$src"
+          $src "${{ github.repository }}" "${{ env.BRANCH_NEW }}" "${{ steps.bump.outputs.current-version }}"
