@@ -70,14 +70,15 @@ class ElnClient:
         try:
             import elabapi_python  # type: ignore[import-untyped]
 
-            configuration = elabapi_python.Configuration()  # pyright: ignore[reportUnknownVariableType,reportUnknownMemberType]
-            configuration.host = self.config.base_url  # pyright: ignore[reportUnknownMemberType]
-            configuration.verify_ssl = self.config.verify_ssl  # pyright: ignore[reportUnknownMemberType]
-            self._api_client = elabapi_python.ApiClient(configuration)  # pyright: ignore[reportUnknownMemberType]
-            self._api_client.set_default_header("Authorization", self.config.api_key)  # pyright: ignore[reportUnknownMemberType]
-            self._experiments_api = elabapi_python.ExperimentsApi(self._api_client)  # pyright: ignore[reportUnknownMemberType]
-            self._items_api = elabapi_python.ItemsApi(self._api_client)  # pyright: ignore[reportUnknownMemberType]
-            self._uploads_api = elabapi_python.UploadsApi(self._api_client)  # pyright: ignore[reportUnknownMemberType]
+            elab: Any = elabapi_python  # untyped SDK — cast to Any once
+            cfg = elab.Configuration()
+            cfg.host = self.config.base_url
+            cfg.verify_ssl = self.config.verify_ssl
+            self._api_client = elab.ApiClient(cfg)
+            self._api_client.set_default_header("Authorization", self.config.api_key)
+            self._experiments_api = elab.ExperimentsApi(self._api_client)
+            self._items_api = elab.ItemsApi(self._api_client)
+            self._uploads_api = elab.UploadsApi(self._api_client)
             logger.info("eLabFTW connected to %s", self.config.base_url)
         except ImportError:
             logger.warning("elabapi-python not installed — running in stub mode")
