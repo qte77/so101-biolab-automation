@@ -64,14 +64,24 @@ See [docs/architecture.md](docs/architecture.md) for full system design, module 
 
 ## Project Structure
 
-- `app/` — software (arms, pipette, workflow, dashboard, CAD pipeline)
-- `hardware/` — CAD sources, STLs, SVGs for 3D-printed parts
+- `app/so101/` — core library + CLI entry points (arms, pipette, workflow, safety, ELN)
+- `app/dashboard/` — FastAPI remote oversight dashboard
+- `app/hardware/` — CAD pipeline (build123d, slicer, renderer)
+- `hardware/` — generated STLs, SVGs, 3D scan data
 - `configs/` — YAML runtime config (ports, positions, backends)
-- `scripts/` — CLI entry points
-- `docs/` — design, user stories, demo scenarios, BOM, research
-- `tests/` — unit + property tests
+- `docs/` — design, user stories, demo scenarios, BOM, research, hardware bringup
+- `tests/` — unit, integration, property-based tests (80% coverage gate)
 
 See [docs/architecture.md](docs/architecture.md) for module responsibilities and data flows.
+
+## CLI Entry Points
+
+```bash
+uv run so101-demo              # run demo pipetting workflows
+uv run so101-coord             # send coordinate commands to an arm
+uv run so101-scan-servos       # scan serial port for STS3215 servos
+uv run so101-patch-lerobot     # patch lerobot for mixed firmware (prototyping)
+```
 
 ## Documentation
 
@@ -79,6 +89,7 @@ See [docs/architecture.md](docs/architecture.md) for module responsibilities and
 - [User Stories](docs/UserStory.md) — use case (UC1-5) acceptance criteria
 - [Demo Scenarios](docs/demo-scenarios.md) — how to run and verify each use case
 - [Hardware BOM](docs/hardware/BOM.md) — shopping list with links ($350-$3000+)
+- [Hardware Bringup](docs/hardware/bringup.md) — SO-101 calibration, teleop, firmware patches
 - [Research](docs/research.md) — prior art, papers, community designs, insights
 - [Roadmap](docs/roadmap.md) — closed-loop printing, tool genesis, VLM/embodied AI vision
 
