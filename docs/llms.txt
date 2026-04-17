@@ -1,0 +1,30 @@
+# so101-biolab-automation
+
+> Dual SO-101 robotic arm bio-lab automation: 96-well pipetting, tool changing, remote oversight.
+
+## Documentation
+
+- [README](https://github.com/qte77/so101-biolab-automation/blob/main/README.md)
+- [AGENTS](https://github.com/qte77/so101-biolab-automation/blob/main/AGENTS.md)
+- [CONTRIBUTING](https://github.com/qte77/so101-biolab-automation/blob/main/CONTRIBUTING.md)
+- [Architecture](https://github.com/qte77/so101-biolab-automation/blob/main/docs/architecture.md)
+- [User Stories](https://github.com/qte77/so101-biolab-automation/blob/main/docs/UserStory.md)
+- [Demo Scenarios](https://github.com/qte77/so101-biolab-automation/blob/main/docs/demo-scenarios.md)
+- [Hardware BOM](https://github.com/qte77/so101-biolab-automation/blob/main/docs/hardware/BOM.md)
+- [CHANGELOG](https://github.com/qte77/so101-biolab-automation/blob/main/CHANGELOG.md)
+
+## Source
+
+- [so101/arms.py](https://github.com/qte77/so101-biolab-automation/blob/main/app/so101/arms.py): Dual SO-101 arm controller (LeRobot wrapper)
+- [so101/pipette.py](https://github.com/qte77/so101-biolab-automation/blob/main/app/so101/pipette.py): Digital pipette serial control
+- [so101/plate.py](https://github.com/qte77/so101-biolab-automation/blob/main/app/so101/plate.py): 96-well coordinate grid (SBS standard)
+- [so101/tool_changer.py](https://github.com/qte77/so101-biolab-automation/blob/main/app/so101/tool_changer.py): Autonomous tool changing
+- [so101/camera.py](https://github.com/qte77/so101-biolab-automation/blob/main/app/so101/camera.py): Multi-camera pipeline
+- [so101/safety.py](https://github.com/qte77/so101-biolab-automation/blob/main/app/so101/safety.py): E-stop, watchdog, joint limits
+- [dashboard/server.py](https://github.com/qte77/so101-biolab-automation/blob/main/app/dashboard/server.py): FastAPI remote oversight
+
+## Configuration
+
+- [configs/arms.yaml](https://github.com/qte77/so101-biolab-automation/blob/main/configs/arms.yaml): Arm port mappings and motor IDs
+- [configs/plate_layout.yaml](https://github.com/qte77/so101-biolab-automation/blob/main/configs/plate_layout.yaml): Well coordinates and heights
+- [configs/tool_dock.yaml](https://github.com/qte77/so101-biolab-automation/blob/main/configs/tool_dock.yaml): Tool dock station positions
