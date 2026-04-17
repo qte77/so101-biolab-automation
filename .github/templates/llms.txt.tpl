@@ -15,13 +15,13 @@
 
 ## Source
 
-- [biolab/arms.py](${BLOB}/src/biolab/arms.py): Dual SO-101 arm controller (LeRobot wrapper)
-- [biolab/pipette.py](${BLOB}/src/biolab/pipette.py): Digital pipette serial control
-- [biolab/plate.py](${BLOB}/src/biolab/plate.py): 96-well coordinate grid (SBS standard)
-- [biolab/tool_changer.py](${BLOB}/src/biolab/tool_changer.py): Autonomous tool changing
-- [biolab/camera.py](${BLOB}/src/biolab/camera.py): Multi-camera pipeline
-- [biolab/safety.py](${BLOB}/src/biolab/safety.py): E-stop, watchdog, joint limits
-- [dashboard/server.py](${BLOB}/src/dashboard/server.py): FastAPI remote oversight
+- [so101/arms.py](${BLOB}/app/so101/arms.py): Dual SO-101 arm controller (LeRobot wrapper)
+- [so101/pipette.py](${BLOB}/app/so101/pipette.py): Digital pipette serial control
+- [so101/plate.py](${BLOB}/app/so101/plate.py): 96-well coordinate grid (SBS standard)
+- [so101/tool_changer.py](${BLOB}/app/so101/tool_changer.py): Autonomous tool changing
+- [so101/camera.py](${BLOB}/app/so101/camera.py): Multi-camera pipeline
+- [so101/safety.py](${BLOB}/app/so101/safety.py): E-stop, watchdog, joint limits
+- [dashboard/server.py](${BLOB}/app/dashboard/server.py): FastAPI remote oversight
 
 ## Configuration
 
