@@ -63,4 +63,6 @@ exclude = [
     "^https://www\\.reddit\\.com",
     # Yaskawa/Motoman — 403 bot protection
     "^https://knowledge\\.motoman\\.com",
+    # Feetech — TLS handshake failure in CI
+    "^https://www\\.feetechrc\\.com",
 ]
