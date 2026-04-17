@@ -35,3 +35,38 @@ class TestRunDemo:
         with caplog.at_level(logging.INFO):
             main()
         assert "Demo complete" in caplog.text
+
+    def test_uc1_single_well(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """--use-case uc1_single dispatches to single-well pipetting."""
+        monkeypatch.setattr(
+            "sys.argv", ["so101-demo", "--use-case", "uc1_single", "--mode", "eval", "--well", "A1"]
+        )
+        with caplog.at_level(logging.INFO):
+            main()
+        assert "Demo complete" in caplog.text
+
+    def test_uc2_fridge(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """--use-case uc2 dispatches to fridge sequence."""
+        monkeypatch.setattr("sys.argv", ["so101-demo", "--use-case", "uc2", "--mode", "eval"])
+        with caplog.at_level(logging.INFO):
+            main()
+        assert "Demo complete" in caplog.text
+
+    def test_uc3_tool_cycle(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """--use-case uc3 dispatches to tool interchange cycle."""
+        monkeypatch.setattr("sys.argv", ["so101-demo", "--use-case", "uc3", "--mode", "eval"])
+        with caplog.at_level(logging.INFO):
+            main()
+        assert "Demo complete" in caplog.text
