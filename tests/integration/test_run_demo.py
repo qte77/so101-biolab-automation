@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from so101.run_demo import main
+from so101.cli.run_demo import main
 
 if TYPE_CHECKING:
     import pytest

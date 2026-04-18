@@ -1,8 +1,8 @@
-"""Compatibility guard for the lerobot monkey-patches in app/so101/patch_lerobot.py.
+"""Compatibility guard for the lerobot monkey-patches in src/so101/cli/patch_lerobot.py.
 
 ## Why this test exists
 
-`app/so101/patch_lerobot.py` modifies the installed lerobot package via
+`src/so101/cli/patch_lerobot.py` modifies the installed lerobot package via
 exact-string replacement. The `ORIGINAL` / `PATCHED` constants must match
 the lerobot source byte-for-byte. When lerobot is upgraded upstream (even
 a whitespace or rename change), the patch script silently becomes a no-op
@@ -59,33 +59,33 @@ class TestPatchLerobotCompat:
         """_assert_same_firmware code block must match the patch script's expectation."""
         # Import here (not at module top) so import errors manifest as test
         # failures, not collection errors — keeps the skip-if-missing flow clean.
-        from so101.patch_lerobot import FEETECH_PY, FW_ORIGINAL, FW_PATCHED
+        from so101.cli.patch_lerobot import FEETECH_PY, FW_ORIGINAL, FW_PATCHED
 
         source = FEETECH_PY.read_text()
         assert FW_ORIGINAL in source or FW_PATCHED in source, (
             f"Neither ORIGINAL nor PATCHED block for _assert_same_firmware found in "
             f"{FEETECH_PY} — lerobot upstream has drifted. Update FW_ORIGINAL/FW_PATCHED "
-            "in app/so101/patch_lerobot.py to match the new source."
+            "in src/so101/cli/patch_lerobot.py to match the new source."
         )
 
     def test_sync_read_block_present(self) -> None:
         """_sync_read code block must match the patch script's expectation."""
-        from so101.patch_lerobot import MOTORS_BUS_PY, SYNC_ORIGINAL, SYNC_PATCHED
+        from so101.cli.patch_lerobot import MOTORS_BUS_PY, SYNC_ORIGINAL, SYNC_PATCHED
 
         source = MOTORS_BUS_PY.read_text()
         assert SYNC_ORIGINAL in source or SYNC_PATCHED in source, (
             f"Neither ORIGINAL nor PATCHED block for _sync_read found in "
             f"{MOTORS_BUS_PY} — lerobot upstream has drifted. Update "
-            "SYNC_ORIGINAL/SYNC_PATCHED in app/so101/patch_lerobot.py to match."
+            "SYNC_ORIGINAL/SYNC_PATCHED in src/so101/cli/patch_lerobot.py to match."
         )
 
     def test_calibration_write_block_present(self) -> None:
         """write_calibration code block must match the patch script's expectation."""
-        from so101.patch_lerobot import CAL_ORIGINAL, CAL_PATCHED, FEETECH_PY
+        from so101.cli.patch_lerobot import CAL_ORIGINAL, CAL_PATCHED, FEETECH_PY
 
         source = FEETECH_PY.read_text()
         assert CAL_ORIGINAL in source or CAL_PATCHED in source, (
             f"Neither ORIGINAL nor PATCHED block for write_calibration found in "
             f"{FEETECH_PY} — lerobot upstream has drifted. Update "
-            "CAL_ORIGINAL/CAL_PATCHED in app/so101/patch_lerobot.py to match."
+            "CAL_ORIGINAL/CAL_PATCHED in src/so101/cli/patch_lerobot.py to match."
         )

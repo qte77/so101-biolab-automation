@@ -38,7 +38,7 @@ uv run pytest -m "not hardware"
 
 - Mock all hardware and external dependencies using `@patch`
 - Test business logic and data validation
-- Mirror `app/` structure in `tests/`
+- Mirror `src/` structure in `tests/`
 
 ### Hardware Tests (opt-in)
 
@@ -50,7 +50,7 @@ uv run pytest -m "not hardware"
 
 - Tag with `@pytest.mark.lerobot` — excluded from `make test` by default
 - Run explicitly: `uv run --group lerobot pytest -m lerobot`
-- Guards the monkey-patches in `app/so101/patch_lerobot.py` against
+- Guards the monkey-patches in `src/so101/cli/patch_lerobot.py` against
   upstream lerobot drift — runs when lerobot is upgraded or before
   release, not on every CI pass (lerobot's dep tree is heavy: torch/CUDA)
 
@@ -101,7 +101,7 @@ Each document has a specific authority. Do not duplicate information across docu
 | [docs/hardware/two-dof-pipette.md](docs/hardware/two-dof-pipette.md) | Hardware — variant | Both | 2-DOF pipette mode analysis, lerobot integration options |
 | [docs/hardware/cad-tooling.md](docs/hardware/cad-tooling.md) | Hardware — tooling | Both | CAD toolchain (build123d, OpenSCAD, slicer profiles) |
 | [docs/hardware/prusa-mk4-ops.md](docs/hardware/prusa-mk4-ops.md) | Hardware — printer | Both | PrusaLink API, slicer profiles, CAD-to-print pipeline |
-| [app/hardware/README.md](app/hardware/README.md) | Hardware — 3D parts | Both | Printed parts index, assembly instructions, print settings |
+| [src/hardware/README.md](src/hardware/README.md) | Hardware — 3D parts | Both | Printed parts index, assembly instructions, print settings |
 | [docs/research.md](docs/research.md) | Research (informational) | Both | Prior art, papers, community designs, insights |
 | [docs/outlook-printer-platforms.md](docs/outlook-printer-platforms.md) | Vision (informational) | Both | Printer platform comparison (Prusa, Bambu, Creality) |
 | [docs/outlook-integrations.md](docs/outlook-integrations.md) | Vision (informational) | Both | External system integration outlook (ELN, scanner, VLM) |

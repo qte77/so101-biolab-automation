@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     import types
 
-HARDWARE_DIR = Path(__file__).resolve().parent  # app/hardware/ — code
+HARDWARE_DIR = Path(__file__).resolve().parent  # src/hardware/ — code
 MANIFEST = HARDWARE_DIR / "parts.json"
 ASSETS_DIR = (
     HARDWARE_DIR.parents[1] / "hardware"

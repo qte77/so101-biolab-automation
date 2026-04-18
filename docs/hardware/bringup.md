@@ -141,7 +141,7 @@ uv run --group lerobot pytest -m lerobot
 ```
 
 If they fail, update the `ORIGINAL` / `PATCHED` constants in
-`app/so101/patch_lerobot.py` to match the new lerobot source.
+`src/so101/cli/patch_lerobot.py` to match the new lerobot source.
 
 > **Warning:** Sequential reads are slower than sync reads. This is acceptable
 > for calibration and prototyping but may add latency during teleoperation.
@@ -249,7 +249,7 @@ Verify the follower arm mirrors the leader's movements.
 
 After grippers are working:
 
-1. Print pipette holders (see [app/hardware/README.md](../../app/hardware/README.md) for parts list and print settings)
+1. Print pipette holders (see [src/hardware/README.md](../../src/hardware/README.md) for parts list and print settings)
 2. Mount holders on follower arm(s)
 3. Re-calibrate if gripper-to-holder swap changes joint offsets
 4. Test tool changer cycle: return gripper, pick up holder

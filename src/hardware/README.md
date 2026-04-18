@@ -145,10 +145,10 @@ Query examples:
 
 ```bash
 # List all active parts
-jq '.[] | select(.status == "active") | .name' app/hardware/parts.json
+jq '.[] | select(.status == "active") | .name' src/hardware/parts.json
 
 # Find scan-derived parts
-jq '.[] | select(.scan_source) | {name, scan_source}' app/hardware/parts.json
+jq '.[] | select(.scan_source) | {name, scan_source}' src/hardware/parts.json
 ```
 
 ## Structural Review Checklist

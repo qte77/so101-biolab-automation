@@ -64,9 +64,9 @@ See [docs/architecture.md](docs/architecture.md) for full system design, module 
 
 ## Project Structure
 
-- `app/so101/` — core library + CLI entry points (arms, pipette, workflow, safety, ELN)
-- `app/dashboard/` — FastAPI remote oversight dashboard
-- `app/hardware/` — CAD pipeline (build123d, slicer, renderer)
+- `src/so101/` — core library + CLI entry points (arms, pipette, workflow, safety, ELN)
+- `src/dashboard/` — FastAPI remote oversight dashboard
+- `src/hardware/` — CAD pipeline (build123d, slicer, renderer)
 - `hardware/` — generated STLs, SVGs, 3D scan data
 - `configs/` — YAML runtime config (ports, positions, backends)
 - `docs/` — design, user stories, demo scenarios, BOM, research, hardware bringup
