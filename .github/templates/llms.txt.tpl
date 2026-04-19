@@ -15,13 +15,13 @@
 
 ## Source
 
-- [so101/arms.py](${BLOB}/app/so101/arms.py): Dual SO-101 arm controller (LeRobot wrapper)
-- [so101/pipette.py](${BLOB}/app/so101/pipette.py): Digital pipette serial control
-- [so101/plate.py](${BLOB}/app/so101/plate.py): 96-well coordinate grid (SBS standard)
-- [so101/tool_changer.py](${BLOB}/app/so101/tool_changer.py): Autonomous tool changing
-- [so101/camera.py](${BLOB}/app/so101/camera.py): Multi-camera pipeline
-- [so101/safety.py](${BLOB}/app/so101/safety.py): E-stop, watchdog, joint limits
-- [dashboard/server.py](${BLOB}/app/dashboard/server.py): FastAPI remote oversight
+- [so101/arms.py](${BLOB}/src/so101/arms.py): Dual SO-101 arm controller (LeRobot wrapper)
+- [so101/pipette.py](${BLOB}/src/so101/pipette.py): Digital pipette serial control
+- [so101/plate.py](${BLOB}/src/so101/plate.py): 96-well coordinate grid (SBS standard)
+- [so101/tool_changer.py](${BLOB}/src/so101/tool_changer.py): Autonomous tool changing
+- [so101/camera.py](${BLOB}/src/so101/camera.py): Multi-camera pipeline
+- [so101/safety.py](${BLOB}/src/so101/safety.py): E-stop, watchdog, joint limits
+- [dashboard/server.py](${BLOB}/src/dashboard/server.py): FastAPI remote oversight
 
 ## Configuration
 

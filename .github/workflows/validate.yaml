@@ -32,7 +32,7 @@ jobs:
         run: uv sync --group dev --group test
 
       - name: Pyright type check
-        run: uv run pyright app
+        run: uv run pyright src
 
       - name: Complexipy cognitive complexity
-        run: uv run complexipy app/so101/ app/dashboard/ --max-complexity-allowed 15
+        run: uv run complexipy src/so101/ src/dashboard/ --max-complexity-allowed 15
