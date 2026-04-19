@@ -5,7 +5,7 @@ ejector lever. Wide waste slot fits both single-channel and 8-channel
 tip ejection. Robot moves pipette laterally into the finger.
 
 Usage:
-    uv run --group cad python app/hardware/cad/dpette/dpette_tip_release.py
+    uv run --group cad python src/hardware/cad/dpette/dpette_tip_release.py
 
 Ported from Antonio Lamb's CadQuery source (PR #48) to build123d;
 geometry and parameters preserved verbatim.

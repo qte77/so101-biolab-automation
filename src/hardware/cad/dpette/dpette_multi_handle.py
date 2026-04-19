@@ -21,7 +21,7 @@ EJECTOR LEVER (replaces top jaw):
   Short arm (20mm) -> ~175N from 35 kg-cm stall torque.
 
 Usage:
-    uv run --group cad python app/hardware/cad/dpette/dpette_multi_handle.py
+    uv run --group cad python src/hardware/cad/dpette/dpette_multi_handle.py
 
 Ported from Antonio Lamb's CadQuery source (PR #48) to build123d.
 Geometry preserved from the 3D-scan-verified redesign. Cylinder

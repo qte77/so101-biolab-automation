@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-CODE_DIR = Path(__file__).resolve().parent.parent.parent  # app/hardware/
+CODE_DIR = Path(__file__).resolve().parent.parent.parent  # src/hardware/
 ASSETS_DIR = CODE_DIR.parents[1] / "hardware"  # top-level hardware/
 STL_DIR = ASSETS_DIR / "stl"
 SVG_DIR = ASSETS_DIR / "svg"

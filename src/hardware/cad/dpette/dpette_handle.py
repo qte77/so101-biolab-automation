@@ -19,7 +19,7 @@ Side view (matches draw.io diagram):
 Motor dims: STS3215 = 45.2 x 24.7 x 35 mm, 25T spline, M2 mount.
 
 Usage:
-    uv run --group cad python app/hardware/cad/dpette/dpette_handle.py
+    uv run --group cad python src/hardware/cad/dpette/dpette_handle.py
 
 Ported from Antonio Lamb's CadQuery source (PR #48) to build123d;
 geometry and parameters preserved as faithfully as possible. Cylinder
