@@ -14,13 +14,13 @@ updated: 2026-04-10
 ┌──────────────────────────────────────────────────────┐
 │                  Remote Dashboard                     │
 │  FastAPI + WebSocket commands + REST /api/status      │
-│  app/dashboard/server.py                              │
+│  src/dashboard/server.py                              │
 └──────────────────┬───────────────────────────────────┘
                    │ WebSocket: e_stop, heartbeat,
                    │ target_well, run_workflow
 ┌──────────────────▼───────────────────────────────────┐
 │               Workflow Orchestration                  │
-│  app/so101/workflow.py                               │
+│  src/so101/workflow.py                               │
 │  Composes modules into use cases (UC1-4)              │
 │  Loads PlateLayout from configs/plate_layout.yaml     │
 ├──────────┬──────────┬──────────┬─────────────────────┤
@@ -45,16 +45,16 @@ updated: 2026-04-10
 
 | Module | File | Responsibility | Dependencies |
 |--------|------|----------------|--------------|
-| **Workflow** | `app/so101/workflow.py` | Orchestrates use cases (UC1-5) by composing other modules | arms, pipette, plate, tool_changer, xz_gantry |
-| **Arms** | `app/so101/arms.py` | Dual SO-101 arm control via LeRobot. Config-driven named positions, sequences, teleoperation skeleton. Stub mode when lerobot absent. | plate (for send_to_well) |
-| **Pipette** | `app/so101/pipette.py` | Multi-backend pipette control (`PipetteProtocol`). Backends: `DigitalPipette` (DIY/Arduino), `ElectronicPipette` (AELAB/DLAB). Stub mode when pyserial absent. | None |
-| **XZ Gantry** | `app/so101/xz_gantry.py` | Dedicated 2-axis pipetting arm (simpler than SO-101). Stub mode when serial absent. | None |
-| **Bento Lab** | `app/so101/bento_lab.py` | Portable PCR thermocycler control (lid, programs, status). Stub mode when serial absent. | None |
-| **Plate** | `app/so101/plate.py` | Pure SBS 96-well coordinate math. No hardware deps. | None |
-| **Tool Changer** | `app/so101/tool_changer.py` | 3-tool magnetic dock: pipette, gripper, fridge hook. | arms (for send_action) |
-| **Camera** | `app/so101/camera.py` | Multi-camera capture via OpenCV. Stub mode when cv2 absent. | None |
-| **Safety** | `app/so101/safety.py` | Watchdog, e-stop, joint limits. Pure Python. | None |
-| **Dashboard** | `app/dashboard/server.py` | FastAPI server with WebSocket commands and REST status. | All biolab modules |
+| **Workflow** | `src/so101/workflow.py` | Orchestrates use cases (UC1-5) by composing other modules | arms, pipette, plate, tool_changer, xz_gantry |
+| **Arms** | `src/so101/arms.py` | Dual SO-101 arm control via LeRobot. Config-driven named positions, sequences, teleoperation skeleton. Stub mode when lerobot absent. | plate (for send_to_well) |
+| **Pipette** | `src/so101/pipette.py` | Multi-backend pipette control (`PipetteProtocol`). Backends: `DigitalPipette` (DIY/Arduino), `ElectronicPipette` (AELAB/DLAB). Stub mode when pyserial absent. | None |
+| **XZ Gantry** | `src/so101/xz_gantry.py` | Dedicated 2-axis pipetting arm (simpler than SO-101). Stub mode when serial absent. | None |
+| **Bento Lab** | `src/so101/bento_lab.py` | Portable PCR thermocycler control (lid, programs, status). Stub mode when serial absent. | None |
+| **Plate** | `src/so101/plate.py` | Pure SBS 96-well coordinate math. No hardware deps. | None |
+| **Tool Changer** | `src/so101/tool_changer.py` | 3-tool magnetic dock: pipette, gripper, fridge hook. | arms (for send_action) |
+| **Camera** | `src/so101/camera.py` | Multi-camera capture via OpenCV. Stub mode when cv2 absent. | None |
+| **Safety** | `src/so101/safety.py` | Watchdog, e-stop, joint limits. Pure Python. | None |
+| **Dashboard** | `src/dashboard/server.py` | FastAPI server with WebSocket commands and REST status. | All biolab modules |
 
 ## Data Flow: Pipetting a Well
 
@@ -113,12 +113,12 @@ This allows the full workflow to run end-to-end without any hardware attached. R
 
 Build-time assets (generated STL/SVG, reference scans) are kept separate from code:
 
-- **Code** — `app/hardware/` (authoritative): `cad/` (build123d parametric scripts, primary), `scad/` (OpenSCAD fallback), `slicer/` (profile validation), `parts.json` (manifest), `render.py` (dispatcher).
+- **Code** — `src/hardware/` (authoritative): `cad/` (build123d parametric scripts, primary), `scad/` (OpenSCAD fallback), `slicer/` (profile validation), `parts.json` (manifest), `render.py` (dispatcher).
 - **Assets** — top-level `hardware/`: `stl/` (generated printable meshes), `svg/` (generated isometric wireframes), `scans/` (reference 3D scans from Revopoint / structured light, used as design inputs).
 
-Parts in `app/hardware/parts.json` may carry an optional `scan_source` field pointing at a file under `hardware/scans/` when their geometry is derived from a physical scan rather than being purely parametric. Example: `dpette_multi_handle` (Ø32mm split-bore clamp) was designed from a 1:1 mm Revopoint scan of the DLAB dPette+ handle.
+Parts in `src/hardware/parts.json` may carry an optional `scan_source` field pointing at a file under `hardware/scans/` when their geometry is derived from a physical scan rather than being purely parametric. Example: `dpette_multi_handle` (Ø32mm split-bore clamp) was designed from a 1:1 mm Revopoint scan of the DLAB dPette+ handle.
 
-See [app/hardware/README.md](../app/hardware/README.md) for the full parts table, print settings, assembly notes, and scan provenance.
+See [src/hardware/README.md](../src/hardware/README.md) for the full parts table, print settings, assembly notes, and scan provenance.
 
 ## Prior Art & Vision
 

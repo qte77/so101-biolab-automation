@@ -113,7 +113,7 @@ curl -s --digest -u "maker:$PRUSA_PW" http://192.168.1.86/api/v1/files/usb
 build123d (.py) → STL → PrusaSlicer → .gcode → PrusaLink PUT → print
 ```
 
-Parts live in `hardware/stl/dpette/` and `hardware/stl/so101/` (generated assets). CAD sources live in `app/hardware/cad/` (build123d is the primary backend).
+Parts live in `hardware/stl/dpette/` and `hardware/stl/so101/` (generated assets). CAD sources live in `src/hardware/cad/` (build123d is the primary backend).
 
 Key printable parts:
 
@@ -123,8 +123,8 @@ Key printable parts:
 | `dpette_multi_handle.stl` | PLA+ | U-bracket mount, 8-channel (Ø32mm split-bore clamp for DLAB dPette+) |
 | `dpette_ejector_lever.stl` | PLA+ | Tip ejection lever for 8-channel pipette |
 
-Slicer profile: `app/hardware/slicer/profiles/prusa_mk4_pla_02mm.ini`
-Generate gcode: `prusa-slicer --load app/hardware/slicer/profiles/prusa_mk4_pla_02mm.ini --export-gcode -o output.gcode hardware/stl/dpette/<part>.stl`
+Slicer profile: `src/hardware/slicer/profiles/prusa_mk4_pla_02mm.ini`
+Generate gcode: `prusa-slicer --load src/hardware/slicer/profiles/prusa_mk4_pla_02mm.ini --export-gcode -o output.gcode hardware/stl/dpette/<part>.stl`
 
 ## Notes
 

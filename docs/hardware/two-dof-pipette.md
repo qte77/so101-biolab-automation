@@ -40,7 +40,7 @@ Three ways to use it with fewer motors:
 
 ### Option A — Skip lerobot, use scservo_sdk directly (recommended)
 
-Minimal 2-servo controller in `app/so101/two_dof_arm.py` talking directly to
+Minimal 2-servo controller in `src/so101/two_dof_arm.py` talking directly to
 `scservo_sdk.PacketHandler`. No patches needed. No 6-DOF infrastructure.
 
 **Pros:** Clean, minimal, no lerobot coupling.
@@ -49,7 +49,7 @@ pipette mode, leader-follower teleop doesn't make much sense anyway).
 
 ### Option B — Patch `SOFollower` to use only 2 motors
 
-Add a 4th patch to `app/so101/patch_lerobot.py` that rewrites the motor
+Add a 4th patch to `src/so101/cli/patch_lerobot.py` that rewrites the motor
 dict in `SOFollower.__init__` to only `shoulder_pan` and `shoulder_lift`.
 
 **Pros:** Reuse `lerobot-calibrate`, `lerobot-teleoperate`, etc.
@@ -58,7 +58,7 @@ this mode won't match 6-DOF files.
 
 ### Option C — Subclass in our project
 
-Create `app/so101/two_dof_follower.py` that inherits `SOFollower` and overrides
+Create `src/so101/two_dof_follower.py` that inherits `SOFollower` and overrides
 `__init__` with only the 2 motors. Used via our `DualArmController`, not
 lerobot CLI.
 
@@ -68,7 +68,7 @@ unless we also register a custom robot type with draccus).
 
 ## Plunger Actuation
 
-Electronic pipette USB protocols are backend-specific. See `app/so101/pipette.py`
+Electronic pipette USB protocols are backend-specific. See `src/so101/pipette.py`
 (skeleton) and the BOM for recommended models (AELAB dPette 7016 single-channel,
 DLAB dPette+ 8-channel).
 

@@ -1,7 +1,7 @@
 # dPette+ 3D Scan Reference Data
 
 Source mesh used to redesign the dPette+ 8-channel mount geometry
-(`app/hardware/cad/dpette/dpette_multi_handle.py` + `dpette_ejector_lever.py`).
+(`src/hardware/cad/dpette/dpette_multi_handle.py` + `dpette_ejector_lever.py`).
 
 ## Files
 
@@ -19,7 +19,7 @@ Source mesh used to redesign the dPette+ 8-channel mount geometry
 
 Reference geometry for parametric rebuilds of dPette+-specific parts.
 Not meant to be 3D printed directly — use the parametric build123d
-scripts in `app/hardware/cad/dpette/` for printable parts.
+scripts in `src/hardware/cad/dpette/` for printable parts.
 
 ## Provenance
 

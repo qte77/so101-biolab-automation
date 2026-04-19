@@ -128,14 +128,14 @@ openscad -p params.json -P set_name -o out.stl input.scad  # parameter file
 OpenSCAD (.scad) --> STL --> PrusaSlicer CLI --> printability report
 ```
 
-- OpenSCAD: parametric generator (reliable CLI, SVG via projection) — archived under `app/hardware/scad/`
+- OpenSCAD: parametric generator (reliable CLI, SVG via projection) — archived under `src/hardware/scad/`
 - PrusaSlicer / CuraEngine: printability validator (optional, graceful fallback if unavailable)
-- build123d: primary CAD backend in `app/hardware/cad/` (migrated from CadQuery 2026-04; scan-informed CAD delivered 2026-04-11)
+- build123d: primary CAD backend in `src/hardware/cad/` (migrated from CadQuery 2026-04; scan-informed CAD delivered 2026-04-11)
 - **PrusaLink API**: first concrete printer-API integration — see [`prusa-mk4-ops.md`](prusa-mk4-ops.md) for MK4 endpoint reference and curl examples
 
 ## STL Files Status
 
-See [`app/hardware/parts.json`](../../app/hardware/parts.json) for the machine-readable manifest and [`app/hardware/README.md`](../../app/hardware/README.md) for the assembly guide. All parts are rendered via `make render_parts` (build123d primary, OpenSCAD fallback) into top-level `hardware/stl/`.
+See [`src/hardware/parts.json`](../../src/hardware/parts.json) for the machine-readable manifest and [`src/hardware/README.md`](../../src/hardware/README.md) for the assembly guide. All parts are rendered via `make render_parts` (build123d primary, OpenSCAD fallback) into top-level `hardware/stl/`.
 
 As of 2026-04-11:
 
@@ -145,6 +145,6 @@ As of 2026-04-11:
   - `dpette_tip_release` — L-bracket tip ejector station, universal single/multi-channel
   - `dpette_multi_handle` / `dpette_ejector_lever` — 32mm split-bore 8-channel clamp replacing SO-101 gripper jaws, **derived from a 1:1 mm Revopoint scan** (see `hardware/scans/dpette/`)
 
-**Print settings:** PLA+ default, 0.4mm nozzle, 0.2mm layer, 15% infill (25% for functional mounts). TPU 95A for gripper tips only. Prusa MK4 profiles available in `app/hardware/slicer/profiles/prusa_mk4_*.ini`.
+**Print settings:** PLA+ default, 0.4mm nozzle, 0.2mm layer, 15% infill (25% for functional mounts). TPU 95A for gripper tips only. Prusa MK4 profiles available in `src/hardware/slicer/profiles/prusa_mk4_*.ini`.
 
-**Design philosophy:** STL files are generated programmatically from build123d parametric scripts — reproducible, parametric, version-controlled. OpenSCAD scripts under `app/hardware/scad/` are archived as a fallback. Scan-derived geometry (Revopoint or similar) is captured at 1:1 mm in `hardware/scans/`; the parts.json `scan_source` field provides queryable provenance.
+**Design philosophy:** STL files are generated programmatically from build123d parametric scripts — reproducible, parametric, version-controlled. OpenSCAD scripts under `src/hardware/scad/` are archived as a fallback. Scan-derived geometry (Revopoint or similar) is captured at 1:1 mm in `hardware/scans/`; the parts.json `scan_source` field provides queryable provenance.
