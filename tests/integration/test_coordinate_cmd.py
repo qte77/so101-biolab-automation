@@ -6,7 +6,7 @@ import logging
 
 import pytest
 
-from so101.coordinate_cmd import main
+from so101.cli.coordinate_cmd import main
 
 
 class TestCoordinateCmd:

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 import pytest
 
-# Import module under test (not a package, lives outside app/)
+# Import module under test (not a package, lives outside src/)
 from _paths import HARDWARE_DIR
 
 sys.path.insert(0, str(HARDWARE_DIR / "slicer"))
