@@ -227,10 +227,10 @@ setup_hardware: setup_uv setup_hardware_deps ## Install all hardware deps (LeRob
 
 
 render_parts: ## Generate STL + SVG from hardware/parts.json (build123d preferred, OpenSCAD fallback)
-	uv run --group cad python app/hardware/render.py
+	uv run --group cad python src/hardware/render.py
 
 check_prints: ## Run slicer printability checks on STLs (CuraEngine or PrusaSlicer)
-	uv run python app/hardware/slicer/validate.py --all
+	uv run python src/hardware/slicer/validate.py --all
 
 render_all: render_parts check_prints ## Generate parts + validate printability
 
@@ -286,7 +286,7 @@ fetch_urdf: ## Download SO-101 URDF + STL assets from foxglove-sdk
 
 start_foxglove: fetch_urdf ## Live 3D arm viz + cameras via Foxglove (ws://localhost:8765)
 	@echo "Requires: uv sync --group foxglove --group lerobot"
-	uv run --group foxglove --group lerobot python -m so101.foxglove_viz \
+	uv run --group foxglove --group lerobot so101-foxglove \
 		--robot.port=$(FOLLOWER_A_PORT) \
 		--robot.id=arm_a \
 		--robot.wrist_cam_id=$(WRIST_CAM) \
@@ -346,7 +346,7 @@ check_docs: ## Lint markdown files (reads .markdownlint.json)
 	fi
 
 check_types: ## Run pyright type checking
-	uv run pyright app $(PYRIGHT_QUIET)
+	uv run pyright src $(PYRIGHT_QUIET)
 
 test: ## Run all tests with pytest
 	uv run pytest $(PYTEST_QUIET)
@@ -358,7 +358,7 @@ retest: ## Rerun last failed tests only
 	uv run pytest --lf -x
 
 check_complexity: ## Check cognitive complexity (max 15/function)
-	uv run complexipy app/so101/ app/dashboard/ --max-complexity-allowed 15
+	uv run complexipy src/so101/ src/dashboard/ --max-complexity-allowed 15
 
 quick_validate: lint check_types ## Fast gate (lint + type check)
 
@@ -372,7 +372,7 @@ eval_policy: ## Evaluate trained policy
 	uv run so101-demo --mode=eval --arm-port=$(FOLLOWER_A_PORT)
 
 serve_dashboard: ## Start remote dashboard
-	uv run uvicorn app.dashboard.server:app --host 0.0.0.0 --port 8080 --reload
+	uv run uvicorn dashboard.server:app --host 0.0.0.0 --port 8080 --reload
 
 run_demo: ## Run full demo pipeline
 	uv run so101-demo --mode=full
