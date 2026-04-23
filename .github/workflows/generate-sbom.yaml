@@ -21,6 +21,6 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Generate SBOM
-        uses: qte77/gha-sbom-action@ca8cef2323ca17f985dd478483fcca7aaf45076c # v0.1.0
+        uses: qte77/gha-sbom-action@82becb244dc8ec442a17d5b5e171d0a384909896 # v0.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
