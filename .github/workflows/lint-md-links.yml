@@ -1,0 +1,17 @@
+---
+name: Lint MD and Links
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    uses: qte77/.github/.github/workflows/lint-md-links.yml@3b1579152e930a53b13d987a9c2344f79e3007d5  # 2026-04-27
+...
