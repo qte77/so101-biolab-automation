@@ -5,7 +5,7 @@ list as context to each.
 
 ## Agent 1: Code Reuse
 
-```
+```yaml
 Review changed files for CODE REUSE issues.
 
 For each change:
@@ -21,7 +21,7 @@ Report: file, issue, suggested fix. No false positives.
 
 ## Agent 2: Code Quality
 
-```
+```yaml
 Review changed files for CODE QUALITY issues.
 
 Look for:
@@ -37,7 +37,7 @@ Report: file, issue, suggested fix. Skip false positives.
 
 ## Agent 3: Efficiency
 
-```
+```yaml
 Review changed files for EFFICIENCY issues.
 
 Look for:

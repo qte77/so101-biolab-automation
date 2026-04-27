@@ -70,7 +70,7 @@ Detect violations across the scope. For each finding, record:
 
    **a) If `markdownlint-cli` is available** (`npx markdownlint-cli --version`
    succeeds): run it with the project config and parse output:
-   ```
+   ```text
    npx markdownlint-cli -c .markdownlint.json <scope> 2>&1
    ```
    Map results to violation types: MD012 → double blanks (fix during align),

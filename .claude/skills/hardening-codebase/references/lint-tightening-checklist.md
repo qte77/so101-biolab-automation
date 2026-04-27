@@ -77,7 +77,7 @@ Tighten one level at a time. Fix violations before tightening further.
 
 Every project needs two recipes:
 
-```
+```text
 autofix    — format + lint --fix (developer convenience)
 lint       — format --check + lint (CI gate, fails on issues)
 complexity — cognitive complexity check (gate, fails above threshold)

@@ -33,7 +33,7 @@ Writes **focused, behavior-driven tests** following the TDD Red-Green-Refactor c
 
 Every test has three phases:
 
-```
+```text
 ARRANGE — Set up test data and dependencies
 ACT     — Execute the behavior under test
 ASSERT  — Verify the outcome

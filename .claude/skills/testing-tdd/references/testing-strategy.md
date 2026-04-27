@@ -6,6 +6,8 @@ purpose: High-level testing strategy aligned with KISS/DRY/YAGNI
 see-also: tdd-best-practices.md
 ---
 
+# Testing Strategy
+
 **Purpose**: What to test, test organization, mocking strategy,
 decision checklist. Language-agnostic.
 
@@ -87,7 +89,7 @@ decision checklist. Language-agnostic.
 tests/
 ├── *.test.*           # Unit tests
 └── setup.*            # Shared setup
-```
+```text
 
 **Organized structure** (larger projects):
 
@@ -102,7 +104,7 @@ tests/
 
 Name describes behavior, not method:
 
-```
+```text
 // Unit tests
 "calculates total from items"
 "returns empty array for unknown user"

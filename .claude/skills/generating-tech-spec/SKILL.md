@@ -45,7 +45,7 @@ Read these before proceeding:
 
 ## Output Naming
 
-```
+```yaml
 ADR:      docs/adr/NNNN-<slug>.md        (e.g., 0003-use-event-sourcing.md)
 RFC:      docs/rfc/NNNN-<slug>.md        (e.g., 0001-api-versioning.md)
 Design:   docs/specs/<date>-<slug>.md    (e.g., 2026-03-01-auth-redesign.md)

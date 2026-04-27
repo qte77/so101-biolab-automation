@@ -5,6 +5,8 @@ based-on: Industry research 2025-2026, adapted from python-dev testing-python
 see-also: testing-strategy.md
 ---
 
+# TDD Best Practices
+
 **Purpose**: How to do TDD — Red-Green-Refactor cycle, AAA structure,
 best practices, anti-patterns. Language-agnostic.
 
@@ -29,7 +31,7 @@ best practices, anti-patterns. Language-agnostic.
 └─────┬───────┘
       │
       └──────> Repeat
-```
+```bash
 
 ## Core Practices
 
@@ -54,7 +56,7 @@ total = processor.calculateTotal(items)
 
 // ASSERT — Verify the outcome
 assertEqual(total, 25)
-```
+```text
 
 ### 3. Keep Tests Atomic and Isolated
 
@@ -90,7 +92,7 @@ assert(service._internalClient instanceof SomeLibrary)
 
 // GOOD — Tests behavior
 assertEqual(service.fetch("key"), expectedValue)
-```
+```text
 
 ### Untyped mocks
 

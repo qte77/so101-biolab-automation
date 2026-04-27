@@ -42,9 +42,9 @@ its sections. If not, use this minimal format:
 ## Commits
 
 <list commits from git log>
-```
+```bash
 
-**Body guidelines:**
+### Body guidelines:
 - Fill template checkboxes where applicable (check items that are done)
 - Include `Closes #N` if the branch name contains an issue number
 - Keep it concise — the diff speaks for itself

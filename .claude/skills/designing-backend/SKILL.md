@@ -12,12 +12,14 @@ metadata:
   last-verified-cc-version: 1.0.34
 ---
 
+# Skill
+
 ## Git Context
 
 - Recent changes: !`git log --oneline -3`
 - Current branch: !`git branch --show-current`
 
-# Backend Architecture
+## Backend Architecture
 
 **Target**: $ARGUMENTS
 
