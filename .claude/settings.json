@@ -79,14 +79,14 @@
     "context7@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
-    "cc-meta@qte77-claude-code-plugins": true,
-    "python-dev@qte77-claude-code-plugins": true,
-    "docs-governance@qte77-claude-code-plugins": true,
-    "commit-helper@qte77-claude-code-plugins": true,
-    "codebase-tools@qte77-claude-code-plugins": true
+    "cc-meta@qte77-claude-code-utils": true,
+    "python-dev@qte77-claude-code-utils": true,
+    "docs-governance@qte77-claude-code-utils": true,
+    "commit-helper@qte77-claude-code-utils": true,
+    "codebase-tools@qte77-claude-code-utils": true
   },
   "extraKnownMarketplaces": {
-    "qte77-claude-code-plugins": {
+    "qte77-claude-code-utils": {
       "source": {
         "source": "github",
         "repo": "qte77/claude-code-plugins"
