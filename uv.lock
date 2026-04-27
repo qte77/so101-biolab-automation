@@ -480,6 +480,14 @@ wheels = [
 ]
 
 [[package]]
+name = "dpette"
+version = "0.2.0"
+source = { git = "https://github.com/Lambda-Biolab/dpette-usb-driver.git#41bea676d4cf95558818f5dc81fb97522d24c138" }
+dependencies = [
+    { name = "pyserial" },
+]
+
+[[package]]
 name = "draccus"
 version = "0.10.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2392,6 +2400,9 @@ foxglove = [
 lerobot = [
     { name = "lerobot", extra = ["feetech"] },
 ]
+pipette = [
+    { name = "dpette" },
+]
 pylabrobot = [
     { name = "pylabrobot" },
 ]
@@ -2437,6 +2448,7 @@ foxglove = [
     { name = "yourdfpy" },
 ]
 lerobot = [{ name = "lerobot", extras = ["feetech"] }]
+pipette = [{ name = "dpette", git = "https://github.com/Lambda-Biolab/dpette-usb-driver.git" }]
 pylabrobot = [{ name = "pylabrobot", specifier = ">=0.2" }]
 test = [
     { name = "httpx", specifier = ">=0.27" },
