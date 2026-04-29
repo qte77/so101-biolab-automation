@@ -50,7 +50,7 @@ jobs:
 
       - name: Bump version
         id: bump
-        uses: callowayproject/bump-my-version@621b2ed57ac6bf20b5c9351e34854d97e4e3abbc  # v0.29.0
+        uses: callowayproject/bump-my-version@e6ecdc3e573698766cd6c2112faeda50bcc2e56a  # v1.3
         env:
           BUMPVERSION_TAG: "true"
         with:
