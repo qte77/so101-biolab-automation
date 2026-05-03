@@ -55,6 +55,12 @@ eln = [
 pylabrobot = [
     "pylabrobot>=0.2",
 ]
+pipette = [  # Electronic pipette driver (AELAB dPette 7016, DLAB dPette+)
+    "dpette",
+]
+
+[tool.uv.sources]
+dpette = { git = "https://github.com/Lambda-Biolab/dpette-usb-driver.git" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/so101", "src/dashboard"]
