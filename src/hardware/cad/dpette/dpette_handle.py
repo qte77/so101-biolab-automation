@@ -73,10 +73,12 @@ M3 = 3.2
 CLAMP_BOLT = 3.2
 
 # --- Straight cam arm ---
-CAM_LENGTH = 32.0
+# #44: CAM_LENGTH 32→40 (torque), CAM_T 4→6 (flex/break resistance),
+# CAM_TIP_R 2→3 (wider contact surface)
+CAM_LENGTH = 40.0
 CAM_W = 6.0
-CAM_T = 4.0
-CAM_TIP_R = 2.0
+CAM_T = 6.0
+CAM_TIP_R = 3.0
 
 
 def build_mount_bracket():
