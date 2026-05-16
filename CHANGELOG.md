@@ -4,6 +4,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ## [Unreleased]
 
+### Removed
+
+- `DualArmController.start_teleoperation()` no-op stub from `src/so101/arms.py`. The method only validated inputs and logged `(stub)` — real teleop is invoked via `make start_teleop` / `lerobot-teleoperate`. Corresponding `TestTeleoperation` class removed from `tests/so101/test_arms.py`.
+
 ## [0.2.0] - 2026-04-16
 
 ### Added
