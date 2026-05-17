@@ -291,6 +291,7 @@ calibrate_leader: ## Calibrate leader only
 
 calibrate_arms: calibrate_arm_a calibrate_arm_b calibrate_leader ## Calibrate all arms (leader + both followers)
 
+# TODO: Rerun.io live viz (via --display_data=true) unvalidated on hardware — joint streams confirmed, camera path unverified
 start_teleop: ## Start teleoperation (leader → follower); CAMERAS="{}" to disable cameras
 	uv run lerobot-teleoperate \
 		--robot.type=so101_follower \
@@ -316,6 +317,7 @@ fetch_urdf: ## Download SO-101 URDF + STL assets from foxglove-sdk
 		echo "SO101/ URDF + STL assets ready"
 	fi
 
+# TODO: Foxglove live 3D viz unvalidated on hardware (local + remote)
 start_foxglove: fetch_urdf ## Live 3D arm viz + cameras via Foxglove (ws://localhost:8765)
 	@echo "Requires: uv sync --group foxglove --group lerobot"
 	uv run --group foxglove --group lerobot so101-foxglove \
@@ -324,6 +326,7 @@ start_foxglove: fetch_urdf ## Live 3D arm viz + cameras via Foxglove (ws://local
 		--robot.wrist_cam_id=$(WRIST_CAM) \
 		--robot.env_cam_id=$(ENV_CAM)
 
+# TODO: Rerun.io live viz (via --display_data=true) unvalidated on hardware — joint streams confirmed, camera path unverified
 record_episodes: ## Record teleoperation episodes; CAMERAS="{}" to disable cameras
 	uv run lerobot-record \
 		--robot.type=so101_follower \

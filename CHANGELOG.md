@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ### Added
 
+- **Live Visualization section** in README: collapsible `<details>` block with annotated Rerun.io screenshot (`assets/images/screenshot_rerun.io_so101.png`) showing joint time-series, observation streams, recording metadata, and blueprint panels. Notes `make start_foxglove` for the separate 3D + camera view.
+- **`TODO:` comments** in Makefile above `start_teleop`, `record_episodes`, and `start_foxglove` marking the live-viz layer as partially validated (Rerun joint streams confirmed; Rerun camera path and Foxglove local+remote unverified on hardware).
 - **Hardware bringup ergonomics for partial setups**:
   - Per-arm calibrate targets `calibrate_arm_a`, `calibrate_arm_b`, `calibrate_leader` — 2-arm setups (leader + one follower) can calibrate only what is connected (Makefile)
   - `CAMERAS` variable so `start_teleop` / `record_episodes` can run headless: `make start_teleop CAMERAS="{}"` (Makefile)
