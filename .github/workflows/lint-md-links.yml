@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  issues: write  # required at workflow startup by reusable notify job (even when unused)
 
 jobs:
   lint:
