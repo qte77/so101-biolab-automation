@@ -34,6 +34,8 @@ See [docs/hardware/BOM.md](docs/hardware/BOM.md) for full shopping list with lin
 make setup_all
 
 # Generate 3D-printed parts (build123d preferred, OpenSCAD fallback)
+# STL + STEP + SVG written to hardware/. STEP is the FreeCAD round-trip
+# escape hatch when parametric editing is awkward — see docs/hardware/cad-tooling.md.
 make render_parts
 
 # Optional: validate printability (CuraEngine / PrusaSlicer)

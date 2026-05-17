@@ -11,6 +11,7 @@ CODE_DIR = Path(__file__).resolve().parent.parent.parent  # src/hardware/
 ASSETS_DIR = CODE_DIR.parents[1] / "hardware"  # top-level hardware/
 STL_DIR = ASSETS_DIR / "stl"
 SVG_DIR = ASSETS_DIR / "svg"
+STEP_DIR = ASSETS_DIR / "step"
 
 
 def _to_compound(shape):
@@ -25,23 +26,29 @@ def _to_compound(shape):
 
 
 def export_part(part, subdir: str, filename: str) -> None:
-    """Export a build123d shape to STL and isometric wireframe SVG.
+    """Export a build123d shape to STL, STEP, and isometric wireframe SVG.
+
+    STEP is the round-trip format for FreeCAD hand-edits when build123d's
+    parametric workflow is too restrictive (see docs/hardware/cad-tooling.md).
 
     Args:
         part: build123d Solid/Compound/ShapeList.
         subdir: output subdirectory (e.g. "so101", "dpette", "labware").
         filename: stem without extension (e.g. "pipette_mount_so101").
     """
-    from build123d import ExportSVG, Rot, export_stl
+    from build123d import ExportSVG, Rot, export_step, export_stl
 
     part = _to_compound(part)
 
     stl_path = STL_DIR / subdir / f"{filename}.stl"
+    step_path = STEP_DIR / subdir / f"{filename}.step"
     svg_path = SVG_DIR / subdir / f"{filename}.svg"
     stl_path.parent.mkdir(parents=True, exist_ok=True)
+    step_path.parent.mkdir(parents=True, exist_ok=True)
     svg_path.parent.mkdir(parents=True, exist_ok=True)
 
     export_stl(part, str(stl_path))
+    export_step(part, str(step_path))
 
     try:
         iso = Rot(35.264, 0, -45) * part

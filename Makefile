@@ -9,7 +9,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_hardware_deps setup_hardware \
+	setup_uv setup_dev setup_all setup_cad setup_freecad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_hardware_deps setup_hardware \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
 	find_port scan_servos install_udev bringup patch_lerobot patch_lerobot_revert \
@@ -88,6 +88,35 @@ setup_all: setup_dev setup_cad ## Install all dependencies + tools
 
 setup_cad: setup_uv ## Install build123d for BREP CAD generation
 	uv sync --group cad
+
+setup_freecad: ## Install FreeCAD GUI for STEP hand-edit round-trip (dev-machine only, not a CI dep)
+	if command -v freecad > /dev/null 2>&1; then
+		echo "freecad already installed: $$(freecad --version 2>&1 | head -1)"
+	elif flatpak list --app 2>/dev/null | grep -q org.freecad.FreeCAD; then
+		echo "freecad already installed via Flatpak (run: flatpak run org.freecad.FreeCAD)"
+	else
+		$(DETECT_PKG_MGR)
+		case "$$HOST_OS" in
+			linux)
+				if command -v flatpak > /dev/null 2>&1; then
+					echo "Installing FreeCAD via Flatpak ..."
+					flatpak install -y --noninteractive flathub org.freecad.FreeCAD
+				else
+					echo "ERROR: flatpak not found. Install flatpak via your distro package manager, then re-run."
+					echo "  Setup: https://flatpak.org/setup/"
+					echo "  FreeCAD on Linux: https://wiki.freecad.org/Installing_on_Linux"
+					exit 1
+				fi ;;
+			darwin)
+				if command -v brew > /dev/null 2>&1; then
+					brew install --cask freecad
+				else
+					echo "ERROR: Homebrew not found. Install brew first (https://brew.sh), then re-run."
+					exit 1
+				fi ;;
+			*) echo "ERROR: unsupported OS — install manually: https://www.freecad.org/downloads.php"; exit 1 ;;
+		esac
+	fi
 
 setup_scad: ## Install OpenSCAD for parametric STL generation
 	if command -v openscad > /dev/null 2>&1; then
