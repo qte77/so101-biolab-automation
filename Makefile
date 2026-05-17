@@ -48,6 +48,7 @@ WANDB ?= 0
 WRIST_CAM ?= 2
 ENV_CAM ?= 0
 CAMERAS ?= { overhead: {type: opencv, index_or_path: $(ENV_CAM), width: 640, height: 480, fps: 30}, wrist: {type: opencv, index_or_path: $(WRIST_CAM), width: 640, height: 480, fps: 30}}
+FOXGLOVE_CAM_FLAGS ?= --robot.wrist_cam_id=$(WRIST_CAM) --robot.env_cam_id=$(ENV_CAM)
 
 # Detect OS and package manager — use in recipes via $(DETECT_PKG_MGR)
 # Sets: PKG_MGR (dnf|apt|pacman|brew), HOST_OS (linux|darwin), HOST_ARCH (x86_64|aarch64|arm64)
@@ -318,13 +319,12 @@ fetch_urdf: ## Download SO-101 URDF + STL assets from foxglove-sdk
 	fi
 
 # TODO: Foxglove live 3D viz unvalidated on hardware (local + remote)
-start_foxglove: fetch_urdf ## Live 3D arm viz + cameras via Foxglove (ws://localhost:8765)
+start_foxglove: fetch_urdf ## Live 3D arm viz via Foxglove (ws://localhost:8765); FOXGLOVE_CAM_FLAGS="" to disable cameras
 	@echo "Requires: uv sync --group foxglove --group lerobot"
 	uv run --group foxglove --group lerobot so101-foxglove \
 		--robot.port=$(FOLLOWER_A_PORT) \
 		--robot.id=arm_a \
-		--robot.wrist_cam_id=$(WRIST_CAM) \
-		--robot.env_cam_id=$(ENV_CAM)
+		$(FOXGLOVE_CAM_FLAGS)
 
 # TODO: Rerun.io live viz (via --display_data=true) unvalidated on hardware — joint streams confirmed, camera path unverified
 record_episodes: ## Record teleoperation episodes; CAMERAS="{}" to disable cameras

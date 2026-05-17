@@ -6,6 +6,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ### Added
 
+- **`FOXGLOVE_CAM_FLAGS` Makefile variable**: parallels `CAMERAS` for the foxglove path. Override with `make start_foxglove FOXGLOVE_CAM_FLAGS=""` to run headless. `foxglove_viz.py` already supports this (camera flags are optional in argparse; `_try_camera(None, ...)` returns early).
 - **Live Visualization section** in README: collapsible `<details>` block with annotated Rerun.io screenshot (`assets/images/screenshot_rerun.io_so101.png`) showing joint time-series, observation streams, recording metadata, and blueprint panels. Notes `make start_foxglove` for the separate 3D + camera view.
 - **`TODO:` comments** in Makefile above `start_teleop`, `record_episodes`, and `start_foxglove` marking the live-viz layer as partially validated (Rerun joint streams confirmed; Rerun camera path and Foxglove local+remote unverified on hardware).
 - **Hardware bringup ergonomics for partial setups**:
@@ -18,6 +19,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ### Changed
 
+- **`make start_foxglove`** no longer hard-codes camera flags inline — references the new `FOXGLOVE_CAM_FLAGS` variable instead, matching the `CAMERAS` pattern used by `start_teleop` / `record_episodes`.
 - **`setup_hardware` Makefile target**: tries PyPI wheels first via `uv sync --group lerobot --group foxglove`; falls back to `setup_hardware_deps` (sudo system build deps) only if wheel install fails. Removes blanket sudo prompt on first install.
 - **`lerobot-*` CLIs invoked via `uv run`**: `find_port`, `calibrate_arm_*`, `start_teleop`, `record_episodes`, `train_policy` no longer require manual `source .venv/bin/activate` (fixes `lerobot-find-port: command not found`)
 - **`.PHONY`** expanded to cover all hardware + per-arm targets
