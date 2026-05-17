@@ -32,6 +32,7 @@ ASSETS_DIR = (
 )  # top-level hardware/ — generated + reference assets
 STL_DIR = ASSETS_DIR / "stl"
 SVG_DIR = ASSETS_DIR / "svg"
+STEP_DIR = ASSETS_DIR / "step"
 
 # Backend constants — normalize manifest values to these
 BACKEND_CAD = "cad"
@@ -91,6 +92,7 @@ def render_cad(parts: list[dict], *, solid: bool = False) -> None:
         ExportSVG,
         LineType,
         Rot,
+        export_step,
         export_stl,
     )
 
@@ -118,9 +120,12 @@ def render_cad(parts: list[dict], *, solid: bool = False) -> None:
 
         stl_out = STL_DIR / part["stl"]
         svg_out = SVG_DIR / part["svg"]
+        step_out = STEP_DIR / part["stl"].replace(".stl", ".step")
         stl_out.parent.mkdir(parents=True, exist_ok=True)
         svg_out.parent.mkdir(parents=True, exist_ok=True)
+        step_out.parent.mkdir(parents=True, exist_ok=True)
         export_stl(shape, str(stl_out))
+        export_step(shape, str(step_out))
         try:
             # Rotate to isometric view (ExportSVG projects top-down on XY)
             iso_shape = Rot(35.264, 0, -45) * shape
@@ -142,7 +147,7 @@ def render_cad(parts: list[dict], *, solid: bool = False) -> None:
             else:
                 exporter.add_shape(iso_shape)
             exporter.write(str(svg_out))
-            print(f"  {part['stl']} + {part['svg']}")
+            print(f"  {part['stl']} + {part['svg']} + {step_out.relative_to(STEP_DIR)}")
         except Exception as exc:
             print(f"  {part['stl']} (SVG failed: {exc})")
 
