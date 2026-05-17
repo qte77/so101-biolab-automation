@@ -4,6 +4,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ## [Unreleased]
 
+### Added
+
+- **Hardware bringup ergonomics for partial setups**:
+  - Per-arm calibrate targets `calibrate_arm_a`, `calibrate_arm_b`, `calibrate_leader` — 2-arm setups (leader + one follower) can calibrate only what is connected (Makefile)
+  - `CAMERAS` variable so `start_teleop` / `record_episodes` can run headless: `make start_teleop CAMERAS="{}"` (Makefile)
+  - Hardware bringup section in README Quick Start: `setup_hardware → find_port → install_udev → bringup → calibrate_arms`
+  - Pre-flight info block in `make bringup` output (find_port / install_udev / port env vars)
+  - `docs/hardware/bringup.md` §6 and §7 now surface per-arm and CAMERAS hints
+  - `CONTRIBUTING.md` make-command table annotates `calibrate_arms`, `start_teleop`, `record_episodes` with the new alternatives
+
+### Changed
+
+- **`setup_hardware` Makefile target**: tries PyPI wheels first via `uv sync --group lerobot --group foxglove`; falls back to `setup_hardware_deps` (sudo system build deps) only if wheel install fails. Removes blanket sudo prompt on first install.
+- **`lerobot-*` CLIs invoked via `uv run`**: `find_port`, `calibrate_arm_*`, `start_teleop`, `record_episodes`, `train_policy` no longer require manual `source .venv/bin/activate` (fixes `lerobot-find-port: command not found`)
+- **`.PHONY`** expanded to cover all hardware + per-arm targets
+
 ### Removed
 
 - `DualArmController.start_teleoperation()` no-op stub from `src/so101/arms.py`. The method only validated inputs and logged `(stub)` — real teleop is invoked via `make start_teleop` / `lerobot-teleoperate`. Corresponding `TestTeleoperation` class removed from `tests/so101/test_arms.py`.

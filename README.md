@@ -40,11 +40,29 @@ make render_parts
 make setup_slicer
 make check_prints
 
-# Calibrate arms
-make calibrate_arms
+# --- Hardware bringup (one-time) ---
+
+# Install LeRobot deps (PyPI wheels first; falls back to build-from-source if needed)
+make setup_hardware
+
+# Identify USB serial ports for each board (unplug one at a time when prompted)
+make find_port
+
+# Fix /dev/ttyACM* permissions (one-time; replug boards after)
+make install_udev
+
+# Scan servos + patch lerobot for mixed STS3215 firmware
+make bringup PORT=/dev/ttyACM1
+
+# Calibrate arms (move each through its full range when prompted)
+make calibrate_arms                       # full 3-arm setup (leader + arm_a + arm_b)
+# for 2-arm setups (leader + one follower) run only what is connected:
+# make calibrate_arm_a calibrate_leader
 
 # Teleoperate (teacher-student)
-make start_teleop
+make start_teleop                         # uses cameras by default
+# or headless (no cameras):
+# make start_teleop CAMERAS="{}"
 
 # Record pipetting episodes
 make record_episodes TASK="pipette row A"

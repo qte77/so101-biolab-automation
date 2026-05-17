@@ -18,9 +18,9 @@ For AI agent behavioral rules, see [AGENTS.md](AGENTS.md).
 | `make validate` | Full gate (lint + types + tests + coverage + complexity) |
 | `make quick_validate` | Fast development validation (lint + type check) |
 | `make test` | Run all non-hardware tests with pytest |
-| `make calibrate_arms` | Calibrate all arms |
-| `make start_teleop` | Start teleoperation |
-| `make record_episodes` | Record training episodes |
+| `make calibrate_arms` | Calibrate all arms (or per-arm: `calibrate_arm_a`, `calibrate_arm_b`, `calibrate_leader` for partial setups) |
+| `make start_teleop` | Start teleoperation (override `CAMERAS="{}"` for headless / no-camera setups) |
+| `make record_episodes` | Record training episodes (same `CAMERAS="{}"` override) |
 | `make train_policy` | Train ACT policy |
 | `make serve_dashboard` | Start remote dashboard |
 

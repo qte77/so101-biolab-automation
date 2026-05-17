@@ -12,7 +12,9 @@ endif
 	setup_uv setup_dev setup_all setup_cad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_hardware_deps setup_hardware \
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
-	calibrate_arms start_teleop start_foxglove fetch_urdf record_episodes train_policy \
+	find_port scan_servos install_udev bringup patch_lerobot patch_lerobot_revert \
+	calibrate_arms calibrate_arm_a calibrate_arm_b calibrate_leader \
+	start_teleop start_foxglove fetch_urdf record_episodes train_policy \
 	eval_policy serve_dashboard run_demo \
 	help
 .DEFAULT_GOAL := help
@@ -45,6 +47,7 @@ POLICY ?= act
 WANDB ?= 0
 WRIST_CAM ?= 2
 ENV_CAM ?= 0
+CAMERAS ?= { overhead: {type: opencv, index_or_path: $(ENV_CAM), width: 640, height: 480, fps: 30}, wrist: {type: opencv, index_or_path: $(WRIST_CAM), width: 640, height: 480, fps: 30}}
 
 # Detect OS and package manager — use in recipes via $(DETECT_PKG_MGR)
 # Sets: PKG_MGR (dnf|apt|pacman|brew), HOST_OS (linux|darwin), HOST_ARCH (x86_64|aarch64|arm64)
@@ -219,8 +222,26 @@ setup_hardware_deps: ## Install system deps for lerobot (kernel headers, cmake, 
 		*) echo "ERROR: unsupported package manager — install kernel headers, cmake, and libav dev packages manually"; exit 1 ;;
 	esac
 
-setup_hardware: setup_uv setup_hardware_deps ## Install all hardware deps (LeRobot, Feetech, Foxglove, system libs)
-	uv sync --group lerobot --group foxglove
+setup_hardware: setup_uv ## Install hardware deps; tries PyPI wheels, falls back to building from source
+	echo "Installing lerobot + foxglove from PyPI wheels (no sudo) ..."
+	if uv sync --group lerobot --group foxglove; then
+		echo "OK: installed from wheels — no system build deps required"
+	else
+		echo ""
+		echo "Wheel install failed — some packages need to build from source."
+		echo "This requires system build deps (sudo will be requested)."
+		echo "Falling back to: make setup_hardware_deps + retry uv sync"
+		echo ""
+		$(MAKE) setup_hardware_deps
+		if ! uv sync --group lerobot --group foxglove; then
+			echo ""
+			echo "ERROR: install still failing after system build deps installed."
+			echo "Re-run with verbose output for details:"
+			echo "  uv sync --group lerobot --group foxglove -v"
+			exit 1
+		fi
+		echo "OK: installed from source after system deps"
+	fi
 
 
 # MARK: HARDWARE
@@ -235,7 +256,7 @@ check_prints: ## Run slicer printability checks on STLs (CuraEngine or PrusaSlic
 render_all: render_parts check_prints ## Generate parts + validate printability
 
 find_port: ## Identify serial port for a single board (unplug USB when prompted)
-	lerobot-find-port
+	uv run lerobot-find-port
 
 scan_servos: ## Scan a port for STS3215 servos (override: PORT=/dev/ttyACM1)
 	uv run so101-scan-servos --port=$(or $(PORT),/dev/ttyACM0)
@@ -247,24 +268,35 @@ install_udev: ## Install udev rule for Waveshare boards (makes ttyACM* world-rw)
 	sudo udevadm trigger
 	echo "udev rule installed. Replug the Waveshare board(s)."
 
-bringup: patch_lerobot scan_servos ## Guided first-bringup: patch lerobot + scan servos
+bringup: patch_lerobot scan_servos ## Patch lerobot + scan servos (run after find_port & install_udev)
+	echo ""
+	echo "Before running 'make bringup':"
+	echo "  - 'make find_port' to identify each /dev/ttyACM* (unplug one board at a time)."
+	echo "  - 'make install_udev' once if /dev/ttyACM* gives permission errors."
+	echo "  - Set LEADER_PORT / FOLLOWER_A_PORT / FOLLOWER_B_PORT to match find_port output."
 	echo ""
 	echo "Next steps:"
 	echo "  1. If scan shows mixed firmware, patches are already applied."
 	echo "  2. Run 'make calibrate_arms' (or calibrate individually)."
 	echo "  3. Run 'make start_teleop' to verify leader → follower."
 
-calibrate_arms: ## Calibrate all arms (leader + followers)
-	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_A_PORT) --robot.id=arm_a
-	lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_B_PORT) --robot.id=arm_b
-	lerobot-calibrate --teleop.type=so101_leader --teleop.port=$(LEADER_PORT) --teleop.id=leader
+calibrate_arm_a: ## Calibrate follower A only
+	uv run lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_A_PORT) --robot.id=arm_a
 
-start_teleop: ## Start teleoperation (leader → follower)
-	lerobot-teleoperate \
+calibrate_arm_b: ## Calibrate follower B only
+	uv run lerobot-calibrate --robot.type=so101_follower --robot.port=$(FOLLOWER_B_PORT) --robot.id=arm_b
+
+calibrate_leader: ## Calibrate leader only
+	uv run lerobot-calibrate --teleop.type=so101_leader --teleop.port=$(LEADER_PORT) --teleop.id=leader
+
+calibrate_arms: calibrate_arm_a calibrate_arm_b calibrate_leader ## Calibrate all arms (leader + both followers)
+
+start_teleop: ## Start teleoperation (leader → follower); CAMERAS="{}" to disable cameras
+	uv run lerobot-teleoperate \
 		--robot.type=so101_follower \
 		--robot.port=$(FOLLOWER_A_PORT) \
 		--robot.id=arm_a \
-		--robot.cameras="{ overhead: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 30}, wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 30}}" \
+		--robot.cameras="$(CAMERAS)" \
 		--teleop.type=so101_leader \
 		--teleop.port=$(LEADER_PORT) \
 		--teleop.id=leader \
@@ -292,12 +324,12 @@ start_foxglove: fetch_urdf ## Live 3D arm viz + cameras via Foxglove (ws://local
 		--robot.wrist_cam_id=$(WRIST_CAM) \
 		--robot.env_cam_id=$(ENV_CAM)
 
-record_episodes: ## Record teleoperation episodes
-	lerobot-record \
+record_episodes: ## Record teleoperation episodes; CAMERAS="{}" to disable cameras
+	uv run lerobot-record \
 		--robot.type=so101_follower \
 		--robot.port=$(FOLLOWER_A_PORT) \
 		--robot.id=arm_a \
-		--robot.cameras="{ overhead: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 30}, wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 30}}" \
+		--robot.cameras="$(CAMERAS)" \
 		--teleop.type=so101_leader \
 		--teleop.port=$(LEADER_PORT) \
 		--teleop.id=leader \
@@ -308,7 +340,7 @@ record_episodes: ## Record teleoperation episodes
 		--display_data=true
 
 train_policy: ## Train policy on recorded data (WANDB=1 to enable wandb)
-	lerobot-train \
+	uv run lerobot-train \
 		--dataset.repo_id=$(DATASET) \
 		--policy.type=$(POLICY) \
 		--output_dir=outputs/train/$(POLICY)_biolab \

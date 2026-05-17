@@ -207,7 +207,9 @@ uv run lerobot-calibrate \
 Or use the Makefile target (calibrates all three sequentially):
 
 ```bash
-make calibrate_arms
+make calibrate_arms                       # all three (leader + both followers)
+# for 2-arm setups (leader + one follower) calibrate only what is connected:
+# make calibrate_arm_a calibrate_leader
 ```
 
 ## 7. Teleoperation Test (Grippers)
@@ -240,7 +242,9 @@ uv run lerobot-teleoperate \
 Or via Makefile:
 
 ```bash
-make start_teleop
+make start_teleop                         # uses cameras by default
+# headless (no cameras):
+# make start_teleop CAMERAS="{}"
 ```
 
 Verify the follower arm mirrors the leader's movements.
