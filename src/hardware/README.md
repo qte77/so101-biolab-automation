@@ -22,6 +22,8 @@ make render_all           # Generate + validate
 
 **Why build123d + slicer?** build123d generates parametric STLs with isometric wireframe SVGs. A slicer (CuraEngine / PrusaSlicer) validates FDM printability (overhangs, unsupported regions, gravity failures) as fast CLI feedback.
 
+**Fallback for hand-edits:** STEP files are exported alongside STL into `../../hardware/step/` so parts can be opened in FreeCAD for WYSIWYG edits (face drag, manual fillet) when parametric Python is awkward. The hand-edited STEP becomes the source of truth for that part — no re-import to build123d. See [../../docs/hardware/cad-tooling.md](../../docs/hardware/cad-tooling.md#hand-edit-round-trip-fallback) for the round-trip and FreeCAD install pointer.
+
 **Status:** EXPERIMENTAL = draft dimensions, untested on hardware.
 
 Generated STL/SVG outputs and reference scans live under the top-level `../../hardware/` directory; only code lives here. See [../../docs/architecture.md](../../docs/architecture.md#hardware-asset-layout) for the authoritative layout description.

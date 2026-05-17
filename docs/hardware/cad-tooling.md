@@ -122,6 +122,28 @@ openscad -p params.json -P set_name -o out.stl input.scad  # parameter file
 - No automated printability checking
 - Proves slicer-based workflow is viable for SO-101 ecosystem
 
+## Hand-edit Round-trip (Fallback)
+
+build123d is the happy path. When a part needs WYSIWYG edits (face drag, manual
+fillet, scan-trace cleanup) that are awkward to express parametrically, drop
+into FreeCAD via STEP:
+
+```text
+build123d (.py) → STEP → FreeCAD GUI (edit) → STEP → PrusaSlicer CLI → gcode
+```
+
+- STEP files ship next to STL/SVG at `hardware/step/<subdir>/` (written by
+  `src/hardware/cad/util/export.py`, committed for review).
+- FreeCAD install is a dev-machine concern only — not a CI dep. STEP export
+  itself is pure Python (build123d/OCP) and runs headless. Install via
+  `make setup_freecad` (Flatpak on Linux, Homebrew cask on macOS); manual
+  paths and AppImage are listed in the
+  [FreeCAD install docs](https://wiki.freecad.org/Download).
+- Hand-edits are **leaf nodes**: a hand-edited `.step` is the source of truth
+  for that part going forward. No automated re-import to build123d.
+- Slice a hand-edited STEP the same way as a generated STL — load it in
+  PrusaSlicer GUI or convert to STL first (FreeCAD: `File → Export → .stl`).
+
 ## Validation Pipeline (Planned)
 
 ```text
