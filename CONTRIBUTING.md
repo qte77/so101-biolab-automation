@@ -106,6 +106,7 @@ Each document has a specific authority. Do not duplicate information across docu
 | [docs/outlook-printer-platforms.md](docs/outlook-printer-platforms.md) | Vision (informational) | Both | Printer platform comparison (Prusa, Bambu, Creality) |
 | [docs/outlook-integrations.md](docs/outlook-integrations.md) | Vision (informational) | Both | External system integration outlook (ELN, scanner, VLM) |
 | [docs/outlook-ceiling-rail.md](docs/outlook-ceiling-rail.md) | Vision (informational) | Both | Ceiling rail / gantry mounting exploration |
+| [docs/outlook-perception-lidar.md](docs/outlook-perception-lidar.md) | Vision (informational) | Both | LIDAR / depth / photogrammetry landscape + BIM/digital-twin outlook |
 | [docs/roadmap.md](docs/roadmap.md) | Vision (informational) | Both | Closed-loop printing, tool genesis, VLM/embodied AI phases |
 | [CHANGELOG.md](CHANGELOG.md) | Version history | Both | Keep a Changelog format |
 | [AGENT_LEARNINGS.md](AGENT_LEARNINGS.md) | Patterns | AI agents | Discovered patterns and solutions |
