@@ -3,7 +3,7 @@ title: Roadmap & Future Vision
 purpose: Forward-looking direction — closed-loop 3D printing, autonomous tool genesis, VLM/embodied AI phases
 authority: Vision (INFORMATIONAL — not requirements)
 created: 2026-03-27
-updated: 2026-04-12
+updated: 2026-05-31
 ---
 
 # Roadmap: Closed-Loop Automation & Autonomous Tool Genesis
@@ -217,6 +217,37 @@ For unattended multi-hour runs (e.g., 96-well plate with replicates, overnight i
 - Overhead camera with ArUco workspace calibration
 - Optional: depth camera ([RealSense D405 mount](https://github.com/TheRobotStudio/SO-ARM100#5-wristmount-cameras)) for 3D tip tracking
 - Optional: wrist F/T sensor for contact-aware manipulation
+
+### Spatial Awareness — Workcell + Lab-Room
+
+Two tracks, two scales, two sensor classes. Full landscape survey:
+[outlook-perception-lidar.md](outlook-perception-lidar.md).
+
+| Track | Scale | Sensor | Phase fit | Status |
+|-------|-------|--------|-----------|--------|
+| (a) Workcell awareness | <= 500 mm | Short-range depth (D405) + ArUco/AprilTag fiducials | Phase 4 — complements wrist-camera visual servoing | #170 — proposed |
+| (b) Lab-room SLAM + digital twin | 3-15 m | 360 deg LIDAR (Livox Mid-360 / Unitree L1) + IMU, MANDEYE-style logger, USD or IFC export | Phase 5+ — requires mobile platform | #171 — blocked on mobile base |
+
+Capability -> tool mapping (why one sensor class does not replace the others):
+
+| Need | Right tool |
+|------|------------|
+| Pre-move collision check, deck occupancy | Short-range depth (D405) or LIDAR — depth wins on cost + min-range |
+| Labware identity, barcode, QC, meniscus | RGB camera, wrist or overhead. No substitute. |
+| Room-scale navigation (mobile base) | LIDAR (track (b) above) |
+| Protocol selection, error recovery, "what did the user mean" | LLM / VLM |
+
+Design intent:
+
+- Depth + RGB (D405) and LIDAR are **complementary, not alternatives**.
+  LIDAR is wrong for the workcell (10 cm min range, no labware identity);
+  cameras are wrong for room-scale (FOV too narrow).
+- VLM / LLM is a **separate axis** from the depth / LIDAR stack — it covers
+  identity, QC, and protocol selection. Geometry sensing does not replace
+  the VLM, and the VLM does not replace geometry sensing.
+- Track (a) plugs into the named-position orchestrator from
+  qte77/i3mega-pipettebot#120 as a pre-move clearance check; track (b)
+  loads a prior map at startup for online localization.
 
 ## Near-Term Actions (When Hardware Arrives)
 
