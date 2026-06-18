@@ -1,3 +1,1 @@
-# Insertions
-
-@AGENTS.md
+AGENTS.md
