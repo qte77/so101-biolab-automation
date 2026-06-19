@@ -36,10 +36,10 @@ test = [
     "httpx>=0.27",
 ]
 lerobot = [  # SO-101 teleoperation, recording, training (pulls torch)
-    "lerobot[feetech]",
+    "lerobot[feetech]>=0.4.4",  # pin: CVE-driven torch/diffusers bumps must not downgrade lerobot
 ]
 train = [  # ACT policy training — requires GPU; wandb opt-in via WANDB=1
-    "lerobot[feetech]",
+    "lerobot[feetech]>=0.4.4",  # pin: CVE-driven torch/diffusers bumps must not downgrade lerobot
     "wandb>=0.18",
 ]
 foxglove = [  # Live visualization + MCAP recording
