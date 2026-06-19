@@ -7,7 +7,7 @@ license = "Apache-2.0"
 # Pin 3.12: build123d → cadquery-ocp → VTK has no cp313 wheels
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "fastapi>=0.115",
+    "fastapi>=0.136.1",  # >=0.136.1 tracks starlette 1.x (security baseline)
     "uvicorn[standard]>=0.30",
     "websockets>=13.0",
     "opencv-python>=4.10",
@@ -79,7 +79,6 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 default-groups = ["dev", "test"]
-exclude-newer = "2026-04-11T00:00:00Z"
 link-mode = "copy"
 
 [tool.ruff]
