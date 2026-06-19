@@ -19,6 +19,8 @@ Dual-path bio-lab automation: SO-101 arms for complex tasks + XZ gantry for dedi
 
 See [docs/UserStory.md](docs/UserStory.md) for use cases (UC1-5) and acceptance criteria.
 
+**Background:** this is the lab scaffold behind [Building a Trustworthy Agent Loop for a Physical Lab](https://qte77.github.io/open-self-driving-lab-agent-loop/).
+
 ## Hardware
 
 **SO-101 path:** Two [SO-101](https://github.com/therobotstudio/so-arm100) follower arms + one leader arm via [LeRobot](https://huggingface.co/docs/lerobot/index). ~$350–$650.
