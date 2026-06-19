@@ -34,5 +34,5 @@ jobs:
             echo "SBOM unchanged — nothing to commit"
           else
             git commit -m "docs: update SBOM [skip ci]"
-            git push
+            git push || echo "::warning::SBOM push rejected by branch protection. Allow the github-actions[bot] to bypass push restrictions on main to enable auto-commit."
           fi
