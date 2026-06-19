@@ -12,6 +12,11 @@ updates:
     groups:
       python-deps:
         patterns: ["*"]
+    # torch/diffusers patched versions require downgrading lerobot 0.4.4 (breaks
+    # patch_lerobot.py). lerobot is pinned >=0.4.4; ignore these to avoid the trap.
+    ignore:
+      - dependency-name: "torch"
+      - dependency-name: "diffusers"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

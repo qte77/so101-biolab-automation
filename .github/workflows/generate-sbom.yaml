@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   generate-sbom:
@@ -23,4 +22,17 @@ jobs:
       - name: Generate SBOM
         uses: qte77/gha-sbom-action@f1aca6c93b91fa3f41060db5c9251fc2715e3c77 # v0.1.0
         with:
+          create_pr: "false"
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit SBOM to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/SBOM
+          if git diff --cached --quiet; then
+            echo "SBOM unchanged — nothing to commit"
+          else
+            git commit -m "docs: update SBOM [skip ci]"
+            git push
+          fi
