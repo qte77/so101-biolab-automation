@@ -3,9 +3,6 @@ name: CodeQL
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   schedule:
     - cron: "27 11 * * 0"
   workflow_dispatch:
@@ -31,4 +28,14 @@ jobs:
       - name: Autobuild
         uses: github/codeql-action/autobuild@8aad20d150bbac5944a9f9d289da16a4b0d87c1e  # v4.36.2
       - name: Perform CodeQL Analysis
+        id: analyze
         uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e  # v4.36.2
+        with:
+          output: sarif-results
+      - name: Dismiss suppressed alerts
+        uses: advanced-security/dismiss-alerts@046d6b48d2e43cf563f96f67332c47c432eff83e  # v2.0.2
+        with:
+          sarif-id: ${{ steps.analyze.outputs.sarif-id }}
+          sarif-file: sarif-results
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
