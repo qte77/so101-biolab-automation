@@ -314,5 +314,3 @@ class TestErrorRecovery:
 
         ctrl.connect()
         assert ctrl.get_observation("arm_a")["history"] == []
-
-

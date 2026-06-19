@@ -38,7 +38,7 @@ MOTORS_BUS_PY = SITE_PACKAGES / "motors_bus.py"
 
 # --- Patch 1: firmware version check ---
 
-FW_ORIGINAL = '''\
+FW_ORIGINAL = """\
     def _assert_same_firmware(self) -> None:
         firmware_versions = self._read_firmware_version(self.ids, raise_on_error=True)
         if len(set(firmware_versions.values())) != 1:
@@ -47,9 +47,9 @@ FW_ORIGINAL = '''\
                 f"\\n{pformat(firmware_versions)}\\n"
                 "Update their firmware first using Feetech's software. "
                 "Visit https://www.feetechrc.com/software."
-            )'''
+            )"""
 
-FW_PATCHED = '''\
+FW_PATCHED = """\
     def _assert_same_firmware(self) -> None:
         firmware_versions = self._read_firmware_version(self.ids, raise_on_error=True)
         if len(set(firmware_versions.values())) != 1:
@@ -58,11 +58,11 @@ FW_PATCHED = '''\
                 "Mixed firmware versions detected (PATCHED — continuing anyway):"
                 f"\\n{pformat(firmware_versions)}\\n"
                 "For production use, update firmware via Feetech FD software."
-            )'''
+            )"""
 
 # --- Patch 2: sync_read fallback to sequential reads ---
 
-SYNC_ORIGINAL = '''\
+SYNC_ORIGINAL = """\
     def _sync_read(
         self,
         addr: int,
@@ -87,9 +87,9 @@ SYNC_ORIGINAL = '''\
             raise ConnectionError(f"{err_msg} {self.packet_handler.getTxRxResult(comm)}")
 
         values = {id_: self.sync_reader.getData(id_, addr, length) for id_ in motor_ids}
-        return values, comm'''
+        return values, comm"""
 
-SYNC_PATCHED = '''\
+SYNC_PATCHED = """\
     _sync_read_warned = False  # PATCHED: suppress repeated warnings
 
     def _sync_read(
@@ -138,20 +138,20 @@ SYNC_PATCHED = '''\
             val = max(0, min(4095, val))
             values[motor_id] = val
             last_comm = c
-        return values, last_comm'''
+        return values, last_comm"""
 
 
 # --- Patch 3: clamp calibration range values before writing to servo EPROM ---
 
-CAL_ORIGINAL = '''\
+CAL_ORIGINAL = """\
     def write_calibration(self, calibration_dict: dict[str, MotorCalibration], cache: bool = True) -> None:
         for motor, calibration in calibration_dict.items():
             if self.protocol_version == 0:
                 self.write("Homing_Offset", motor, calibration.homing_offset)
             self.write("Min_Position_Limit", motor, calibration.range_min)
-            self.write("Max_Position_Limit", motor, calibration.range_max)'''
+            self.write("Max_Position_Limit", motor, calibration.range_max)"""
 
-CAL_PATCHED = '''\
+CAL_PATCHED = """\
     def write_calibration(self, calibration_dict: dict[str, MotorCalibration], cache: bool = True) -> None:
         for motor, calibration in calibration_dict.items():
             if self.protocol_version == 0:
@@ -160,7 +160,7 @@ CAL_PATCHED = '''\
             range_min = max(0, min(4095, calibration.range_min))
             range_max = max(0, min(4095, calibration.range_max))
             self.write("Min_Position_Limit", motor, range_min)
-            self.write("Max_Position_Limit", motor, range_max)'''
+            self.write("Max_Position_Limit", motor, range_max)"""
 
 
 def _apply_patch(path: Path, original: str, patched: str, name: str, *, revert: bool) -> bool:
@@ -198,7 +198,9 @@ def main() -> None:
 
     results = [
         _apply_patch(FEETECH_PY, FW_ORIGINAL, FW_PATCHED, "firmware_check", revert=revert),
-        _apply_patch(MOTORS_BUS_PY, SYNC_ORIGINAL, SYNC_PATCHED, "sync_read_fallback", revert=revert),
+        _apply_patch(
+            MOTORS_BUS_PY, SYNC_ORIGINAL, SYNC_PATCHED, "sync_read_fallback", revert=revert
+        ),
         _apply_patch(FEETECH_PY, CAL_ORIGINAL, CAL_PATCHED, "calibration_clamp", revert=revert),
     ]
 
