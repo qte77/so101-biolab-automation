@@ -31,9 +31,7 @@ def scan(port_path: str, ids: range) -> list[tuple[int, int, str]]:
     try:
         from scservo_sdk import PacketHandler, PortHandler  # type: ignore[import-untyped]
     except ImportError as err:
-        raise RuntimeError(
-            "scservo_sdk not installed — run 'uv sync --group lerobot'"
-        ) from err
+        raise RuntimeError("scservo_sdk not installed — run 'uv sync --group lerobot'") from err
 
     port = PortHandler(port_path)
     if not port.openPort():

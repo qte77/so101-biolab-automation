@@ -89,8 +89,11 @@ def _publish_frame(camera: Any, channel: Any) -> None:
 
 
 _JOINT_KEYS = [
-    "shoulder_pan", "shoulder_lift", "elbow_flex",
-    "wrist_flex", "wrist_roll",
+    "shoulder_pan",
+    "shoulder_lift",
+    "elbow_flex",
+    "wrist_flex",
+    "wrist_roll",
 ]
 
 
@@ -116,7 +119,8 @@ def _build_transforms(robot_model: Any) -> list[Any]:
     ]
     for joint in robot_model.robot.joints:
         t_local = robot_model.get_transform(
-            frame_to=joint.child, frame_from=joint.parent,
+            frame_to=joint.child,
+            frame_from=joint.parent,
         )
         trans = t_local[:3, 3]
         quat = Rotation.from_matrix(t_local[:3, :3]).as_quat()
@@ -125,11 +129,15 @@ def _build_transforms(robot_model: Any) -> list[Any]:
                 parent_frame_id=joint.parent,
                 child_frame_id=joint.child,
                 translation=Vector3(
-                    x=float(trans[0]), y=float(trans[1]), z=float(trans[2]),
+                    x=float(trans[0]),
+                    y=float(trans[1]),
+                    z=float(trans[2]),
                 ),
                 rotation=Quaternion(
-                    x=float(quat[0]), y=float(quat[1]),
-                    z=float(quat[2]), w=float(quat[3]),
+                    x=float(quat[0]),
+                    y=float(quat[1]),
+                    z=float(quat[2]),
+                    w=float(quat[3]),
                 ),
             ),
         )
