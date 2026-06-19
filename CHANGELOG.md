@@ -28,6 +28,25 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 - `DualArmController.start_teleoperation()` no-op stub from `src/so101/arms.py`. The method only validated inputs and logged `(stub)` — real teleop is invoked via `make start_teleop` / `lerobot-teleoperate`. Corresponding `TestTeleoperation` class removed from `tests/so101/test_arms.py`.
 
+### Security
+
+- **Resolved 25 of 28 Dependabot alerts (10 of 12 high)** by dropping the `[tool.uv]`
+  `exclude-newer` cap — every patched version was released after the 2026-04-11 pin, so
+  no fix was reachable while it stood — and re-locking the affected packages:
+  `starlette` 1.0.0 → 1.3.1 (5 alerts, 2 high; also raised `fastapi>=0.136.1`, the first
+  line tracking starlette 1.x), `aiohttp` 3.13.5 → 3.14.1 (11), `gitpython` 3.1.46 →
+  3.1.50 (5 high), `urllib3` 2.6.3 → 2.7.0 (2 high), `lxml` 6.0.3 → 6.1.1 (1 high),
+  `idna` 3.11 → 3.18 (1). Only `starlette`/`idna` reach the deployed dashboard; the rest
+  are pulled solely by optional ML/hardware groups.
+- **`.github/dependabot.yaml`**: switched `pip` → `uv` ecosystem (the `pip` ecosystem
+  does not update `uv.lock`, so transitive lockfile fixes were never proposed — the root
+  cause of the backlog) and added grouped updates, `chore(deps)`/`chore(ci)` commit
+  prefixes, and labels.
+- **Known unfixed, tracked**: `torch` ≤2.12 (CVE-2025-3000, low) — no upstream patch
+  exists; `diffusers` 0.35.2 (CVE-2026-45804 / CVE-2026-44513, high ×2) — capped by
+  `lerobot 0.4.4` (`diffusers<0.36.0`). Both are reachable only via the optional
+  `lerobot`/`train` GPU group and require loading untrusted remote pipelines to exploit.
+
 ## [0.2.0] - 2026-04-16
 
 ### Added
