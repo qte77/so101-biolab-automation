@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Generate SBOM
-        uses: qte77/gha-sbom-action@f1aca6c93b91fa3f41060db5c9251fc2715e3c77 # v0.1.0
+        uses: qte77/gha-sbom-action@609bd863e5bbf40b33dae190799d5cd0e1e14c0e # v0.1.0
         with:
           create_pr: "false"
           github_token: ${{ secrets.GITHUB_TOKEN }}
