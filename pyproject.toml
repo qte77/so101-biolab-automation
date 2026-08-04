@@ -20,7 +20,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff>=0.15.21",
+"ruff==0.15.21",
     "pyright>=1.1.411",
     "complexipy>=6.0.1",
     "types-PyYAML>=6.0",
@@ -28,9 +28,9 @@ dev = [
 ]
 test = [
     "scriv[toml]>=1.8",
-    "pytest>=9.1.1",
+    "pytest==9.1.1",
     "pytest-asyncio>=1.4.0",
-    "pytest-cov>=6.0",
+    "pytest-cov==6.0",
     "hypothesis>=6.156.6",
     "inline-snapshot>=0.35.0",
     "httpx>=0.27",

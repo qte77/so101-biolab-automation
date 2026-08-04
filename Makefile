@@ -9,7 +9,7 @@ endif
 .SILENT:
 .ONESHELL:
 .PHONY: \
-	setup_uv setup_dev setup_all setup_cad setup_freecad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_hardware_deps setup_hardware \
+	setup_uv setup_dev setup_all setup_cad setup_freecad setup_scad setup_slicer setup_node setup_rtk setup_lychee setup_mdlint setup_diagramforge setup_hardware_deps setup_hardware \ (build: pin dev/test tools + add make update / update-bump / ci-local)
 	render_parts check_prints render_all \
 	autofix lint check_links check_docs check_types check_complexity test test_cov retest quick_validate validate \
 	find_port scan_servos install_udev bringup patch_lerobot patch_lerobot_revert \
@@ -18,6 +18,19 @@ endif
 	eval_policy serve_dashboard run_demo \
 	help
 .DEFAULT_GOAL := help
+
+# Pinned dev/test tools. Match pyproject.toml dev/test groups exactly so
+# `uv sync --frozen` fetches a deterministic version. Local and CI must
+# match; version drift between local and CI has caused real CI failures
+# (e.g. ruff format output differs between 0.15.x patch versions).
+#
+# Renewal cadence: bump weekly. Use `make update` to see what's
+# available, then `make update-bump TOOL=X.Y.Z` to bump the pin and
+# update uv.lock. After bumping, run `make ci-local` to verify.
+RUFF_VERSION := 0.15.21
+PYTEST_VERSION := 9.1.1
+PYTEST_COV_VERSION := 6.0
+
 
 
 # -- config --
