@@ -17,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate SBOM
-        uses: qte77/gha-sbom-action@609bd863e5bbf40b33dae190799d5cd0e1e14c0e # v0.1.0
+        uses: qte77/gha-sbom-action@c14e7fea31fffaf46c8a995ede2a50caf560ed2b # v0.1.0
         with:
           create_pr: "false"
           github_token: ${{ secrets.GITHUB_TOKEN }}
