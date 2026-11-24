@@ -8,10 +8,8 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/qte77/so101-biolab-automation/badge)](https://www.codefactor.io/repository/github/qte77/so101-biolab-automation)
 [![ruff](https://github.com/qte77/so101-biolab-automation/actions/workflows/ruff.yaml/badge.svg)](https://github.com/qte77/so101-biolab-automation/actions/workflows/ruff.yaml)
 [![pytest](https://github.com/qte77/so101-biolab-automation/actions/workflows/pytest.yaml/badge.svg)](https://github.com/qte77/so101-biolab-automation/actions/workflows/pytest.yaml)
-[![Link Checker](https://github.com/qte77/so101-biolab-automation/actions/workflows/links-fail-fast.yaml/badge.svg)](https://github.com/qte77/so101-biolab-automation/actions/workflows/links-fail-fast.yaml)
+[![Link Checker](https://github.com/qte77/so101-biolab-automation/actions/workflows/lint-md-links.yml/badge.svg)](https://github.com/qte77/so101-biolab-automation/actions/workflows/lint-md-links.yml)
 
-[![Flat Repo (UitHub)](https://img.shields.io/badge/Flat_Repo-uithub-800080.svg)](https://uithub.com/qte77/so101-biolab-automation)
-[![Flat Repo (GitToDoc)](https://img.shields.io/badge/Flat_Repo-GitToDoc-fe4a60.svg)](https://gittodoc.com/qte77/so101-biolab-automation)
 [![vscode.dev](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=vscode.dev&labelColor=2c2c32&color=007acc&logoColor=007acc)](https://vscode.dev/github/qte77/so101-biolab-automation)
 [![Codespace Dev](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=Codespace%20Dev&labelColor=2c2c32&color=007acc&logoColor=007acc)](https://github.com/codespaces/new?repo=qte77/so101-biolab-automation)
 
@@ -19,7 +17,17 @@ Dual-path bio-lab automation: SO-101 arms for complex tasks + XZ gantry for dedi
 
 See [docs/UserStory.md](docs/UserStory.md) for use cases (UC1-5) and acceptance criteria.
 
-**Background:** this is the lab scaffold behind [Building a Trustworthy Agent Loop for a Physical Lab](https://qte77.github.io/open-self-driving-lab-agent-loop/).
+## Why
+
+Lab automation is closed and expensive: cloud labs run $8k–$250k+/yr behind
+institutional contracts, and an Opentrons Flex starts near $26k. The individual
+researcher, iGEM team, or low-resource lab is unserved. This closes that gap with
+an open, self-hostable lab on commodity hardware — a ~$150 repurposed 3D printer
+pipettes, a colorimeter the lab 3D-prints for itself reads absorbance, an agent
+picks the next move from the readings, and results stream to an eLabFTW notebook
+over HTTP.
+
+**Background:** this is the lab scaffold behind [Building a Trustworthy Agent Loop for a Physical Lab](https://qte77.github.io/open-self-driving-lab-agent-loop/) — the article is the narrative, this repo is the implementation. The closed loop it describes (perceive → decide → act → record) is the design target; see the "Two tracks" section of [docs/roadmap.md](docs/roadmap.md).
 
 ## Hardware
 

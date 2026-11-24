@@ -9,6 +9,21 @@
 
 ## Learned Patterns
 
+### Verify a doc's claim against code before repeating it — README claimed a module the table omitted
+
+- **Context**: When any doc (README, architecture.md, roadmap.md) asserts that a module, flag, or capability exists, and that assertion is about to be repeated in a new doc, plan, issue, or PR body.
+- **Problem**: README's Project Structure line names an "ELN" module in `src/so101/`. `docs/architecture.md` — the declared AUTHORITY for the module table — did not list one. Faced with that conflict an agent guessed three filenames (`eln.py`, `elabftw.py`, `eln/__init__.py`), found none, and concluded the module did not exist. It does: `src/so101/eln_client.py`, fully implemented and tested. The wrong conclusion was written into three files before being caught. Absence of a guessed filename is not absence of the feature.
+- **Solution**: Resolve doc-vs-doc conflicts against **code**, and search by symbol/content rather than by guessed filename. `Bash ls`/`find`/`grep` are denylisted in `.claude/settings.json`, so use `python3 -c` with `os.walk` + `re`, or delegate to a subagent with search tools. Only report "does not exist" after a content search over `src/` and `tests/`, and state what was searched.
+- **Same root cause, second form — subagent research summaries.** A research subagent reported "MCAP is Apache-2.0"; it is MIT (per `foxglove/mcap`'s own LICENSE). The claim was written into `docs/outlook-observability.md` and only caught on a later re-audit. A subagent's finding is a hypothesis, not a source. Before a vendor/license/pricing claim lands in any artifact, fetch the artifact itself — the LICENSE file, the pricing page, the package metadata — not a summary of it. `raw.githubusercontent.com/<org>/<repo>/main/LICENSE` settles licenses in one request; the GitHub API is rate-limited unauthenticated and `gh` may have no credentials, so prefer polyfetch (see `polyfetch-scrape/USING.md`) for JS-rendered vendor pages.
+- **References**: `src/so101/eln_client.py`, `docs/architecture.md` (Module Responsibilities table), `README.md` (Project Structure), `docs/outlook-observability.md` (§ Sourcing and confidence)
+
+### `make validate` did not gate docs — markdown and links were unchecked
+
+- **Context**: Before pushing any change that touches `*.md`, `.lychee.toml`, or `.markdownlint.json`.
+- **Problem**: `validate` was `lint check_types test_cov check_complexity` — Python only. A docs-only change passed the canonical gate green while markdown lint and link checking never ran. Both gates had silently drifted red on main (2 MD033 errors, 4 dead/blocked links) because nothing local ran them, even though CI checks them via the `lint-md-links.yml` reusable workflow.
+- **Solution**: `validate` now also runs `check_docs` + `check_links`; `quick_validate` (`lint check_types`) remains the offline inner loop since `check_links` needs network. When a link fails, distinguish the two cases: a 403/400/timeout from bot protection belongs in `.lychee.toml`'s exclude list, but a **404 is real link rot** — excluding it hides a dead reference instead of fixing it.
+- **References**: `Makefile` (`validate`, `quick_validate`), `.lychee.toml`, `.markdownlint.json`, `.github/workflows/lint-md-links.yml`
+
 ### `make test` excludes hardware + network tests by default
 
 - **Context**: When running, describing, or debugging `make test` / `make test_cov` behaviour

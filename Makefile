@@ -426,7 +426,7 @@ check_complexity: ## Check cognitive complexity (max 15/function)
 
 quick_validate: lint check_types ## Fast gate (lint + type check)
 
-validate: lint check_types test_cov check_complexity ## Full gate (lint + types + tests + coverage + complexity)
+validate: lint check_types test_cov check_complexity check_docs check_links ## Full gate (lint + types + tests + coverage + complexity + docs + links)
 
 
 # MARK: APP

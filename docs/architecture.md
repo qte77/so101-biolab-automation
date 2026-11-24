@@ -53,6 +53,9 @@ updated: 2026-04-10
 | **Plate** | `src/so101/plate.py` | Pure SBS 96-well coordinate math. No hardware deps. | None |
 | **Tool Changer** | `src/so101/tool_changer.py` | 3-tool magnetic dock: pipette, gripper, fridge hook. | arms (for send_action) |
 | **Camera** | `src/so101/camera.py` | Multi-camera capture via OpenCV. Stub mode when cv2 absent. | None |
+| **Cartesian Platform** | `src/so101/cartesian_platform.py` | 3-axis (XYZ) G-code pipetting on a Voron/CoreXY printer running Klipper, driven over the Moonraker HTTP API. | `httpx` |
+| **PyLabRobot Backend** | `src/so101/pylabrobot_backend.py` | Wraps `DualArmController` + `PipetteProtocol` so SO-101 arms are usable from the PyLabRobot ecosystem. Falls back to a standalone class when pylabrobot is absent. | arms, pipette |
+| **ELN Client** | `src/so101/eln_client.py` | eLabFTW REST API v2 client (`ElnClient`, `ElnConfig.from_yaml`) — creates/updates experiments, uploads attachments. Stub mode when `elabapi-python` is absent or the server is unreachable. | `elabapi-python` |
 | **Safety** | `src/so101/safety.py` | Watchdog, e-stop, joint limits. Pure Python. | None |
 | **Dashboard** | `src/dashboard/server.py` | FastAPI server with WebSocket commands and REST status. | All biolab modules |
 

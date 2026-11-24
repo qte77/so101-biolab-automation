@@ -155,7 +155,8 @@ against the existing payload limits before committing a design.
 | FAST-LIO2 | <https://github.com/hku-mars/FAST_LIO> |
 | GLIM | <https://github.com/koide3/glim> |
 | Livox Mid-360 | <https://www.livoxtech.com/mid-360> |
-| Unitree LIDAR | <https://shop.unitree.com/products/unitree-lidar> |
+| Unitree 4D LIDAR L1 | <https://shop.unitree.com/products/unitree-4d-lidar-l1> |
+| Unitree 4D LIDAR L2 | <https://shop.unitree.com/products/unitree-4d-lidar-l2> |
 | Intel RealSense D405 | <https://www.intelrealsense.com/depth-camera-d405/> |
 | Orbbec Femto Bolt | <https://www.orbbec.com/products/tof-camera/femto-bolt/> |
 | Luxonis OAK-D SR | <https://shop.luxonis.com/products/oak-d-sr> |

@@ -8,7 +8,26 @@ updated: 2026-05-31
 
 # Roadmap: Closed-Loop Automation & Autonomous Tool Genesis
 
-Long-term direction for so101-biolab-automation. For actionable prior art and research, see [research.md](research.md).
+Long-term direction for this project. For actionable prior art and research, see
+[research.md](research.md).
+
+Narrative context:
+[Building a Trustworthy Agent Loop for a Physical Lab](https://qte77.github.io/open-self-driving-lab-agent-loop/).
+
+## Two tracks
+
+This roadmap covers two loops that share the same hardware and orchestration
+layer but are independent of each other:
+
+| Track | Loop | Where specified |
+| --- | --- | --- |
+| **Self-driving lab** | perceive → decide → act → record — an agent picks the next pipetting move from live measurements and converges to a target | [the narrative article](https://qte77.github.io/open-self-driving-lab-agent-loop/) |
+| **Tool genesis** | goal → CAD → slice → print → mount → VLM-inspect → iterate | this document, below |
+
+The self-driving-lab track is the nearer-term one: **act** (`xz_gantry.py`,
+`pipette.py`), **record** (`eln_client.py`) and the unattended-operation
+scaffolding (`safety.py` watchdog, `src/dashboard/`) already exist. The missing
+links are **perceive** (absorbance read) and **decide**.
 
 ## Overview
 
@@ -203,7 +222,9 @@ Phase 5 (autonomous) → VLM task planning + embodied execution, long-running un
 
 ### Long-Running Autonomous Execution
 
-For unattended multi-hour runs (e.g., 96-well plate with replicates, overnight incubation cycles):
+For unattended multi-hour runs (e.g., 96-well plate with replicates, overnight incubation cycles).
+Tooling landscape for the items below — run journal, telemetry substrate, agent
+traces — is surveyed in [outlook-observability.md](outlook-observability.md):
 
 - **Watchdog**: SafetyMonitor already parks arms on heartbeat timeout (5s)
 - **Remote dashboard**: WebSocket commands for pause/resume/e-stop from anywhere

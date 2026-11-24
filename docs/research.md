@@ -19,6 +19,7 @@ updated: 2026-04-12
 | CAD, slicers, simulation | [hardware/cad-tooling.md](hardware/cad-tooling.md) |
 | PCR use case & acceptance criteria | [UserStory.md](UserStory.md) |
 | Future vision & roadmap | [roadmap.md](roadmap.md) |
+| Observability — run records, telemetry, agent traces | [outlook-observability.md](outlook-observability.md) |
 
 ## Key Finding: No SO-101 Pipette End Effector Exists
 

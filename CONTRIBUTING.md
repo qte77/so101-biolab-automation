@@ -15,7 +15,7 @@ For AI agent behavioral rules, see [AGENTS.md](AGENTS.md).
 | `make check_prints` | Run slicer printability checks on STLs |
 | `make render_all` | Generate parts + validate printability |
 | `make check_complexity` | Check cognitive complexity |
-| `make validate` | Full gate (lint + types + tests + coverage + complexity) |
+| `make validate` | Full gate (lint + types + tests + coverage + complexity + markdown + links). `check_links` needs network; use `quick_validate` for the offline inner loop |
 | `make quick_validate` | Fast development validation (lint + type check) |
 | `make test` | Run all non-hardware tests with pytest |
 | `make calibrate_arms` | Calibrate all arms (or per-arm: `calibrate_arm_a`, `calibrate_arm_b`, `calibrate_leader` for partial setups) |
@@ -75,7 +75,7 @@ uv run pytest -m "not hardware"
 
 ## Pre-commit Checklist
 
-1. `make validate` — lint + type check + tests must all pass
+1. `make validate` — the full gate (see the command table above) must pass
 2. Update `CHANGELOG.md` — add entry to `## [Unreleased]` section
 3. Commit with conventional commit format (see `.gitmessage`)
 
