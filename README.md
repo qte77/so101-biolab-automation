@@ -19,11 +19,9 @@ See [docs/UserStory.md](docs/UserStory.md) for use cases (UC1-5) and acceptance 
 
 ## Why
 
-Lab automation is closed and expensive: cloud labs run $8k–$250k+/yr behind
-institutional contracts, and an Opentrons Flex starts near $26k. The individual
-researcher, iGEM team, or low-resource lab is unserved. This closes that gap with
-an open, self-hostable lab on commodity hardware — a ~$150 repurposed 3D printer
-pipettes, a colorimeter the lab 3D-prints for itself reads absorbance, an agent
+Lab automation is closed and expensive, so individual researchers and small labs
+are left out. This closes that gap with an open, self-hostable lab on commodity
+hardware — a repurposed 3D printer pipettes, a colorimeter the lab 3D-prints for itself reads absorbance, an agent
 picks the next move from the readings, and results stream to an eLabFTW notebook
 over HTTP.
 

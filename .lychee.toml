@@ -13,12 +13,10 @@ exclude = [
     # GitHub special pages — redirect to login
     "^https://github\\.com/codespaces/new",
     "^https://vscode\\.dev",
-    # Retired Lambda-Biolab org — provenance links, not dependencies.
-    # qte77 is authoritative; these may vanish without notice, so don't gate CI on them.
-    "^https://github\\.com/Lambda-Biolab",
     # Code quality services — require auth
     "^https://www\\.codefactor\\.io",
     # Vendor/commerce sites — 403 bot protection or unstable product URLs
+    # Timed out on every check (2026-11-24); whether it is slow or dead is unverified.
     "^https://www\\.senaite\\.com",
     "^https://www\\.intelrealsense\\.com",
     "^https://shop\\.prusa3d\\.com",
