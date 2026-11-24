@@ -15,10 +15,10 @@ exclude = [
     "^https://vscode\\.dev",
     # Code quality services — require auth
     "^https://www\\.codefactor\\.io",
-    # Flat repo viewers — 401 to bots
-    "^https://uithub\\.com",
-    "^https://gittodoc\\.com",
     # Vendor/commerce sites — 403 bot protection or unstable product URLs
+    # Timed out on every check (2026-11-24); whether it is slow or dead is unverified.
+    "^https://www\\.senaite\\.com",
+    "^https://www\\.intelrealsense\\.com",
     "^https://shop\\.prusa3d\\.com",
     "^https://www\\.revopoint3d\\.com",
     "^https://www\\.alibaba\\.com",
@@ -50,17 +50,20 @@ exclude = [
     # Reference sites — timeout in CI
     "^https://keepachangelog\\.com",
     "^https://semver\\.org",
-    # OpenBuilds — 423 Locked to bots
+    # OpenBuilds — 423 Locked to bots (us.), intermittent 522 origin timeouts (builds.)
     "^https://us\\.openbuilds\\.com",
+    "^https://builds\\.openbuilds\\.com",
     # Autoprotocol — expired SSL (dead project)
     "^https://www\\.autoprotocol\\.org",
-    # Publisher sites — 403 bot protection
+    # Publisher sites — 403/400 bot protection
+    "^https://www\\.sciencedirect\\.com",
     "^https://3dprintingindustry\\.com",
     "^https://journals\\.sagepub\\.com",
     "^https://pubs\\.acs\\.org",
     "^https://www\\.hardware-x\\.com",
-    # Reddit — 403 to bots
+    # Community Q&A / forums — 403 to bots
     "^https://www\\.reddit\\.com",
+    "^https://answers\\.ros\\.org",
     # Yaskawa/Motoman — 403 bot protection
     "^https://knowledge\\.motoman\\.com",
     # Feetech — TLS handshake failure in CI

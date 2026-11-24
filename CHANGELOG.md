@@ -8,6 +8,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 
 ### Added
 
+- **`docs/outlook-observability.md`** — landscape survey splitting observability into three layers (physical telemetry, agent decisions, visual failure triage) with a verified assessment of Foxglove, Rerun, MCAP, Arize Phoenix, Langfuse, Pydantic Logfire and Nomadic. Records the current baseline (stdlib logging, no run IDs, no run journal, no metrics endpoint) and concludes the gap is the run journal, not a vendor. Notes that **Foxglove discontinued its open-source edition** (repo archived Jul 2024; self-host now Enterprise-only) while `foxglove-sdk` sits in an optional dependency group. Linked from `docs/research.md` and `docs/roadmap.md`.
+- **Self-driving-lab framing**:
+  - `README.md` gains a "Why" section; `docs/roadmap.md` gains a "Two tracks" section separating the self-driving-lab loop (perceive → decide → act → record) from the tool-genesis loop. **act** (`xz_gantry.py`, `pipette.py`), **record** (`eln_client.py`) and the unattended-operation scaffolding (`safety.py`, `src/dashboard/`) exist; **perceive** and **decide** are the missing links.
 - **`FOXGLOVE_CAM_FLAGS` Makefile variable**: parallels `CAMERAS` for the foxglove path. Override with `make start_foxglove FOXGLOVE_CAM_FLAGS=""` to run headless. `foxglove_viz.py` already supports this (camera flags are optional in argparse; `_try_camera(None, ...)` returns early).
 - **Live Visualization section** in README: collapsible `<details>` block with annotated Rerun.io screenshot (`assets/images/screenshot_rerun.io_so101.png`) showing joint time-series, observation streams, recording metadata, and blueprint panels. Notes `make start_foxglove` for the separate 3D + camera view.
 - **`TODO:` comments** in Makefile above `start_teleop`, `record_episodes`, and `start_foxglove` marking the live-viz layer as partially validated (Rerun joint streams confirmed; Rerun camera path and Foxglove local+remote unverified on hardware).
@@ -26,8 +29,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), [Semantic Versi
 - **`lerobot-*` CLIs invoked via `uv run`**: `find_port`, `calibrate_arm_*`, `start_teleop`, `record_episodes`, `train_policy` no longer require manual `source .venv/bin/activate` (fixes `lerobot-find-port: command not found`)
 - **`.PHONY`** expanded to cover all hardware + per-arm targets
 
+### Fixed
+
+- **`make validate` now gates docs**: added `check_docs` + `check_links`. Previously `validate` was Python-only, so a docs-only change passed the canonical gate with markdown and links unchecked — which is how both drifted red on main. `quick_validate` stays offline for the inner loop. `CONTRIBUTING.md` command table and pre-commit checklist updated.
+- **Both doc gates are green again** (were 2 markdown + 4 link errors, all pre-existing):
+  - `docs/outlook-perception-lidar.md` — replaced the dead `shop.unitree.com/products/unitree-lidar` (404, real link rot) with the verified L1 and L2 product pages.
+  - `.lychee.toml` — excluded `sciencedirect.com`, `answers.ros.org`, `intelrealsense.com` and `builds.openbuilds.com` (403/400/522/timeout bot protection, not rot), and `senaite.com` (times out; whether it is slow or dead is unverified).
+  - `.markdownlint.json` — `MD033` now allows `details`/`summary`, used deliberately for the README's collapsible Rerun.io screenshot.
+- **`docs/architecture.md` module table** was missing three modules that exist in code: `cartesian_platform.py` (Klipper/Moonraker HTTP), `pylabrobot_backend.py` (wraps arms + pipette) and `eln_client.py` (eLabFTW REST v2). Nothing in the table was absent from code.
+- **Link Checker badge** pointed at a non-existent workflow (`links-fail-fast.yaml`); the actual workflow is `lint-md-links.yml`. The badge had been 404ing and was the only README failure in `make check_links`.
+
 ### Removed
 
+- **UitHub and GitToDoc "Flat Repo" badges** from README — no longer relevant. Their `.lychee.toml` exclude entries were dropped with them.
 - `DualArmController.start_teleoperation()` no-op stub from `src/so101/arms.py`. The method only validated inputs and logged `(stub)` — real teleop is invoked via `make start_teleop` / `lerobot-teleoperate`. Corresponding `TestTeleoperation` class removed from `tests/so101/test_arms.py`.
 
 ### Security
